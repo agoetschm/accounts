@@ -5,6 +5,7 @@ import ch.goetschy.android.accounts.R.layout;
 import ch.goetschy.android.accounts.R.menu;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
 
 public class AccountsOverviewActivity extends Activity {
@@ -13,6 +14,7 @@ public class AccountsOverviewActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_overview);
+        Log.w("overviewActivity", "test");
     }
 
     @Override
