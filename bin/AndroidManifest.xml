@@ -4,7 +4,7 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="8"
+        android:minSdkVersion="11"
         android:targetSdkVersion="15" />
 
     <application
@@ -20,6 +20,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:name="ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider"
+            android:authorities="ch.goetschy.android.accounts.contentprovider"
+            android:multiprocess="true" >
+        </provider>
     </application>
 
 </manifest>

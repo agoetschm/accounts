@@ -6,23 +6,25 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
 public class AccountsDatabaseHelper extends SQLiteOpenHelper {
+	private static final String DATABASE_NAME = "accounts.db";
+	private static final int DATABASE_VERSION = 1;
 
-	public AccountsDatabaseHelper(Context context, String name,
-			CursorFactory factory, int version) {
-		super(context, name, factory, version);
-		// TODO Auto-generated constructor stub
+	public AccountsDatabaseHelper(Context context) {
+		super(context, DATABASE_NAME, null, DATABASE_VERSION);
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase arg0) {
-		// TODO Auto-generated method stub
-		
+		new AccountsTable().onCreate(arg0);
+		new TransactionTable().onCreate(arg0);
+		new TypeTable().onCreate(arg0);
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		// TODO Auto-generated method stub
-		
+		new AccountsTable().onUpgrade(db, oldVersion, newVersion);
+		new TransactionTable().onUpgrade(db, oldVersion, newVersion);
+		new TypeTable().onUpgrade(db, oldVersion, newVersion);
 	}
 
 }

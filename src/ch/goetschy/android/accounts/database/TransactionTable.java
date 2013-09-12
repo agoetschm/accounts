@@ -17,8 +17,10 @@ public class TransactionTable extends Table {
 
 	private static final String DATATBASE_CREATE = "create table " + TABLE_NAME
 			+ "( " + COLUMN_ID + " integer primary key autoincrement,"
-			+ COLUMN_NAME + " text not null, " + COLUMN_AMOUNT + " integer, "
-			+ COLUMN_ORDER + " integer );";
+			+ COLUMN_AMOUNT + " integer, " + COLUMN_NAME + " text not null, "
+			+ COLUMN_DESCRIPTION + " text not null, " + COLUMN_DATE
+			+ " integer, " + COLUMN_TYPE + " integer, " + COLUMN_PARENT
+			+ " integer );";
 
 	@Override
 	public void onCreate(SQLiteDatabase database) {
