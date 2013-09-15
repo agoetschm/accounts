@@ -5,9 +5,9 @@ import java.util.HashSet;
 
 import ch.goetschy.android.accounts.database.AccountsDatabaseHelper;
 import ch.goetschy.android.accounts.database.AccountsTable;
-import ch.goetschy.android.accounts.database.Table;
 import ch.goetschy.android.accounts.database.TransactionTable;
 import ch.goetschy.android.accounts.database.TypeTable;
+
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -16,6 +16,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class MyAccountsContentProvider extends ContentProvider {
@@ -54,29 +55,52 @@ public class MyAccountsContentProvider extends ContentProvider {
 		sUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS + "/#", ACCOUNT_ID);
 
 		sUriMatcher.addURI(AUTHORITY, PATH_TRANSACTIONS, TRANSACTIONS);
-		sUriMatcher.addURI(AUTHORITY, PATH_TRANSACTIONS + "/#",
-				TRANSACTION_ID);
+		sUriMatcher.addURI(AUTHORITY, PATH_TRANSACTIONS + "/#", TRANSACTION_ID);
 
 		sUriMatcher.addURI(AUTHORITY, PATH_TYPES, TYPES);
 		sUriMatcher.addURI(AUTHORITY, PATH_TYPES + "/#", TYPE_ID);
 	}
-	
 
-//	private static final int ITEMS = 70;
-//	private static final int ITEM_ID = 80;
-//	private static final UriMatcher typeUriMatcher = new UriMatcher(
-//			UriMatcher.NO_MATCH);
-//	static {
-//		typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS, ACCOUNTS);
-//		typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS + "/#", ACCOUNT_ID);
-//	}
+	// private static final int ITEMS = 70;
+	// private static final int ITEM_ID = 80;
+	// private static final UriMatcher typeUriMatcher = new UriMatcher(
+	// UriMatcher.NO_MATCH);
+	// static {
+	// typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS, ACCOUNTS);
+	// typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS + "/#", ACCOUNT_ID);
+	// }
 
 	private AccountsDatabaseHelper database;
 
 	@Override
-	public int delete(Uri arg0, String arg1, String[] arg2) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int delete(Uri uri, String selection, String[] selectionArgs) {
+		int uriType = sUriMatcher.match(uri);
+		SQLiteDatabase sqlDB = database.getWritableDatabase();
+		int rowDeleted = 0;
+
+		switch (uriType) {
+		case ACCOUNTS:
+			rowDeleted = sqlDB.delete(AccountsTable.TABLE_NAME, selection,
+					selectionArgs);
+			break;
+		case ACCOUNT_ID:
+			String id = uri.getLastPathSegment();
+			if (TextUtils.isEmpty(selection)) {
+				rowDeleted = sqlDB.delete(AccountsTable.TABLE_NAME,
+						AccountsTable.COLUMN_ID + "=" + id, null);
+			} else {
+				rowDeleted = sqlDB.delete(AccountsTable.TABLE_NAME,
+						AccountsTable.COLUMN_ID + "=" + id + " and "
+								+ selection, selectionArgs);
+			}
+
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown URI : " + uri);
+		}
+		this.getContext().getContentResolver().notifyChange(uri, null);
+
+		return rowDeleted;
 	}
 
 	@Override
@@ -129,13 +153,14 @@ public class MyAccountsContentProvider extends ContentProvider {
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
-		
+
 		String table = uri.getPathSegments().get(0);
-		if(!table.equals(PATH_ACCOUNTS) && !table.equals(PATH_TRANSACTIONS) && !table.equals(PATH_TYPES)){
+		if (!table.equals(PATH_ACCOUNTS) && !table.equals(PATH_TRANSACTIONS)
+				&& !table.equals(PATH_TYPES)) {
 			Log.w("contentProvider", "path : " + table);
 			throw new IllegalArgumentException("Unknown table : " + table);
 		}
-		
+
 		checkColumns(projection, table);
 
 		queryBuilder.setTables(table);
@@ -163,8 +188,33 @@ public class MyAccountsContentProvider extends ContentProvider {
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
 			String[] selectionArgs) {
-		// TODO Auto-generated method stub
-		return 0;
+		int uriType = sUriMatcher.match(uri);
+		SQLiteDatabase sqlDB = database.getWritableDatabase();
+		int rowUpdated = 0;
+
+		switch (uriType) {
+		case ACCOUNTS:
+			rowUpdated = sqlDB.update(AccountsTable.TABLE_NAME, values,
+					selection, selectionArgs);
+			break;
+		case ACCOUNT_ID:
+			String id = uri.getLastPathSegment();
+			if (TextUtils.isEmpty(selection)) {
+				rowUpdated = sqlDB.update(AccountsTable.TABLE_NAME, values,
+						AccountsTable.COLUMN_ID + "=" + id, null);
+			} else {
+				rowUpdated = sqlDB.update(AccountsTable.TABLE_NAME, values,
+						AccountsTable.COLUMN_ID + "=" + id + " and "
+								+ selection, selectionArgs);
+			}
+
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown URI : " + uri);
+		}
+		this.getContext().getContentResolver().notifyChange(uri, null);
+
+		return rowUpdated;
 	}
 
 	private void checkColumns(String[] projection, String table) {

@@ -3,8 +3,10 @@ package ch.goetschy.android.accounts.activities;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
+
 import android.app.Activity;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -55,9 +57,17 @@ public class EditAccountActivity extends Activity {
 		});
 	}
 
-	private void fillData(Uri accountUri2) {
-		// TODO Auto-generated method stub
+	private void fillData(Uri uri) {
+		String[] projection = { AccountsTable.COLUMN_NAME };
+		Cursor cursor = this.getContentResolver().query(uri, projection, null,
+				null, null);
+		
+		if (cursor.moveToFirst()) {
 
+			mName.setText(cursor.getString(cursor
+					.getColumnIndexOrThrow(AccountsTable.COLUMN_NAME)));
+			cursor.close();
+		}
 	}
 
 	private void makeToast() {

@@ -6,6 +6,7 @@ import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.app.Activity;
 import android.app.ListActivity;
@@ -16,15 +17,22 @@ import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class AccountsOverviewActivity extends ListActivity implements
 		LoaderManager.LoaderCallbacks<Cursor> {
+
+	private static final int DELETE_ID = 10;
+	private static final int EDIT_ID = 20;
 
 	private SimpleCursorAdapter adapter;
 
@@ -47,42 +55,16 @@ public class AccountsOverviewActivity extends ListActivity implements
 		this.getLoaderManager().initLoader(0, null, this);
 		adapter = new SimpleCursorAdapter(this,
 				R.layout.activity_overview_item, null, from, to, 0);
-		// adapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
-		//
-		// @Override
-		// public boolean setViewValue(View view, Cursor cursor,
-		// int columnIndex) {
-		// if (columnIndex == 2)
-		// ((TextView) view).setText(cursor.getString(columnIndex));
-		// else if (columnIndex == 1)
-		// ((TextView) view).setText(cursor.getInt(columnIndex));
-		// return true;
-		// }
-		//
-		// });
 
 		this.setListAdapter(adapter);
 	}
 
 	private void createAccount() {
-		// test
-		// adapter.add("new one");
-
-		// ContentValues values = new ContentValues();
-		// values.put(AccountsTable.COLUMN_AMOUNT, 3);
-		// values.put(AccountsTable.COLUMN_NAME, "name");
-		// values.put(AccountsTable.COLUMN_ORDER, 1);
-		// values.put(AccountsTable.COLUMN_PARENT, 0);
-		//
-		// this.getContentResolver().insert(
-		// MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, values);
-		// end test
-
 		Intent intent = new Intent(this, EditAccountActivity.class);
-		Log.w("accountOverview", "startintent");
 		startActivity(intent);
-
 	}
+
+	// ADD BUTTON ------------------------
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,6 +81,57 @@ public class AccountsOverviewActivity extends ListActivity implements
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+	// DELETE and EDIT BUTTONs -----------
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.add(Menu.NONE, EDIT_ID, Menu.NONE, R.string.account_overview_edit);
+		menu.add(Menu.NONE, DELETE_ID, Menu.NONE,
+				R.string.account_overview_delete);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		
+		// get id
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+		Uri uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/"
+				+ info.id);
+		
+		// delete or edit
+		switch (item.getItemId()) {
+		case DELETE_ID:
+			this.getContentResolver().delete(uri, null, null);
+			fillData();
+			return true;
+		case EDIT_ID:
+			Intent intent = new Intent(this, EditAccountActivity.class);
+			intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, uri);
+			startActivity(intent);
+		}
+		
+		return super.onContextItemSelected(item);
+	}
+
+	// ACCOUNT DETAILS -------------------
+
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+
+		Intent intent = new Intent(this, AccountDetailActivity.class);
+		Uri todoUri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
+				+ "/" + id);
+		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, todoUri);
+
+		startActivity(intent);
+	}
+
+	// -----------------------------------
 
 	@Override
 	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {

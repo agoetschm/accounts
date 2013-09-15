@@ -5,9 +5,16 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_accounts_overview">Accounts</string>
     <string name="title_activity_edit_accounts">New/Edit account</string>
-    <string name="no_account">There is no account to display.</string>
+    <string name="title_activity_account_detail">Account</string>
+    
+    <string name="no_transaction">There isn\'t any transaction to display.</string>
+    <string name="no_account">There isn\'t any account to display.</string>
+    
     <string name="edit_account_name">Account name</string>
     <string name="edit_account_confirm">Save</string>
+    <string name="account_overview_delete">Delete</string>
+    <string name="account_overview_edit">Edit</string>
     
+
     <string name="menu_add">ADD</string>
 </resources>

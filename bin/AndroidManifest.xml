@@ -25,6 +25,10 @@
             android:name=".activities.EditAccountActivity"
             android:label="@string/title_activity_edit_accounts"
             android:windowSoftInputMode="stateVisible|adjustResize" />
+        
+        <activity
+            android:name=".activities.AccountDetailActivity"
+            android:label="@string/title_activity_account_detail"/>
 
         <provider
             android:name="ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider"
