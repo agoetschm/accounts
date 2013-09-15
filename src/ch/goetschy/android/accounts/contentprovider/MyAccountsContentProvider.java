@@ -1,7 +1,11 @@
 package ch.goetschy.android.accounts.contentprovider;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import ch.goetschy.android.accounts.database.AccountsDatabaseHelper;
 import ch.goetschy.android.accounts.database.AccountsTable;
+import ch.goetschy.android.accounts.database.Table;
 import ch.goetschy.android.accounts.database.TransactionTable;
 import ch.goetschy.android.accounts.database.TypeTable;
 import android.content.ContentProvider;
@@ -10,22 +14,24 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
+import android.util.Log;
 
 public class MyAccountsContentProvider extends ContentProvider {
 
 	private static final String AUTHORITY = "ch.goetschy.android.accounts.contentprovider";
 
-	private static final String BASE_PATH_ACCOUNTS = AccountsTable.TABLE_NAME;
-	private static final String BASE_PATH_TRANSACTIONS = TransactionTable.TABLE_NAME;
-	private static final String BASE_PATH_TYPES = TypeTable.TABLE_NAME;
+	private static final String PATH_ACCOUNTS = AccountsTable.TABLE_NAME;
+	private static final String PATH_TRANSACTIONS = TransactionTable.TABLE_NAME;
+	private static final String PATH_TYPES = TypeTable.TABLE_NAME;
 
 	public final static Uri CONTENT_URI_ACCOUNTS = Uri.parse("content://"
-			+ AUTHORITY + "/" + BASE_PATH_ACCOUNTS);
+			+ AUTHORITY + "/" + PATH_ACCOUNTS);
 	public final static Uri CONTENT_URI_TRANSACTIONS = Uri.parse("content://"
-			+ AUTHORITY + "/" + BASE_PATH_TRANSACTIONS);
+			+ AUTHORITY + "/" + PATH_TRANSACTIONS);
 	public final static Uri CONTENT_URI_TYPES = Uri.parse("content://"
-			+ AUTHORITY + "/" + BASE_PATH_TYPES);
+			+ AUTHORITY + "/" + PATH_TYPES);
 
 	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
 			+ "/items";
@@ -44,16 +50,26 @@ public class MyAccountsContentProvider extends ContentProvider {
 	private static final UriMatcher sUriMatcher = new UriMatcher(
 			UriMatcher.NO_MATCH);
 	static {
-		sUriMatcher.addURI(AUTHORITY, BASE_PATH_ACCOUNTS, ACCOUNTS);
-		sUriMatcher.addURI(AUTHORITY, BASE_PATH_ACCOUNTS + "/#", ACCOUNT_ID);
+		sUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS, ACCOUNTS);
+		sUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS + "/#", ACCOUNT_ID);
 
-		sUriMatcher.addURI(AUTHORITY, BASE_PATH_TRANSACTIONS, TRANSACTIONS);
-		sUriMatcher.addURI(AUTHORITY, BASE_PATH_TRANSACTIONS + "/#",
+		sUriMatcher.addURI(AUTHORITY, PATH_TRANSACTIONS, TRANSACTIONS);
+		sUriMatcher.addURI(AUTHORITY, PATH_TRANSACTIONS + "/#",
 				TRANSACTION_ID);
 
-		sUriMatcher.addURI(AUTHORITY, BASE_PATH_TYPES, TYPES);
-		sUriMatcher.addURI(AUTHORITY, BASE_PATH_TYPES + "/#", TYPE_ID);
+		sUriMatcher.addURI(AUTHORITY, PATH_TYPES, TYPES);
+		sUriMatcher.addURI(AUTHORITY, PATH_TYPES + "/#", TYPE_ID);
 	}
+	
+
+//	private static final int ITEMS = 70;
+//	private static final int ITEM_ID = 80;
+//	private static final UriMatcher typeUriMatcher = new UriMatcher(
+//			UriMatcher.NO_MATCH);
+//	static {
+//		typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS, ACCOUNTS);
+//		typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS + "/#", ACCOUNT_ID);
+//	}
 
 	private AccountsDatabaseHelper database;
 
@@ -85,13 +101,13 @@ public class MyAccountsContentProvider extends ContentProvider {
 
 		switch (uriType) {
 		case ACCOUNTS:
-			table = BASE_PATH_ACCOUNTS;
+			table = PATH_ACCOUNTS;
 			break;
 		case TRANSACTIONS:
-			table = BASE_PATH_TRANSACTIONS;
+			table = PATH_TRANSACTIONS;
 			break;
 		case TYPES:
-			table = BASE_PATH_TYPES;
+			table = PATH_TYPES;
 			break;
 		default:
 			table = "error";
@@ -112,8 +128,36 @@ public class MyAccountsContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		// TODO Auto-generated method stub
-		return null;
+		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+		
+		String table = uri.getPathSegments().get(0);
+		if(!table.equals(PATH_ACCOUNTS) && !table.equals(PATH_TRANSACTIONS) && !table.equals(PATH_TYPES)){
+			Log.w("contentProvider", "path : " + table);
+			throw new IllegalArgumentException("Unknown table : " + table);
+		}
+		
+		checkColumns(projection, table);
+
+		queryBuilder.setTables(table);
+
+		int uriType = sUriMatcher.match(uri);
+		switch (uriType) {
+		case ACCOUNTS:
+			break;
+		case ACCOUNT_ID:
+			String id = uri.getLastPathSegment();
+			queryBuilder.appendWhere(AccountsTable.COLUMN_ID + "=" + id);
+			break;
+		default:
+			throw new IllegalArgumentException("Unknown URI : " + uri);
+		}
+
+		SQLiteDatabase sqlDB = database.getWritableDatabase();
+		Cursor cursor = queryBuilder.query(sqlDB, projection, selection,
+				selectionArgs, null, null, sortOrder);
+		cursor.setNotificationUri(this.getContext().getContentResolver(), uri);
+
+		return cursor;
 	}
 
 	@Override
@@ -123,4 +167,24 @@ public class MyAccountsContentProvider extends ContentProvider {
 		return 0;
 	}
 
+	private void checkColumns(String[] projection, String table) {
+		String[] available = {};
+		if (table.equals(PATH_ACCOUNTS)) {
+			available = AccountsTable.available;
+		} else if (table.equals(PATH_TRANSACTIONS)) {
+			available = TransactionTable.available;
+		} else if (table == PATH_TYPES) {
+			available = TypeTable.available;
+		}
+		if (projection != null) {
+			HashSet<String> requestedCols = new HashSet<String>(
+					Arrays.asList(projection));
+			HashSet<String> availableCols = new HashSet<String>(
+					Arrays.asList(available));
+			if (!availableCols.containsAll(requestedCols)) {
+				throw new IllegalArgumentException(
+						"Unknown columns in projection");
+			}
+		}
+	}
 }

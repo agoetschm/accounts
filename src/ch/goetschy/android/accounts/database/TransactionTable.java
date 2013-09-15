@@ -15,6 +15,10 @@ public class TransactionTable extends Table {
 	public static final String COLUMN_TYPE = "type";
 	public static final String COLUMN_PARENT = "parent";
 
+	public static final String[] available = { COLUMN_AMOUNT, COLUMN_DATE,
+			COLUMN_DESCRIPTION, COLUMN_ID, COLUMN_NAME, COLUMN_PARENT,
+			COLUMN_TYPE };
+
 	private static final String DATATBASE_CREATE = "create table " + TABLE_NAME
 			+ "( " + COLUMN_ID + " integer primary key autoincrement,"
 			+ COLUMN_AMOUNT + " integer, " + COLUMN_NAME + " text not null, "

@@ -13,6 +13,9 @@ public class AccountsTable extends Table {
 	public static final String COLUMN_ORDER = "number";
 	public static final String COLUMN_PARENT = "parent";
 
+	public static final String[] available = { COLUMN_AMOUNT, COLUMN_ID,
+			COLUMN_NAME, COLUMN_ORDER, COLUMN_PARENT };
+
 	private static final String DATATBASE_CREATE = "create table " + TABLE_NAME
 			+ "( " + COLUMN_ID + " integer primary key autoincrement,"
 			+ COLUMN_AMOUNT + " integer, " + COLUMN_NAME + " text not null, "

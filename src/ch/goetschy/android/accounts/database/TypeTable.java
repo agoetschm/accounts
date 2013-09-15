@@ -11,6 +11,9 @@ public class TypeTable extends Table {
 	public static final String COLUMN_NAME = "name";
 	public static final String COLUMN_ORDER = "number";
 
+	public static final String[] available = { COLUMN_ID, COLUMN_NAME,
+			COLUMN_ORDER};
+
 	private static final String DATATBASE_CREATE = "create table " + TABLE_NAME
 			+ "( " + COLUMN_ID + " integer primary key autoincrement,"
 			+ COLUMN_NAME + " text not null, " + COLUMN_ORDER + " integer );";
