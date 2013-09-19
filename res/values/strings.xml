@@ -12,9 +12,11 @@
     
     <string name="edit_account_name">Account name</string>
     <string name="edit_account_confirm">Save</string>
+    <string name="edit_account_delete">Delete</string>
     <string name="account_overview_delete">Delete</string>
     <string name="account_overview_edit">Edit</string>
     
 
     <string name="menu_add">ADD</string>
+    <string name="menu_filter">FILTER</string>
 </resources>

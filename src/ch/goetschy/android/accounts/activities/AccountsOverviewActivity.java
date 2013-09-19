@@ -1,31 +1,26 @@
 package ch.goetschy.android.accounts.activities;
 
-import java.util.ArrayList;
 
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
+import ch.goetschy.android.accounts.objects.Account;
 
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Activity;
 import android.app.ListActivity;
 import android.app.LoaderManager;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
-import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class AccountsOverviewActivity extends ListActivity implements
@@ -47,14 +42,8 @@ public class AccountsOverviewActivity extends ListActivity implements
 
 	private void fillData() {
 
-		String[] from = new String[] { AccountsTable.COLUMN_NAME,
-				AccountsTable.COLUMN_AMOUNT };
-		int[] to = new int[] { R.id.activity_overview_name,
-				R.id.activity_overview_amount };
-
 		this.getLoaderManager().initLoader(0, null, this);
-		adapter = new SimpleCursorAdapter(this,
-				R.layout.activity_overview_item, null, from, to, 0);
+		adapter = Account.getAdapter(this, R.layout.activity_overview_item);
 
 		this.setListAdapter(adapter);
 	}
@@ -95,22 +84,23 @@ public class AccountsOverviewActivity extends ListActivity implements
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
+		Account account = new Account();
 		
 		// get id
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
-		Uri uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/"
-				+ info.id);
+		account.setUri(Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/"
+				+ info.id));
 		
 		// delete or edit
 		switch (item.getItemId()) {
 		case DELETE_ID:
-			this.getContentResolver().delete(uri, null, null);
+			account.delete(getContentResolver());
 			fillData();
 			return true;
 		case EDIT_ID:
 			Intent intent = new Intent(this, EditAccountActivity.class);
-			intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, uri);
+			intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, account.getUri());
 			startActivity(intent);
 		}
 		
@@ -124,9 +114,9 @@ public class AccountsOverviewActivity extends ListActivity implements
 		super.onListItemClick(l, v, position, id);
 
 		Intent intent = new Intent(this, AccountDetailActivity.class);
-		Uri todoUri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
+		Uri accountUri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
 				+ "/" + id);
-		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, todoUri);
+		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, accountUri);
 
 		startActivity(intent);
 	}

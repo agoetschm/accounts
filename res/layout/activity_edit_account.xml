@@ -6,7 +6,6 @@
     android:orientation="vertical" >
 
     <LinearLayout
-        android:id="@+id/LinearLayout01"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
@@ -20,12 +19,24 @@
         </EditText>
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <Button
-        android:id="@+id/edit_account_confirm"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/edit_account_confirm" >
-    </Button>
+        <Button
+            android:id="@+id/edit_account_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_account_confirm" >
+        </Button>
+        
+        
+        <Button
+            android:id="@+id/edit_account_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/edit_account_delete" >
+        </Button>
+    </LinearLayout>
 
 </LinearLayout>

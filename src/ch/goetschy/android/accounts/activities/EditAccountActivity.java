@@ -3,6 +3,7 @@ package ch.goetschy.android.accounts.activities;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
+import ch.goetschy.android.accounts.objects.Account;
 
 import android.app.Activity;
 import android.content.ContentValues;
@@ -19,8 +20,7 @@ import android.widget.Toast;
 public class EditAccountActivity extends Activity {
 
 	private EditText mName;
-
-	private Uri accountUri;
+	private Account account;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,19 +30,26 @@ public class EditAccountActivity extends Activity {
 
 		mName = (EditText) findViewById(R.id.edit_account_name);
 		Button confirmButton = (Button) findViewById(R.id.edit_account_confirm);
+		Button deleteButton = (Button) findViewById(R.id.edit_account_delete);
 
+		// data from parent activity
 		Bundle extras = getIntent().getExtras();
 
+		// account object
+		account = new Account();
+		
+		
 		// if saved instance
-		accountUri = (savedInstanceState == null) ? null
+		account.setUri((savedInstanceState == null) ? null
 				: (Uri) savedInstanceState
-						.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE);
+						.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
 		// edit or add
 		if (extras != null) {
-			accountUri = extras
-					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE);
-			fillData(accountUri);
+			account.setUri((Uri) extras
+					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
+			fillData();
 		}
+
 
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -55,19 +62,24 @@ public class EditAccountActivity extends Activity {
 				}
 			}
 		});
+		
+		deleteButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				setResult(RESULT_CANCELED);
+				if (account.getUri() == null) {
+					finish();
+				} else {
+					account.delete(getContentResolver());
+					finish();
+				}
+			}
+		});
 	}
 
-	private void fillData(Uri uri) {
-		String[] projection = { AccountsTable.COLUMN_NAME };
-		Cursor cursor = this.getContentResolver().query(uri, projection, null,
-				null, null);
-		
-		if (cursor.moveToFirst()) {
-
-			mName.setText(cursor.getString(cursor
-					.getColumnIndexOrThrow(AccountsTable.COLUMN_NAME)));
-			cursor.close();
-		}
+	private void fillData() {
+		if (account.loadFromDB(getContentResolver()))
+			mName.setText(account.getName());
 	}
 
 	private void makeToast() {
@@ -86,7 +98,7 @@ public class EditAccountActivity extends Activity {
 		super.onSaveInstanceState(outState);
 		save();
 		outState.putParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
-				accountUri);
+				account.getUri());
 	}
 
 	private void save() {
@@ -94,19 +106,8 @@ public class EditAccountActivity extends Activity {
 
 		if (name.length() == 0)
 			return;
-
-		ContentValues values = new ContentValues();
-		values.put(AccountsTable.COLUMN_NAME, name);
-
-		if (accountUri == null) { 	// insert new account
-			values.put(AccountsTable.COLUMN_AMOUNT, 0);
-			values.put(AccountsTable.COLUMN_ORDER, 0);
-			values.put(AccountsTable.COLUMN_PARENT, 0);
-
-			this.getContentResolver().insert(
-					MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, values);
-		} else { 					// update account
-			this.getContentResolver().update(accountUri, values, null, null);
-		}
+		
+		account.setName(name);
+		account.saveInDB(getContentResolver());
 	}
 }
