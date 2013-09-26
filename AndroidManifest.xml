@@ -3,7 +3,7 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
-    <uses-sdk 
+    <uses-sdk
         android:minSdkVersion="11"
         android:targetSdkVersion="15" />
 
@@ -20,15 +20,24 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
         <activity
             android:name=".activities.EditAccountActivity"
             android:label="@string/title_activity_edit_accounts"
             android:windowSoftInputMode="stateVisible|adjustResize" />
-        
         <activity
             android:name=".activities.AccountDetailActivity"
-            android:label="@string/title_activity_account_detail"/>
+            android:label="@string/title_activity_account_detail" />
+        <activity
+            android:name=".activities.EditTransactionActivity"
+            android:label="@string/title_activity_edit_transaction"
+            android:windowSoftInputMode="stateVisible|adjustResize" />
+        <activity
+            android:name=".activities.ManageTypesActivity"
+            android:label="@string/title_activity_types" />
+        <activity
+            android:name=".activities.EditTypeActivity"
+            android:label="@string/title_activity_edit_type"
+            android:windowSoftInputMode="stateVisible|adjustResize" />
 
         <provider
             android:name="ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider"

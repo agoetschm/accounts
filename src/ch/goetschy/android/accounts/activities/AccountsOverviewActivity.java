@@ -1,6 +1,5 @@
 package ch.goetschy.android.accounts.activities;
 
-
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
@@ -52,6 +51,11 @@ public class AccountsOverviewActivity extends ListActivity implements
 		Intent intent = new Intent(this, EditAccountActivity.class);
 		startActivity(intent);
 	}
+	
+	private void manageTypes(){
+		Intent intent = new Intent(this, ManageTypesActivity.class);
+		startActivity(intent);
+	}
 
 	// ADD BUTTON ------------------------
 
@@ -67,7 +71,11 @@ public class AccountsOverviewActivity extends ListActivity implements
 		case R.id.menu_add:
 			createAccount();
 			return true;
+		case R.id.menu_types:
+			manageTypes();
+			return true;
 		}
+
 		return super.onOptionsItemSelected(item);
 	}
 
@@ -85,13 +93,13 @@ public class AccountsOverviewActivity extends ListActivity implements
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
 		Account account = new Account();
-		
+
 		// get id
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
-		account.setUri(Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/"
-				+ info.id));
-		
+		account.setUri(Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
+				+ "/" + info.id));
+
 		// delete or edit
 		switch (item.getItemId()) {
 		case DELETE_ID:
@@ -100,10 +108,11 @@ public class AccountsOverviewActivity extends ListActivity implements
 			return true;
 		case EDIT_ID:
 			Intent intent = new Intent(this, EditAccountActivity.class);
-			intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, account.getUri());
+			intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
+					account.getUri());
 			startActivity(intent);
 		}
-		
+
 		return super.onContextItemSelected(item);
 	}
 
@@ -114,8 +123,9 @@ public class AccountsOverviewActivity extends ListActivity implements
 		super.onListItemClick(l, v, position, id);
 
 		Intent intent = new Intent(this, AccountDetailActivity.class);
-		Uri accountUri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
-				+ "/" + id);
+		Uri accountUri = Uri
+				.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/"
+						+ id);
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, accountUri);
 
 		startActivity(intent);

@@ -1,5 +1,6 @@
 package ch.goetschy.android.accounts.objects;
 
+import android.content.ContentResolver;
 import android.net.Uri;
 
 public abstract class Item {
@@ -11,7 +12,7 @@ public abstract class Item {
 	
 	public static final long DEFAULT_ID = -1;
 	public static final int DEFAULT_AMOUNT = 0;
-	public static final String DEFAULT_NAME = null;
+	public static final String DEFAULT_NAME = "";
 	public static final Uri DEFAULT_URI = null;
 	public static final Item DEFAULT_PARENT = null;
 	
@@ -71,4 +72,10 @@ public abstract class Item {
 	public void setUri(Uri uri) {
 		this.uri = uri;
 	}
+	
+	public abstract void delete(ContentResolver contentResolver);
+	
+	public abstract void saveInDB(ContentResolver contentResolver);
+	
+	public abstract boolean loadFromDB(ContentResolver contentResolver);
 }

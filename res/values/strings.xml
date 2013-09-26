@@ -6,6 +6,11 @@
     <string name="title_activity_accounts_overview">Accounts</string>
     <string name="title_activity_edit_accounts">New/Edit account</string>
     <string name="title_activity_account_detail">Account</string>
+    <string name="title_activity_edit_transaction">New/Edit transaction</string>
+    <string name="title_activity_types">Manage types</string>
+    <string name="title_activity_edit_type">New/Edit type</string>
+    
+    
     
     <string name="no_transaction">There isn\'t any transaction to display.</string>
     <string name="no_account">There isn\'t any account to display.</string>
@@ -13,10 +18,27 @@
     <string name="edit_account_name">Account name</string>
     <string name="edit_account_confirm">Save</string>
     <string name="edit_account_delete">Delete</string>
+    
+    <string name="edit_type_name">Type name</string>
+    <string name="edit_type_color">Set color</string>
+    <string name="edit_type_confirm">Save</string>
+    <string name="edit_type_delete">Delete</string>
+    
+    <string name="edit_transaction_name">Name</string>
+    <string name="edit_transaction_amount">0.0</string>
+    <string name="edit_transaction_description">Description</string>
+    <string name="edit_transaction_date">Set date</string>
+    <string name="edit_transaction_name_toast">Please enter a name</string>
+    <string name="edit_transaction_amount_toast">Please enter a valid amount</string>
+    <string name="edit_transaction_confirm">Save</string>
+    <string name="edit_transaction_delete">Delete</string>
+    
     <string name="account_overview_delete">Delete</string>
     <string name="account_overview_edit">Edit</string>
     
 
     <string name="menu_add">ADD</string>
     <string name="menu_filter">FILTER</string>
+    <string name="menu_types">TYPES</string>
+    
 </resources>

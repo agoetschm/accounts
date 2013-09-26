@@ -1,52 +1,68 @@
 package ch.goetschy.android.accounts.activities;
 
 import ch.goetschy.android.accounts.R;
+import ch.goetschy.android.accounts.activities.ColorPickerDialog.OnColorChangedListener;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.objects.Account;
-
+import ch.goetschy.android.accounts.objects.Type;
 import android.app.Activity;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class EditAccountActivity extends Activity {
+public class EditTypeActivity extends Activity implements OnColorChangedListener {
 
 	private EditText mName;
-	private Account account;
+	private Button mColor;
+	private Type type;
+	private Paint mPaint;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		this.setContentView(R.layout.activity_edit_account);
+		this.setContentView(R.layout.activity_edit_type);
 
-		mName = (EditText) findViewById(R.id.edit_account_name);
-		Button confirmButton = (Button) findViewById(R.id.edit_account_confirm);
-		Button deleteButton = (Button) findViewById(R.id.edit_account_delete);
+		mName = (EditText) findViewById(R.id.edit_type_name);
+		mColor = (Button) findViewById(R.id.edit_type_color);
+		Button confirmButton = (Button) findViewById(R.id.edit_type_confirm);
+		Button deleteButton = (Button) findViewById(R.id.edit_type_delete);
 
 		// data from parent activity
 		Bundle extras = getIntent().getExtras();
 
-		// account object
-		account = new Account();
-		
-		
+		// type object
+		type = new Type();
+		// paint object
+		mPaint = new Paint();
+
 		// if saved instance
-		account.setUri((savedInstanceState == null) ? null
+		type.setUri((savedInstanceState == null) ? null
 				: (Uri) savedInstanceState
 						.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
 		// edit or add
 		if (extras != null) {
-			account.setUri((Uri) extras
+			type.setUri((Uri) extras
 					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
 			fillData();
 		}
 
+		// color
+		mColor.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				new ColorPickerDialog(EditTypeActivity.this,
+						EditTypeActivity.this, mPaint.getColor()).show();
+			}
+		});
 
+		// confirm
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -58,15 +74,16 @@ public class EditAccountActivity extends Activity {
 				}
 			}
 		});
-		
+
+		// delete
 		deleteButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				setResult(RESULT_CANCELED);
-				if (account.getUri() == null) {
+				if (type.getUri() == null) {
 					finish();
 				} else {
-					account.delete(getContentResolver());
+					type.delete(getContentResolver());
 					finish();
 				}
 			}
@@ -74,12 +91,15 @@ public class EditAccountActivity extends Activity {
 	}
 
 	private void fillData() {
-		if (account.loadFromDB(getContentResolver()))
-			mName.setText(account.getName());
+		if (type.loadFromDB(getContentResolver())){
+			mName.setText(type.getName());
+			mPaint.setColor(type.getColor());
+			mColor.setBackgroundColor(type.getColor());
+		}
 	}
 
 	private void makeToast() {
-		Toast.makeText(EditAccountActivity.this, "Please enter a name",
+		Toast.makeText(EditTypeActivity.this, "Please enter a name",
 				Toast.LENGTH_LONG).show();
 	}
 
@@ -94,16 +114,24 @@ public class EditAccountActivity extends Activity {
 		super.onSaveInstanceState(outState);
 		save();
 		outState.putParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
-				account.getUri());
+				type.getUri());
 	}
 
 	private void save() {
 		String name = mName.getText().toString();
+		int color = mPaint.getColor();
 
 		if (name.length() == 0)
 			return;
-		
-		account.setName(name);
-		account.saveInDB(getContentResolver());
+
+		type.setName(name);
+		type.setColor(color);
+		type.saveInDB(getContentResolver());
+	}
+
+	@Override
+	public void colorChanged(int color) {
+		mPaint.setColor(color);
+		mColor.setBackgroundColor(color);
 	}
 }

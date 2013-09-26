@@ -2,4 +2,7 @@
     <item android:id="@+id/menu_add"
         android:title="@string/menu_add"
         android:showAsAction="always" />
+    <item android:id="@+id/menu_types"
+        android:title="@string/menu_types"
+        android:showAsAction="always" />
 </menu>
