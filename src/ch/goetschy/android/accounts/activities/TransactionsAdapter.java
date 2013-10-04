@@ -1,6 +1,8 @@
 package ch.goetschy.android.accounts.activities;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.objects.Transaction;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 public class TransactionsAdapter extends ArrayAdapter<Transaction> {
 	private final Context context;
 	private ArrayList<Transaction> list;
+	private DecimalFormat amountFormat = new DecimalFormat("##.00");
 
 	public TransactionsAdapter(Context context, ArrayList<Transaction> list) {
 		super(context, R.layout.activity_detail_item, list);
@@ -39,10 +42,18 @@ public class TransactionsAdapter extends ArrayAdapter<Transaction> {
 		TextView date = (TextView) rowView
 				.findViewById(R.id.activity_detail_date);
 
+		// set type color
+		rowView.setBackgroundColor(list.get(position).getType().getColor());
+
 		Log.w("transactionsAdapter", list.get(position).getName());
 		name.setText(list.get(position).getName());
-		amount.setText(String.valueOf(list.get(position).getAmount()));
-		date.setText(String.valueOf(list.get(position).getDate()));
+		amount.setText(amountFormat.format(list.get(position).getAmount()));
+
+		// date format
+		Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(list.get(position).getDate());
+		date.setText(c.get(Calendar.DAY_OF_MONTH) + "/" + c.get(Calendar.MONTH)
+				+ "/" + c.get(Calendar.YEAR));
 
 		Log.w("transactionsAdapter", "end");
 		return rowView;

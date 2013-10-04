@@ -1,5 +1,6 @@
 package ch.goetschy.android.accounts.activities;
 
+import ch.goetschy.android.accounts.R;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,10 +11,20 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.LinearLayout.LayoutParams;
+
 
 public class ColorPickerDialog extends Dialog {
+
+	private int size;
+	private int offset;
+	public static final float ratio = 0.8f;
+	
 
 	public interface OnColorChangedListener {
 		void colorChanged(int color);
@@ -27,12 +38,15 @@ public class ColorPickerDialog extends Dialog {
 		private Paint mCenterPaint;
 		private final int[] mColors;
 		private OnColorChangedListener mListener;
+		private int ALPHA = 80;
 
-		ColorPickerView(Context c, OnColorChangedListener l, int color) {
+		ColorPickerView(Context c, OnColorChangedListener l, int color, int size, int offset) {
 			super(c);
 			mListener = l;
 			mColors = new int[] { 0xFFFF0000, 0xFFFF00FF, 0xFF0000FF,
 					0xFF00FFFF, 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000 };
+//			mColors = new int[] { 0xAAAA0000, 0xAAAA00AA, 0xAA0000AA,
+//					0xAA00AAAA, 0xAA00AA00, 0xAAAAAA00, 0xAAAA0000 };
 			Shader s = new SweepGradient(0, 0, mColors, null);
 
 			mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -43,6 +57,11 @@ public class ColorPickerDialog extends Dialog {
 			mCenterPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			mCenterPaint.setColor(color);
 			mCenterPaint.setStrokeWidth(5);
+
+			CENTER_X = size;
+			CENTER_Y = size;
+			CENTER_RADIUS = size / 3;
+			OFFSET = offset;
 		}
 
 		private boolean mTrackingCenter;
@@ -52,8 +71,9 @@ public class ColorPickerDialog extends Dialog {
 		protected void onDraw(Canvas canvas) {
 			float r = CENTER_X - mPaint.getStrokeWidth() * 0.5f;
 
-			canvas.translate(CENTER_X, CENTER_X);
-
+			canvas.translate(CENTER_X + OFFSET, CENTER_X + OFFSET);
+			
+			mPaint.setAlpha(ALPHA);
 			canvas.drawOval(new RectF(-r, -r, r, r), mPaint);
 			canvas.drawCircle(0, 0, CENTER_RADIUS, mCenterPaint);
 
@@ -77,26 +97,27 @@ public class ColorPickerDialog extends Dialog {
 
 		@Override
 		protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-			setMeasuredDimension(CENTER_X * 2, CENTER_Y * 2);
+			setMeasuredDimension((CENTER_X+OFFSET) * 2, (CENTER_Y + OFFSET) * 2);
 		}
 
-		private static final int CENTER_X = 100;
-		private static final int CENTER_Y = 100;
-		private static final int CENTER_RADIUS = 32;
+		private int CENTER_X;
+		private int CENTER_Y;
+		private int CENTER_RADIUS;
+		private int OFFSET;
 
-		private int floatToByte(float x) {
-			int n = java.lang.Math.round(x);
-			return n;
-		}
+//		private int floatToByte(float x) {
+//			int n = java.lang.Math.round(x);
+//			return n;
+//		}
 
-		private int pinToByte(int n) {
-			if (n < 0) {
-				n = 0;
-			} else if (n > 255) {
-				n = 255;
-			}
-			return n;
-		}
+//		private int pinToByte(int n) {
+//			if (n < 0) {
+//				n = 0;
+//			} else if (n > 255) {
+//				n = 255;
+//			}
+//			return n;
+//		}
 
 		private int ave(int s, int d, float p) {
 			return s + java.lang.Math.round(p * (d - s));
@@ -125,30 +146,30 @@ public class ColorPickerDialog extends Dialog {
 			return Color.argb(a, r, g, b);
 		}
 
-		private int rotateColor(int color, float rad) {
-			float deg = rad * 180 / 3.1415927f;
-			int r = Color.red(color);
-			int g = Color.green(color);
-			int b = Color.blue(color);
-
-			ColorMatrix cm = new ColorMatrix();
-			ColorMatrix tmp = new ColorMatrix();
-
-			cm.setRGB2YUV();
-			tmp.setRotate(0, deg);
-			cm.postConcat(tmp);
-			tmp.setYUV2RGB();
-			cm.postConcat(tmp);
-
-			final float[] a = cm.getArray();
-
-			int ir = floatToByte(a[0] * r + a[1] * g + a[2] * b);
-			int ig = floatToByte(a[5] * r + a[6] * g + a[7] * b);
-			int ib = floatToByte(a[10] * r + a[11] * g + a[12] * b);
-
-			return Color.argb(Color.alpha(color), pinToByte(ir), pinToByte(ig),
-					pinToByte(ib));
-		}
+//		private int rotateColor(int color, float rad) {
+//			float deg = rad * 180 / 3.1415927f;
+//			int r = Color.red(color);
+//			int g = Color.green(color);
+//			int b = Color.blue(color);
+//
+//			ColorMatrix cm = new ColorMatrix();
+//			ColorMatrix tmp = new ColorMatrix();
+//
+//			cm.setRGB2YUV();
+//			tmp.setRotate(0, deg);
+//			cm.postConcat(tmp);
+//			tmp.setYUV2RGB();
+//			cm.postConcat(tmp);
+//
+//			final float[] a = cm.getArray();
+//
+//			int ir = floatToByte(a[0] * r + a[1] * g + a[2] * b);
+//			int ig = floatToByte(a[5] * r + a[6] * g + a[7] * b);
+//			int ib = floatToByte(a[10] * r + a[11] * g + a[12] * b);
+//
+//			return Color.argb(Color.alpha(color), pinToByte(ir), pinToByte(ig),
+//					pinToByte(ib));
+//		}
 
 		private static final float PI = 3.1415926f;
 
@@ -180,6 +201,7 @@ public class ColorPickerDialog extends Dialog {
 						unit += 1;
 					}
 					mCenterPaint.setColor(interpColor(mColors, unit));
+					mCenterPaint.setAlpha(ALPHA);
 					invalidate();
 				}
 				break;
@@ -198,11 +220,13 @@ public class ColorPickerDialog extends Dialog {
 	}
 
 	public ColorPickerDialog(Context context, OnColorChangedListener listener,
-			int initialColor) {
+			int initialColor, int windowSize) {
 		super(context);
 
 		mListener = listener;
 		mInitialColor = initialColor;
+		size = (int) (windowSize * ratio / 2);
+		offset = (int) (windowSize * (1 - ratio) / 3);
 	}
 
 	@Override
@@ -214,8 +238,12 @@ public class ColorPickerDialog extends Dialog {
 				dismiss();
 			}
 		};
+		
+		ColorPickerView colorPicker = new ColorPickerView(getContext(), l,
+				mInitialColor, size, offset);
 
-		setContentView(new ColorPickerView(getContext(), l, mInitialColor));
-		setTitle("Pick a Color");
+		setContentView(colorPicker);
+
+		setTitle(R.string.color_picker_title);
 	}
 }

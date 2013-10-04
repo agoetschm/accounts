@@ -16,7 +16,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class EditTypeActivity extends Activity implements OnColorChangedListener {
+public class EditTypeActivity extends Activity implements
+		OnColorChangedListener {
 
 	private EditText mName;
 	private Button mColor;
@@ -58,7 +59,9 @@ public class EditTypeActivity extends Activity implements OnColorChangedListener
 			@Override
 			public void onClick(View v) {
 				new ColorPickerDialog(EditTypeActivity.this,
-						EditTypeActivity.this, mPaint.getColor()).show();
+						EditTypeActivity.this, mPaint.getColor(),
+						EditTypeActivity.this.getWindow().getDecorView()
+								.getWidth()).show();
 			}
 		});
 
@@ -91,7 +94,7 @@ public class EditTypeActivity extends Activity implements OnColorChangedListener
 	}
 
 	private void fillData() {
-		if (type.loadFromDB(getContentResolver())){
+		if (type.loadFromDB(getContentResolver())) {
 			mName.setText(type.getName());
 			mPaint.setColor(type.getColor());
 			mColor.setBackgroundColor(type.getColor());

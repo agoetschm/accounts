@@ -19,6 +19,9 @@ public class Type {
 	private int order;
 	private int color;
 
+	public static final String[] DEFAULT_TYPES = new String[] { "other",
+			"clothes", "food", "loan", "salary", "leisure" };
+
 	public Type() {
 		setId(0);
 		setName(null);
@@ -42,7 +45,6 @@ public class Type {
 		setColor(0);
 		setOrder(0);
 	}
-
 
 	public String getName() {
 		return name;
@@ -83,7 +85,7 @@ public class Type {
 	public void setOrder(int order) {
 		this.order = order;
 	}
-	
+
 	public static ArrayList<Type> getTypes(ContentResolver contentResolver) {
 		ArrayList<Type> typesList = new ArrayList<Type>();
 
@@ -92,7 +94,7 @@ public class Type {
 				null);
 
 		Log.w("type", "cursor movetofirst");
-		if (cursor.moveToFirst()) {
+		if (cursor != null && cursor.moveToFirst()) {
 			while (!cursor.isAfterLast()) {
 				Log.w("type", "cursor line");
 				typesList.add(new Type(cursor));
@@ -102,11 +104,10 @@ public class Type {
 			cursor.close();
 		} else
 			return null;
-		
+
 		return typesList;
 	}
-	
-	
+
 	public void saveInDB(ContentResolver contentResolver) {
 
 		ContentValues values = new ContentValues();
@@ -115,12 +116,12 @@ public class Type {
 		values.put(TypeTable.COLUMN_ORDER, order);
 
 		if (uri == null)
-			contentResolver.insert(
-					MyAccountsContentProvider.CONTENT_URI_TYPES, values);
+			contentResolver.insert(MyAccountsContentProvider.CONTENT_URI_TYPES,
+					values);
 		else
 			contentResolver.update(uri, values, null, null);
 	}
-	
+
 	public boolean loadFromDB(ContentResolver contentResolver) {
 		Cursor cursor = contentResolver.query(uri, null, null, null, null);
 
@@ -131,25 +132,47 @@ public class Type {
 		}
 		return false;
 	}
-	
+
 	public void delete(ContentResolver contentResolver) {
 		if (uri != null)
 			contentResolver.delete(uri, null, null);
+		// TODO
+		// control if transaction is connected
 	}
 
-	
+	public boolean loadColorFromDB(ContentResolver contentResolver) {
+		String[] projection = new String[] { TypeTable.COLUMN_COLOR };
+		Cursor cursor = contentResolver.query(
+				MyAccountsContentProvider.CONTENT_URI_TYPES, projection,
+				TypeTable.COLUMN_ID + "=" + id, null, null);
+		if (cursor.moveToFirst()) {
+			this.setColor(cursor.getInt(cursor
+					.getColumnIndex(TypeTable.COLUMN_COLOR)));
+			cursor.close();
+			return true;
+		}
+		return false;
+	}
+
 	private void loadFromCursor(Cursor cursor) {
-		this.setId(cursor.getLong(cursor
-				.getColumnIndex(TypeTable.COLUMN_ID)));
+		this.setId(cursor.getLong(cursor.getColumnIndex(TypeTable.COLUMN_ID)));
 		this.setName(cursor.getString(cursor
-				.getColumnIndex(TypeTable.COLUMN_NAME)));	
+				.getColumnIndex(TypeTable.COLUMN_NAME)));
 
 		this.setOrder(cursor.getInt(cursor
 				.getColumnIndex(TypeTable.COLUMN_ORDER)));
 		this.setColor(cursor.getInt(cursor
 				.getColumnIndex(TypeTable.COLUMN_COLOR)));
 	}
-	
-	
+
+	@Override
+	public String toString() {
+		return getName();
+	}
+
+	public static void controlDefault(ContentResolver contentResolver) {
+		ArrayList<Type> typesList = getTypes(contentResolver);
+		// TODO
+	}
 
 }

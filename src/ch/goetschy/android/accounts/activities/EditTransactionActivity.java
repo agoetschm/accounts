@@ -2,6 +2,7 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
@@ -21,6 +22,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -34,6 +36,9 @@ public class EditTransactionActivity extends Activity {
 	private Spinner mType;
 	private Button mDateButton;
 	private TextView mDateTextView;
+	private long mTimeInMillis;
+	private RadioGroup inOrOutRadio;
+
 	private Transaction transaction;
 	private long parent_id;
 
@@ -43,11 +48,13 @@ public class EditTransactionActivity extends Activity {
 
 		this.setContentView(R.layout.activity_edit_transaction);
 
+		// get widgets
 		mName = (EditText) findViewById(R.id.edit_transaction_name);
 		mAmount = (EditText) findViewById(R.id.edit_transaction_amount);
 		mType = (Spinner) findViewById(R.id.edit_transaction_type);
 		mDateButton = (Button) findViewById(R.id.edit_transaction_date_button);
 		mDateTextView = (TextView) findViewById(R.id.edit_transaction_date);
+		inOrOutRadio = (RadioGroup) findViewById(R.id.edit_transaction_radio);
 		Button confirmButton = (Button) findViewById(R.id.edit_transaction_confirm);
 		Button deleteButton = (Button) findViewById(R.id.edit_transaction_delete);
 
@@ -73,43 +80,44 @@ public class EditTransactionActivity extends Activity {
 		if (extras != null) {
 			Uri uri = extras
 					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE);
-			if (uri != null) {
+
+			if (uri != null)
 				transaction.setUri(uri);
-				fillData();
-			}
+
 			parent_id = extras
 					.getLong(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE);
 		}
 
-		// type spinner
-		ArrayList<Type> typesList = new ArrayList<Type>();// Type.getTypes(getContentResolver());
-		ArrayAdapter<String> typeAdapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_spinner_item);
-		// test
-		typesList.add(new Type(1, "type1"));
-		typesList.add(new Type(2, "type2"));
-		typesList.add(new Type(3, "type3"));
-		// end test
-		int typesListSize = typesList.size();
-		for (int i = 0; i < typesListSize; i++) {
-			typeAdapter.add(typesList.get(i).getName());
-		}
-		typeAdapter
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mType.setAdapter(typeAdapter);
+		// radio
+		inOrOutRadio.check(R.id.edit_transaction_credit);
 
-		
+		// type spinner
+		ArrayList<Type> typesList = Type.getTypes(getContentResolver());
+		if (typesList != null) {
+			ArrayAdapter<Type> typeAdapter = new TypesAdapter(this, typesList);// ArrayAdapter<String>(this,android.R.layout.simple_spinner_item);
+			//
+			// int typesListSize = typesList.size();
+			// for (int i = 0; i < typesListSize; i++) {
+			// typeAdapter.add(typesList.get(i).getName());
+			// }
+			typeAdapter
+					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			mType.setAdapter(typeAdapter);
+		}
+
+		Log.w("editTransaction", "2");
+
 		// date
 		mDateButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				DatePickerFragment dateFragment = new DatePickerFragment();
-				dateFragment.setTextView(mDateTextView);
-			    dateFragment.show(getFragmentManager(), "datePicker");
+				dateFragment.setParent(EditTransactionActivity.this);
+				dateFragment.setMillis(mTimeInMillis);
+				dateFragment.show(getFragmentManager(), "datePicker");
 			}
 		});
-		
-		
+
 		// confirm button
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -138,14 +146,44 @@ public class EditTransactionActivity extends Activity {
 				}
 			}
 		});
-	}
 
-	private void fillData() {
+		// fill values from DB
+		// fillData();
 		if (transaction.loadFromDB(getContentResolver())) {
 			mName.setText(transaction.getName());
-			mAmount.setText(String.valueOf(transaction.getAmount()));
+
+			// amount
+			double dAmount = transaction.getAmount();
+			if (dAmount < 0) {
+				inOrOutRadio.check(R.id.edit_transaction_debit);
+				dAmount *= -1;
+			}
+			mAmount.setText(String.valueOf(dAmount));
+
+			// set default type
+			long typeId = transaction.getType().getId();
+			int listSize = typesList.size();
+			for (int i = 0; i < listSize; i++) {
+				if (typesList.get(i).getId() == typeId)
+					mType.setSelection(i);
+			}
+			// set date
+			mTimeInMillis = transaction.getDate();
+
 		}
+
+		// init default date
+		setDate();
 	}
+
+	// private void fillData() {
+	// if (transaction.loadFromDB(getContentResolver())) {
+	// mName.setText(transaction.getName());
+	// mAmount.setText(String.valueOf(transaction.getAmount()));
+	// //mType
+	//
+	// }
+	// }
 
 	private boolean validAmount(String amount) {
 		return amount.matches("-?\\d+(\\.\\d+)?");
@@ -173,48 +211,48 @@ public class EditTransactionActivity extends Activity {
 	}
 
 	private void save() {
+		// name
 		String name = mName.getText().toString();
-		String amount = mAmount.getText().toString();
-
-		if (name.length() == 0 || !validAmount(amount))
+		if (name.length() == 0)
 			return;
+		
+		// amount
+		String amount = mAmount.getText().toString();
+		if (!validAmount(amount))
+			return;
+		double dAmount = Double.parseDouble(amount);
+		if (inOrOutRadio.getCheckedRadioButtonId() == R.id.edit_transaction_debit) // neg
+			dAmount *= -1;
+		
+		amount = String.valueOf(dAmount);
+
 		Log.w("editTransaction", "save " + name);
 		transaction.setName(name);
-		transaction.setAmount(Integer.parseInt(amount));
+		transaction.setAmount(Double.parseDouble(amount));
+		transaction.setDate(mTimeInMillis);
+		transaction.getType().setId(mType.getSelectedItemId());
 		transaction.setParent(new Account(parent_id));
 		transaction.saveInDB(getContentResolver());
 	}
 
-	public static class DatePickerFragment extends DialogFragment implements
-			DatePickerDialog.OnDateSetListener {
-		private TextView textView;
-		
-		
-		@Override
-		public Dialog onCreateDialog(Bundle savedInstanceState) {
-			// Use the current date as the default date in the picker
-	        final Calendar c = Calendar.getInstance();
-	        int year = c.get(Calendar.YEAR);
-	        int month = c.get(Calendar.MONTH);
-	        int day = c.get(Calendar.DAY_OF_MONTH);
+	public void setDate() {
+		final Calendar c = Calendar.getInstance();
+		if (mTimeInMillis != 0)
+			c.setTimeInMillis(mTimeInMillis);
+		int year = c.get(Calendar.YEAR);
+		int month = c.get(Calendar.MONTH);
+		int day = c.get(Calendar.DAY_OF_MONTH);
+		mDateTextView.setText(day + "/" + month + "/" + year);
+		if (mTimeInMillis == 0)
+			mTimeInMillis = c.getTimeInMillis();
+	}
 
-	        // Create a new instance of DatePickerDialog and return it
-	        return new DatePickerDialog(getActivity(), this, year, month, day);
-		}
+	public void setDate(int year, int month, int day) {
+		mDateTextView.setText(day + "/" + month + "/" + year);
+		final Calendar c = Calendar.getInstance();
+		c.set(year, month, day);
 
-		@Override
-		public void onDateSet(DatePicker view, int year, int monthOfYear,
-				int dayOfMonth) {
-			textView.setText(dayOfMonth + "." + monthOfYear + "." + year);
-			
-		}
-
-
-		public void setTextView(TextView textView) {
-			this.textView = textView;
-		}
-
-		
+		mTimeInMillis = c.getTimeInMillis();
 	}
 
 }

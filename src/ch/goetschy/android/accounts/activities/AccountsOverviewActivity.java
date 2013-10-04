@@ -4,6 +4,7 @@ import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.objects.Account;
+import ch.goetschy.android.accounts.objects.Type;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -37,6 +38,9 @@ public class AccountsOverviewActivity extends ListActivity implements
 		this.getListView().setDividerHeight(2);
 		fillData();
 		this.registerForContextMenu(getListView());
+		
+		// control for default types
+		Type.controlDefault(this.getContentResolver());
 	}
 
 	private void fillData() {

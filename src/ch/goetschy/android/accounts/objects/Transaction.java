@@ -19,15 +19,20 @@ public class Transaction extends Item {
 		setDate(0);
 	}
 
-	public Transaction(Cursor cursor) {
+	public Transaction(Cursor cursor, ContentResolver contentResolver) {
 		super();
-		if (cursor != null)
+		setType(new Type());
+		setDescription("");
+		setDate(0);
+		if (cursor != null){
 			loadFromCursor(cursor);
+			type.loadColorFromDB(contentResolver);
+		}
 		else
 			throw new NullPointerException("Null cursor");
 	}
 
-	public Transaction(int p_id, int p_amount, String p_name,
+	public Transaction(int p_id, double p_amount, String p_name,
 			String p_description, long p_date, Type p_type, Account p_parent) {
 		super(p_id, p_amount, p_name, p_parent);
 		setType(p_type);
@@ -87,12 +92,14 @@ public class Transaction extends Item {
 
 	@Override
 	public boolean loadFromDB(ContentResolver contentResolver) {
-		Cursor cursor = contentResolver.query(uri, null, null, null, null);
+		if (uri != null) {
+			Cursor cursor = contentResolver.query(uri, null, null, null, null);
 
-		if (cursor.moveToFirst()) {
-			loadFromCursor(cursor);
-			cursor.close();
-			return true;
+			if (cursor.moveToFirst()) {
+				loadFromCursor(cursor);
+				cursor.close();
+				return true;
+			}
 		}
 		return false;
 	}
@@ -100,7 +107,7 @@ public class Transaction extends Item {
 	private void loadFromCursor(Cursor cursor) {
 		this.setId(cursor.getLong(cursor
 				.getColumnIndex(TransactionTable.COLUMN_ID)));
-		this.setAmount(cursor.getInt(cursor
+		this.setAmount(cursor.getDouble(cursor
 				.getColumnIndex(TransactionTable.COLUMN_AMOUNT)));
 		this.setName(cursor.getString(cursor
 				.getColumnIndex(TransactionTable.COLUMN_NAME)));

@@ -277,7 +277,7 @@ public class MyAccountsContentProvider extends ContentProvider {
 			available = AccountsTable.available;
 		} else if (table.equals(PATH_TRANSACTIONS)) {
 			available = TransactionTable.available;
-		} else if (table == PATH_TYPES) {
+		} else if (table.equals(PATH_TYPES)) {
 			available = TypeTable.available;
 		}
 		if (projection != null) {

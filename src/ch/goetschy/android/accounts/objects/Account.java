@@ -49,6 +49,8 @@ public class Account extends Item {
 	public ArrayList<Transaction> getListTransactions(
 			ContentResolver contentResolver) {
 		if (uri != null) {
+			double tmpAmount = 0;
+			
 			Cursor cursor = contentResolver.query(
 					MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS, null,
 					TransactionTable.COLUMN_PARENT + "=" + id, null, null);
@@ -58,13 +60,26 @@ public class Account extends Item {
 				listTransactions.clear();
 				while(!cursor.isAfterLast()){
 					Log.w("account", "cursor line");
-					listTransactions.add(new Transaction(cursor));
+					Transaction newTrans = new Transaction(cursor, contentResolver); 
+					listTransactions.add(newTrans);
+					
+					tmpAmount += newTrans.getAmount();
+					
 					cursor.moveToNext();
 				}
 				Log.w("account", "cursor close");
 				cursor.close();
-			} else
+				
+				// save new amount 
+				amount = tmpAmount;
+				saveAmountInDB(contentResolver);
+			} else{
+				// save zero amount 
+				amount = 0;
+				saveAmountInDB(contentResolver);
+				
 				return null;
+			}
 		}
 		return listTransactions;
 	}
@@ -90,7 +105,7 @@ public class Account extends Item {
 		if (cursor.moveToFirst()) {
 			this.setId(cursor.getLong(cursor
 					.getColumnIndex(AccountsTable.COLUMN_ID)));
-			this.setAmount(cursor.getInt(cursor
+			this.setAmount(cursor.getDouble(cursor
 					.getColumnIndex(AccountsTable.COLUMN_AMOUNT)));
 			this.setName(cursor.getString(cursor
 					.getColumnIndex(AccountsTable.COLUMN_NAME)));
@@ -122,6 +137,17 @@ public class Account extends Item {
 					MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, values);
 		else
 
+			contentResolver.update(uri, values, null, null);
+
+	}
+	
+	public void saveAmountInDB(ContentResolver contentResolver) {
+
+		ContentValues values = new ContentValues();
+
+		values.put(AccountsTable.COLUMN_AMOUNT, amount);
+
+		if (uri != null)
 			contentResolver.update(uri, values, null, null);
 
 	}

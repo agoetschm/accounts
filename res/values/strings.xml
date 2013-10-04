@@ -9,6 +9,12 @@
     <string name="title_activity_edit_transaction">New/Edit transaction</string>
     <string name="title_activity_types">Manage types</string>
     <string name="title_activity_edit_type">New/Edit type</string>
+    <string name="color_picker_title">Pick a color</string>
+    
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="icon">Icon</string>
+    
     
     
     
@@ -30,6 +36,8 @@
     <string name="edit_transaction_date">Set date</string>
     <string name="edit_transaction_name_toast">Please enter a name</string>
     <string name="edit_transaction_amount_toast">Please enter a valid amount</string>
+    <string name="edit_transaction_credit">Credit</string>
+    <string name="edit_transaction_debit">Debit</string>
     <string name="edit_transaction_confirm">Save</string>
     <string name="edit_transaction_delete">Delete</string>
     

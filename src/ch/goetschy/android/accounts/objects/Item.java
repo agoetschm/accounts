@@ -5,7 +5,7 @@ import android.net.Uri;
 
 public abstract class Item {
 	protected long id;
-	protected int amount;
+	protected double amount;
 	protected String name;
 	protected Uri uri;
 	protected Item parent;
@@ -24,7 +24,7 @@ public abstract class Item {
 		setUri(DEFAULT_URI);
 	}
 	
-	public Item(long p_id, int p_amount, String p_name, Item p_parent){
+	public Item(long p_id, double p_amount, String p_name, Item p_parent){
 		setId(p_id);
 		setAmount(p_amount);
 		setName(p_name);
@@ -32,11 +32,11 @@ public abstract class Item {
 		setUri(null);
 	}
 
-	public int getAmount() {
+	public double getAmount() {
 		return amount;
 	}
 
-	public void setAmount(int amount) {
+	public void setAmount(double amount) {
 		this.amount = amount;
 	}
 

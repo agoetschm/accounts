@@ -12,7 +12,7 @@
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:layout_weight="10"
-        android:contentDescription="icon"
+        android:contentDescription="@string/icon"
         android:src="@drawable/ic_launcher" />
 
     <TextView
@@ -22,7 +22,7 @@
         android:layout_marginTop="6dp"
         android:layout_weight="70"
         android:lines="1"
-        android:textSize="24dp" >
+        android:textSize="24sp" >
     </TextView>
 
     <TextView
@@ -34,7 +34,7 @@
         android:lines="1"
         android:layout_weight="20"
         android:layout_gravity="right"
-        android:textSize="24dp" >
+        android:textSize="24sp" >
     </TextView>
 
 </LinearLayout>

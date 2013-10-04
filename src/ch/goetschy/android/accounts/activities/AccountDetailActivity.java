@@ -7,9 +7,11 @@ import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.database.TransactionTable;
 import ch.goetschy.android.accounts.objects.Account;
+import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
 import android.app.ListActivity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -17,17 +19,24 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 public class AccountDetailActivity extends ListActivity {
 
 	private TransactionsAdapter adapter;
 	private Account account;
+	private Spinner timeFilter;
+	private Filter filter;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -51,22 +60,66 @@ public class AccountDetailActivity extends ListActivity {
 
 		// listview
 		this.setContentView(R.layout.activity_detail);
-		this.getListView().setDividerHeight(2);
+		ListView listView = getListView();
+		listView.setDividerHeight(2);
 		fillData();
+
+		// get views
+		ImageButton previous = (ImageButton) findViewById(R.id.activity_detail_previous);
+		ImageButton next = (ImageButton) findViewById(R.id.activity_detail_next);
+		timeFilter = (Spinner) findViewById(R.id.activity_detail_spinner);
+		
+		// init filter
+		filter = new Filter();
+
+		// previous
+		previous.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				filter.previous();
+			}
+		});
+
+		Log.w("detail", "after");
+
+		// next
+		next.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				filter.next();
+			}
+		});
+
+		// spinner
+		timeFilter
+				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+					@Override
+					public void onItemSelected(AdapterView<?> arg0, View arg1,
+							int arg2, long arg3) {
+						// TODO Auto-generated method stub
+
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> arg0) {
+						// TODO Auto-generated method stub
+
+					}
+
+				});
+
 	}
 
 	private void fillData() {
 		ArrayList<Transaction> transactions = account
 				.getListTransactions(getContentResolver());
 		if (transactions != null) {
-			Log.w("accountDetail", "break1");
 			adapter = new TransactionsAdapter(this, transactions);
-			Log.w("accountDetail", "list size : " + transactions.size());
-			for (Transaction i : transactions) {
-				Log.w("accountDetail", i.getName());
-			}
 			this.setListAdapter(adapter);
 		}
+		else if (adapter != null)
+			adapter.clear();
 	}
 
 	private void createTransaction() {

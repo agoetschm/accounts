@@ -52,12 +52,7 @@ public class ManageTypesActivity extends ListActivity {
 
 	private void createType() {
 		Intent intent = new Intent(this, EditTypeActivity.class);
-		startActivity(intent);	
-//		ContentValues values = new ContentValues();
-//		values.put(TypeTable.COLUMN_NAME, "newType");
-//		values.put(TypeTable.COLUMN_COLOR, 1);
-//		
-//		getContentResolver().insert(MyAccountsContentProvider.CONTENT_URI_TYPES, values);
+		startActivity(intent);
 	}
 
 	// ADD BUTTON ------------------------
