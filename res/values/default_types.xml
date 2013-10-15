@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <string-array name="default_types">
+        <item>other</item>
+        <item>clothes</item>
+        <item>food</item>
+        <item>loan</item>
+        <item>salary</item>
+        <item>leisure</item>
+    </string-array>
+</resources>

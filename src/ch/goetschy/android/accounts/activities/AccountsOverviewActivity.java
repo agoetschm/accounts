@@ -1,5 +1,7 @@
 package ch.goetschy.android.accounts.activities;
 
+import java.util.ArrayList;
+
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
@@ -23,13 +25,14 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-public class AccountsOverviewActivity extends ListActivity implements
-		LoaderManager.LoaderCallbacks<Cursor> {
+public class AccountsOverviewActivity extends ListActivity /*implements
+		LoaderManager.LoaderCallbacks<Cursor> */{
 
 	private static final int DELETE_ID = 10;
 	private static final int EDIT_ID = 20;
 
-	private SimpleCursorAdapter adapter;
+//	private SimpleCursorAdapter adapter;
+	private AccountsAdapter adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -44,11 +47,18 @@ public class AccountsOverviewActivity extends ListActivity implements
 	}
 
 	private void fillData() {
-
-		this.getLoaderManager().initLoader(0, null, this);
-		adapter = Account.getAdapter(this, R.layout.activity_overview_item);
-
-		this.setListAdapter(adapter);
+		ArrayList<Account> accounts = Account.getListAccounts(getContentResolver());
+		
+		if (accounts != null) {
+			adapter = new AccountsAdapter(this, accounts);
+			this.setListAdapter(adapter);
+		} else if (adapter != null)
+			adapter.clear();
+//		
+//		this.getLoaderManager().initLoader(0, null, this);
+//		adapter = Account.getAdapter(this, R.layout.activity_overview_item);
+//
+//		this.setListAdapter(adapter);
 	}
 
 	private void createAccount() {
@@ -137,23 +147,23 @@ public class AccountsOverviewActivity extends ListActivity implements
 
 	// -----------------------------------
 
-	@Override
-	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
-		String[] projection = { AccountsTable.COLUMN_ID,
-				AccountsTable.COLUMN_NAME, AccountsTable.COLUMN_AMOUNT };
-		CursorLoader cursorLoader = new CursorLoader(this,
-				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, projection,
-				null, null, null);
-		return cursorLoader;
-	}
+//	@Override
+//	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
+//		String[] projection = { AccountsTable.COLUMN_ID,
+//				AccountsTable.COLUMN_NAME, AccountsTable.COLUMN_AMOUNT };
+//		CursorLoader cursorLoader = new CursorLoader(this,
+//				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, projection,
+//				null, null, null);
+//		return cursorLoader;
+//	}
 
-	@Override
-	public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
-		adapter.swapCursor(arg1);
-	}
-
-	@Override
-	public void onLoaderReset(Loader<Cursor> arg0) {
-		adapter.swapCursor(null);
-	}
+//	@Override
+//	public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
+//		adapter.swapCursor(arg1);
+//	}
+//
+//	@Override
+//	public void onLoaderReset(Loader<Cursor> arg0) {
+//		adapter.swapCursor(null);
+//	}
 }

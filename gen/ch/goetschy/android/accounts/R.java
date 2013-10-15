@@ -9,7 +9,8 @@ package ch.goetschy.android.accounts;
 
 public final class R {
     public static final class array {
-        public static final int time_filter=0x7f060000;
+        public static final int default_types=0x7f040000;
+        public static final int time_filter=0x7f040001;
     }
     public static final class attr {
     }
@@ -20,40 +21,41 @@ public final class R {
         public static final int ic_launcher=0x7f020003;
     }
     public static final class id {
-        public static final int activity_detail_amount=0x7f080006;
-        public static final int activity_detail_date=0x7f080005;
+        public static final int activity_detail_amount=0x7f080007;
+        public static final int activity_detail_date=0x7f080006;
         public static final int activity_detail_footer=0x7f080000;
-        public static final int activity_detail_name=0x7f080004;
-        public static final int activity_detail_next=0x7f080003;
+        public static final int activity_detail_interval=0x7f080003;
+        public static final int activity_detail_name=0x7f080005;
+        public static final int activity_detail_next=0x7f080004;
         public static final int activity_detail_previous=0x7f080001;
         public static final int activity_detail_spinner=0x7f080002;
-        public static final int activity_overview_amount=0x7f08001b;
-        public static final int activity_overview_name=0x7f08001a;
-        public static final int activity_types_name=0x7f08001c;
-        public static final int edit_account_confirm=0x7f080008;
-        public static final int edit_account_delete=0x7f080009;
-        public static final int edit_account_name=0x7f080007;
-        public static final int edit_transaction_amount=0x7f08000b;
-        public static final int edit_transaction_confirm=0x7f080013;
-        public static final int edit_transaction_credit=0x7f08000d;
-        public static final int edit_transaction_date=0x7f080010;
-        public static final int edit_transaction_date_button=0x7f080011;
-        public static final int edit_transaction_debit=0x7f08000e;
-        public static final int edit_transaction_delete=0x7f080014;
-        public static final int edit_transaction_description=0x7f080012;
-        public static final int edit_transaction_name=0x7f08000a;
-        public static final int edit_transaction_radio=0x7f08000c;
-        public static final int edit_transaction_type=0x7f08000f;
-        public static final int edit_type_color=0x7f080016;
-        public static final int edit_type_confirm=0x7f080017;
-        public static final int edit_type_delete=0x7f080018;
-        public static final int edit_type_name=0x7f080015;
-        public static final int icon=0x7f080019;
-        public static final int menu_add=0x7f08001f;
-        public static final int menu_detail_add=0x7f08001d;
-        public static final int menu_detail_filter=0x7f08001e;
-        public static final int menu_types=0x7f080020;
-        public static final int menu_types_add=0x7f080021;
+        public static final int activity_overview_amount=0x7f08001c;
+        public static final int activity_overview_name=0x7f08001b;
+        public static final int activity_types_name=0x7f08001d;
+        public static final int edit_account_confirm=0x7f080009;
+        public static final int edit_account_delete=0x7f08000a;
+        public static final int edit_account_name=0x7f080008;
+        public static final int edit_transaction_amount=0x7f08000c;
+        public static final int edit_transaction_confirm=0x7f080014;
+        public static final int edit_transaction_credit=0x7f08000e;
+        public static final int edit_transaction_date=0x7f080011;
+        public static final int edit_transaction_date_button=0x7f080012;
+        public static final int edit_transaction_debit=0x7f08000f;
+        public static final int edit_transaction_delete=0x7f080015;
+        public static final int edit_transaction_description=0x7f080013;
+        public static final int edit_transaction_name=0x7f08000b;
+        public static final int edit_transaction_radio=0x7f08000d;
+        public static final int edit_transaction_type=0x7f080010;
+        public static final int edit_type_color=0x7f080017;
+        public static final int edit_type_confirm=0x7f080018;
+        public static final int edit_type_delete=0x7f080019;
+        public static final int edit_type_name=0x7f080016;
+        public static final int icon=0x7f08001a;
+        public static final int menu_add=0x7f080020;
+        public static final int menu_detail_add=0x7f08001e;
+        public static final int menu_detail_filter=0x7f08001f;
+        public static final int menu_types=0x7f080021;
+        public static final int menu_types_add=0x7f080022;
     }
     public static final class layout {
         public static final int activity_detail=0x7f030000;
@@ -72,45 +74,46 @@ public final class R {
         public static final int activity_types=0x7f070002;
     }
     public static final class string {
-        public static final int account_overview_delete=0x7f040020;
-        public static final int account_overview_edit=0x7f040021;
-        public static final int app_name=0x7f040000;
-        public static final int color_picker_title=0x7f040009;
-        public static final int edit_account_confirm=0x7f040010;
-        public static final int edit_account_delete=0x7f040011;
-        public static final int edit_account_name=0x7f04000f;
-        public static final int edit_transaction_amount=0x7f040017;
-        public static final int edit_transaction_amount_toast=0x7f04001b;
-        public static final int edit_transaction_confirm=0x7f04001e;
-        public static final int edit_transaction_credit=0x7f04001c;
-        public static final int edit_transaction_date=0x7f040019;
-        public static final int edit_transaction_debit=0x7f04001d;
-        public static final int edit_transaction_delete=0x7f04001f;
-        public static final int edit_transaction_description=0x7f040018;
-        public static final int edit_transaction_name=0x7f040016;
-        public static final int edit_transaction_name_toast=0x7f04001a;
-        public static final int edit_type_color=0x7f040013;
-        public static final int edit_type_confirm=0x7f040014;
-        public static final int edit_type_delete=0x7f040015;
-        public static final int edit_type_name=0x7f040012;
-        public static final int hello_world=0x7f040001;
-        public static final int icon=0x7f04000c;
-        public static final int menu_add=0x7f040022;
-        public static final int menu_filter=0x7f040023;
-        public static final int menu_settings=0x7f040002;
-        public static final int menu_types=0x7f040024;
-        public static final int next=0x7f04000b;
-        public static final int no_account=0x7f04000e;
-        public static final int no_transaction=0x7f04000d;
-        public static final int previous=0x7f04000a;
-        public static final int title_activity_account_detail=0x7f040005;
-        public static final int title_activity_accounts_overview=0x7f040003;
-        public static final int title_activity_edit_accounts=0x7f040004;
-        public static final int title_activity_edit_transaction=0x7f040006;
-        public static final int title_activity_edit_type=0x7f040008;
-        public static final int title_activity_types=0x7f040007;
+        public static final int account_overview_delete=0x7f050021;
+        public static final int account_overview_edit=0x7f050022;
+        public static final int app_name=0x7f050000;
+        public static final int color_picker_title=0x7f050009;
+        public static final int edit_account_confirm=0x7f050011;
+        public static final int edit_account_delete=0x7f050012;
+        public static final int edit_account_name=0x7f050010;
+        public static final int edit_transaction_amount=0x7f050018;
+        public static final int edit_transaction_amount_toast=0x7f05001c;
+        public static final int edit_transaction_confirm=0x7f05001f;
+        public static final int edit_transaction_credit=0x7f05001d;
+        public static final int edit_transaction_date=0x7f05001a;
+        public static final int edit_transaction_debit=0x7f05001e;
+        public static final int edit_transaction_delete=0x7f050020;
+        public static final int edit_transaction_description=0x7f050019;
+        public static final int edit_transaction_name=0x7f050017;
+        public static final int edit_transaction_name_toast=0x7f05001b;
+        public static final int edit_type_color=0x7f050014;
+        public static final int edit_type_confirm=0x7f050015;
+        public static final int edit_type_delete=0x7f050016;
+        public static final int edit_type_name=0x7f050013;
+        public static final int hello_world=0x7f050001;
+        public static final int icon=0x7f05000c;
+        public static final int interval=0x7f05000d;
+        public static final int menu_add=0x7f050023;
+        public static final int menu_filter=0x7f050024;
+        public static final int menu_settings=0x7f050002;
+        public static final int menu_types=0x7f050025;
+        public static final int next=0x7f05000b;
+        public static final int no_account=0x7f05000f;
+        public static final int no_transaction=0x7f05000e;
+        public static final int previous=0x7f05000a;
+        public static final int title_activity_account_detail=0x7f050005;
+        public static final int title_activity_accounts_overview=0x7f050003;
+        public static final int title_activity_edit_accounts=0x7f050004;
+        public static final int title_activity_edit_transaction=0x7f050006;
+        public static final int title_activity_edit_type=0x7f050008;
+        public static final int title_activity_types=0x7f050007;
     }
     public static final class style {
-        public static final int AppTheme=0x7f050000;
+        public static final int AppTheme=0x7f060000;
     }
 }

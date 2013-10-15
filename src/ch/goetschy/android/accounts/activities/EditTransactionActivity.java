@@ -7,6 +7,7 @@ import java.util.Date;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.objects.Account;
+import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Type;
 import android.app.Activity;
@@ -239,20 +240,18 @@ public class EditTransactionActivity extends Activity {
 		final Calendar c = Calendar.getInstance();
 		if (mTimeInMillis != 0)
 			c.setTimeInMillis(mTimeInMillis);
-		int year = c.get(Calendar.YEAR);
-		int month = c.get(Calendar.MONTH);
-		int day = c.get(Calendar.DAY_OF_MONTH);
-		mDateTextView.setText(day + "/" + month + "/" + year);
-		if (mTimeInMillis == 0)
+		else
 			mTimeInMillis = c.getTimeInMillis();
+		
+		mDateTextView.setText(Filter.millisToText(mTimeInMillis));
 	}
 
 	public void setDate(int year, int month, int day) {
-		mDateTextView.setText(day + "/" + month + "/" + year);
 		final Calendar c = Calendar.getInstance();
 		c.set(year, month, day);
-
 		mTimeInMillis = c.getTimeInMillis();
+
+		mDateTextView.setText(Filter.millisToText(mTimeInMillis));
 	}
 
 }

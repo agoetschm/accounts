@@ -103,8 +103,9 @@ public class Transaction extends Item {
 		}
 		return false;
 	}
-
-	private void loadFromCursor(Cursor cursor) {
+	
+	@Override
+	protected void loadFromCursor(Cursor cursor) {
 		this.setId(cursor.getLong(cursor
 				.getColumnIndex(TransactionTable.COLUMN_ID)));
 		this.setAmount(cursor.getDouble(cursor

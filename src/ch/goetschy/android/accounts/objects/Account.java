@@ -29,18 +29,18 @@ public class Account extends Item {
 		setOrder(0);
 		setId(p_id);
 	}
-	
+
 	public Account(int p_id, String p_name, Item p_parent) {
 		super(p_id, 0, p_name, p_parent);
 		listTransactions = new ArrayList<Transaction>();
 		setOrder(0);
 	}
 
-	//
-	// public void addTransaction(Transaction transaction) {
-	// listTransactions.add(transaction);
-	// }
-
+	public Account(Cursor cursor) {
+		super();
+		listTransactions = new ArrayList<Transaction>();
+		loadFromCursor(cursor);
+	}
 
 	public ArrayList<Transaction> getListTransactions() {
 		return listTransactions;
@@ -50,7 +50,7 @@ public class Account extends Item {
 			ContentResolver contentResolver) {
 		if (uri != null) {
 			double tmpAmount = 0;
-			
+
 			Cursor cursor = contentResolver.query(
 					MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS, null,
 					TransactionTable.COLUMN_PARENT + "=" + id, null, null);
@@ -58,30 +58,47 @@ public class Account extends Item {
 			if (cursor.moveToFirst()) {
 				// clear actual list
 				listTransactions.clear();
-				while(!cursor.isAfterLast()){
+				while (!cursor.isAfterLast()) {
 					Log.w("account", "cursor line");
-					Transaction newTrans = new Transaction(cursor, contentResolver); 
+					Transaction newTrans = new Transaction(cursor,
+							contentResolver);
 					listTransactions.add(newTrans);
-					
+
 					tmpAmount += newTrans.getAmount();
-					
+
 					cursor.moveToNext();
 				}
 				Log.w("account", "cursor close");
 				cursor.close();
-				
-				// save new amount 
+
+				// save new amount
 				amount = tmpAmount;
 				saveAmountInDB(contentResolver);
-			} else{
-				// save zero amount 
+			} else {
+				// save zero amount
 				amount = 0;
 				saveAmountInDB(contentResolver);
-				
+
 				return null;
 			}
 		}
 		return listTransactions;
+	}
+
+	// return only the transactions within the filter's bounds
+	public ArrayList<Transaction> getListTransactions(
+			ContentResolver contentResolver, Filter filter) {
+
+		getListTransactions(contentResolver);
+		ArrayList<Transaction> filteredTransactions = new ArrayList<Transaction>();
+		Log.w("account", "filter bounds : " + filter.getLowerBound() + " - "
+				+ filter.getUpperBound());
+		for (Transaction trans : listTransactions) {
+			if (filter.isSelected(trans.getDate())) {
+				filteredTransactions.add(trans);
+			}
+		}
+		return filteredTransactions;
 	}
 
 	public int getOrder() {
@@ -103,22 +120,26 @@ public class Account extends Item {
 		Cursor cursor = contentResolver.query(uri, null, null, null, null);
 
 		if (cursor.moveToFirst()) {
-			this.setId(cursor.getLong(cursor
-					.getColumnIndex(AccountsTable.COLUMN_ID)));
-			this.setAmount(cursor.getDouble(cursor
-					.getColumnIndex(AccountsTable.COLUMN_AMOUNT)));
-			this.setName(cursor.getString(cursor
-					.getColumnIndex(AccountsTable.COLUMN_NAME)));
-			this.setOrder(cursor.getInt(cursor
-					.getColumnIndex(AccountsTable.COLUMN_ORDER)));
-			if (parent != null)
-				parent.setId(cursor.getLong(cursor
-						.getColumnIndex(AccountsTable.COLUMN_PARENT)));
-
+			loadFromCursor(cursor);
 			cursor.close();
 			return true;
 		}
 		return false;
+	}
+	
+	@Override
+	protected void loadFromCursor(Cursor cursor){
+		this.setId(cursor.getLong(cursor
+				.getColumnIndex(AccountsTable.COLUMN_ID)));
+		this.setAmount(cursor.getDouble(cursor
+				.getColumnIndex(AccountsTable.COLUMN_AMOUNT)));
+		this.setName(cursor.getString(cursor
+				.getColumnIndex(AccountsTable.COLUMN_NAME)));
+		this.setOrder(cursor.getInt(cursor
+				.getColumnIndex(AccountsTable.COLUMN_ORDER)));
+		if (parent != null)
+			parent.setId(cursor.getLong(cursor
+					.getColumnIndex(AccountsTable.COLUMN_PARENT)));
 	}
 
 	@Override
@@ -140,7 +161,7 @@ public class Account extends Item {
 			contentResolver.update(uri, values, null, null);
 
 	}
-	
+
 	public void saveAmountInDB(ContentResolver contentResolver) {
 
 		ContentValues values = new ContentValues();
@@ -160,4 +181,29 @@ public class Account extends Item {
 
 		return new SimpleCursorAdapter(context, layout, null, from, to, 0);
 	}
+
+	public static ArrayList<Account> getListAccounts(
+			ContentResolver contentResolver) {
+		ArrayList<Account> listAccounts = new ArrayList<Account>();
+
+		Cursor cursor = contentResolver.query(
+				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, null,
+				null, null, null);
+		Log.w("account", "cursor movetofirst");
+		if (cursor.moveToFirst()) {
+			while (!cursor.isAfterLast()) {
+				Log.w("account", "cursor line");
+				
+				listAccounts.add(new Account(cursor));
+
+				cursor.moveToNext();
+			}
+			Log.w("account", "cursor close");
+			cursor.close();
+
+		} 
+		
+		return listAccounts;
+	}
+
 }

@@ -1,6 +1,7 @@
 package ch.goetschy.android.accounts.objects;
 
 import android.content.ContentResolver;
+import android.database.Cursor;
 import android.net.Uri;
 
 public abstract class Item {
@@ -78,4 +79,6 @@ public abstract class Item {
 	public abstract void saveInDB(ContentResolver contentResolver);
 	
 	public abstract boolean loadFromDB(ContentResolver contentResolver);
+	
+	protected abstract void loadFromCursor(Cursor cursor);
 }

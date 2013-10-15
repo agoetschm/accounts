@@ -1,6 +1,7 @@
 package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
@@ -29,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class AccountDetailActivity extends ListActivity {
@@ -37,6 +39,7 @@ public class AccountDetailActivity extends ListActivity {
 	private Account account;
 	private Spinner timeFilter;
 	private Filter filter;
+	private TextView intervalView;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +61,10 @@ public class AccountDetailActivity extends ListActivity {
 			finish();
 		}
 
+		// init filter
+		filter = new Filter();
+		filter.setLowerBound(Calendar.getInstance().getTimeInMillis());
+
 		// listview
 		this.setContentView(R.layout.activity_detail);
 		ListView listView = getListView();
@@ -68,25 +75,27 @@ public class AccountDetailActivity extends ListActivity {
 		ImageButton previous = (ImageButton) findViewById(R.id.activity_detail_previous);
 		ImageButton next = (ImageButton) findViewById(R.id.activity_detail_next);
 		timeFilter = (Spinner) findViewById(R.id.activity_detail_spinner);
-		
-		// init filter
-		filter = new Filter();
+		intervalView = (TextView) findViewById(R.id.activity_detail_interval);
+
+		// LISTENERS ************
 
 		// previous
 		previous.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				filter.previous();
+				setDateInterval();
+				fillData();
 			}
 		});
-
-		Log.w("detail", "after");
 
 		// next
 		next.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				filter.next();
+				setDateInterval();
+				fillData();
 			}
 		});
 
@@ -95,10 +104,11 @@ public class AccountDetailActivity extends ListActivity {
 				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
 					@Override
-					public void onItemSelected(AdapterView<?> arg0, View arg1,
-							int arg2, long arg3) {
-						// TODO Auto-generated method stub
-
+					public void onItemSelected(AdapterView<?> parent,
+							View view, int position, long id) {
+						filter.setInterval(timeFilter.getSelectedItemPosition());
+						setDateInterval();
+						fillData();
 					}
 
 					@Override
@@ -108,18 +118,26 @@ public class AccountDetailActivity extends ListActivity {
 					}
 
 				});
+		timeFilter.setSelection(Filter.WEEK);
+
+		// ***********************
 
 	}
 
 	private void fillData() {
-		ArrayList<Transaction> transactions = account
-				.getListTransactions(getContentResolver());
+		ArrayList<Transaction> transactions = account.getListTransactions(
+				getContentResolver(), filter);
+
 		if (transactions != null) {
 			adapter = new TransactionsAdapter(this, transactions);
 			this.setListAdapter(adapter);
-		}
-		else if (adapter != null)
+		} else if (adapter != null)
 			adapter.clear();
+	}
+
+	private void setDateInterval() {
+		intervalView.setText(Filter.millisToText(filter.getLowerBound())
+				+ " - " + Filter.millisToText(filter.getUpperBound() - 1));
 	}
 
 	private void createTransaction() {
