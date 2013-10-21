@@ -2,6 +2,8 @@ package ch.goetschy.android.accounts.objects;
 
 import java.util.Calendar;
 
+import ch.goetschy.android.accounts.BuildConfig;
+
 import android.util.Log;
 
 public class Filter {
@@ -13,8 +15,9 @@ public class Filter {
 	public static String millisToText(long time) {
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(time);
-		return "" + (c.get(Calendar.YEAR) % 100) + "/" + (c.get(Calendar.MONTH) + 1)
-				+ "/" + c.get(Calendar.DAY_OF_MONTH);/* month begin with 0 */
+		return "" + (c.get(Calendar.YEAR) % 100) + "/"
+				+ (c.get(Calendar.MONTH) + 1) + "/"
+				+ c.get(Calendar.DAY_OF_MONTH);/* month begin with 0 */
 	}
 
 	private long upperBound;
@@ -60,12 +63,15 @@ public class Filter {
 	public void setInterval(int interval) {
 		this.interval = interval;
 
-		Log.w("filter", "begin setInterval");
-		Log.w("filter", "interval : " + interval);
+		if (BuildConfig.DEBUG) {
+			Log.w("filter", "begin setInterval");
+			Log.w("filter", "interval : " + interval);
+		}
 
 		Calendar c = getCalendar();
 
-		Log.w("filter", "now : " + c.getTimeInMillis());
+		if (BuildConfig.DEBUG)
+			Log.w("filter", "now : " + c.getTimeInMillis());
 
 		switch (interval) {
 		case DAY:
@@ -105,7 +111,8 @@ public class Filter {
 	}
 
 	public void previous() {
-		Log.w("filter", "previous");
+		if (BuildConfig.DEBUG)
+			Log.w("filter", "previous");
 
 		upperBound = lowerBound;
 
@@ -116,7 +123,8 @@ public class Filter {
 	}
 
 	public void next() {
-		Log.w("filter", "next");
+		if (BuildConfig.DEBUG)
+			Log.w("filter", "next");
 
 		lowerBound = upperBound;
 

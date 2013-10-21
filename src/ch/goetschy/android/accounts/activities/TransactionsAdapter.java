@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
@@ -46,7 +47,8 @@ public class TransactionsAdapter extends ArrayAdapter<Transaction> {
 		// set type color
 		rowView.setBackgroundColor(list.get(position).getType().getColor());
 
-		Log.w("transactionsAdapter", list.get(position).getName());
+		if (BuildConfig.DEBUG)
+			Log.w("transactionsAdapter", list.get(position).getName());
 
 		// set name & amount
 		name.setText(list.get(position).getName());
@@ -56,7 +58,8 @@ public class TransactionsAdapter extends ArrayAdapter<Transaction> {
 		Calendar c = Calendar.getInstance();
 		date.setText(Filter.millisToText(list.get(position).getDate()));
 
-		Log.w("transactionsAdapter", "end");
+		if (BuildConfig.DEBUG)
+			Log.w("transactionsAdapter", "end");
 		return rowView;
 	}
 

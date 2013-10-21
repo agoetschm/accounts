@@ -2,6 +2,7 @@ package ch.goetschy.android.accounts.objects;
 
 import java.util.ArrayList;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.TransactionTable;
 import ch.goetschy.android.accounts.database.TypeTable;
@@ -93,14 +94,17 @@ public class Type {
 				MyAccountsContentProvider.CONTENT_URI_TYPES, null, null, null,
 				null);
 
+		if(BuildConfig.DEBUG)
 		Log.w("type", "cursor movetofirst");
 		if (cursor != null && cursor.moveToFirst()) {
 			while (!cursor.isAfterLast()) {
+				if(BuildConfig.DEBUG)
 				Log.w("type", "cursor line");
 				typesList.add(new Type(cursor));
 				cursor.moveToNext();
 			}
-			Log.w("type", "cursor close");
+			if(BuildConfig.DEBUG)
+				Log.w("type", "cursor close");
 			cursor.close();
 		} else
 			return null;

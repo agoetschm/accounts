@@ -25,13 +25,12 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-public class AccountsOverviewActivity extends ListActivity /*implements
-		LoaderManager.LoaderCallbacks<Cursor> */{
+public class AccountsOverviewActivity extends ListActivity {
 
 	private static final int DELETE_ID = 10;
 	private static final int EDIT_ID = 20;
 
-//	private SimpleCursorAdapter adapter;
+	// private SimpleCursorAdapter adapter;
 	private AccountsAdapter adapter;
 
 	@Override
@@ -41,37 +40,39 @@ public class AccountsOverviewActivity extends ListActivity /*implements
 		this.getListView().setDividerHeight(2);
 		fillData();
 		this.registerForContextMenu(getListView());
-		
+
 		// control for default types
 		Type.controlDefault(this.getContentResolver());
 	}
 
 	private void fillData() {
-		ArrayList<Account> accounts = Account.getListAccounts(getContentResolver());
-		
+		ArrayList<Account> accounts = Account
+				.getListAccounts(getContentResolver());
+
 		if (accounts != null) {
 			adapter = new AccountsAdapter(this, accounts);
 			this.setListAdapter(adapter);
 		} else if (adapter != null)
 			adapter.clear();
-//		
-//		this.getLoaderManager().initLoader(0, null, this);
-//		adapter = Account.getAdapter(this, R.layout.activity_overview_item);
-//
-//		this.setListAdapter(adapter);
+	}
+
+	@Override
+	protected void onResume() {
+		fillData();
+		super.onResume();
 	}
 
 	private void createAccount() {
 		Intent intent = new Intent(this, EditAccountActivity.class);
 		startActivity(intent);
 	}
-	
-	private void manageTypes(){
+
+	private void manageTypes() {
 		Intent intent = new Intent(this, ManageTypesActivity.class);
 		startActivity(intent);
 	}
 
-	// ADD BUTTON ------------------------
+	// ADD and TYPES BUTTON ------------------------
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -129,6 +130,7 @@ public class AccountsOverviewActivity extends ListActivity /*implements
 
 		return super.onContextItemSelected(item);
 	}
+	
 
 	// ACCOUNT DETAILS -------------------
 
@@ -144,26 +146,4 @@ public class AccountsOverviewActivity extends ListActivity /*implements
 
 		startActivity(intent);
 	}
-
-	// -----------------------------------
-
-//	@Override
-//	public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
-//		String[] projection = { AccountsTable.COLUMN_ID,
-//				AccountsTable.COLUMN_NAME, AccountsTable.COLUMN_AMOUNT };
-//		CursorLoader cursorLoader = new CursorLoader(this,
-//				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, projection,
-//				null, null, null);
-//		return cursorLoader;
-//	}
-
-//	@Override
-//	public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
-//		adapter.swapCursor(arg1);
-//	}
-//
-//	@Override
-//	public void onLoaderReset(Loader<Cursor> arg0) {
-//		adapter.swapCursor(null);
-//	}
 }

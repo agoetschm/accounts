@@ -3,6 +3,7 @@ package ch.goetschy.android.accounts.activities;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
@@ -118,7 +119,7 @@ public class AccountDetailActivity extends ListActivity {
 					}
 
 				});
-		timeFilter.setSelection(Filter.WEEK);
+		timeFilter.setSelection(Filter.MONTH);
 
 		// ***********************
 
@@ -184,7 +185,8 @@ public class AccountDetailActivity extends ListActivity {
 		Uri transactionUri = Uri
 				.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS + "/"
 						+ id);
-		Log.w("accountDetail", "transactionUri : " + transactionUri);
+		if (BuildConfig.DEBUG)
+			Log.w("accountDetail", "transactionUri : " + transactionUri);
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
 				transactionUri);
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,

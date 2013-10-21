@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.objects.Account;
@@ -106,8 +107,9 @@ public class EditTransactionActivity extends Activity {
 			mType.setAdapter(typeAdapter);
 		}
 
+		if(BuildConfig.DEBUG)
 		Log.w("editTransaction", "2");
-
+		
 		// date
 		mDateButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -115,7 +117,6 @@ public class EditTransactionActivity extends Activity {
 				DatePickerFragment dateFragment = new DatePickerFragment();
 				dateFragment.setParent(EditTransactionActivity.this);
 				dateFragment.setMillis(mTimeInMillis);
-				dateFragment.show(getFragmentManager(), "datePicker");
 			}
 		});
 
@@ -227,7 +228,8 @@ public class EditTransactionActivity extends Activity {
 		
 		amount = String.valueOf(dAmount);
 
-		Log.w("editTransaction", "save " + name);
+		if(BuildConfig.DEBUG)
+			Log.w("editTransaction", "save " + name);
 		transaction.setName(name);
 		transaction.setAmount(Double.parseDouble(amount));
 		transaction.setDate(mTimeInMillis);

@@ -8,6 +8,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 import android.widget.SimpleCursorAdapter;
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
@@ -46,6 +47,11 @@ public class Account extends Item {
 		return listTransactions;
 	}
 
+	public void updateAmount(ContentResolver contentResolver) {
+
+	}
+
+	// also updates amount
 	public ArrayList<Transaction> getListTransactions(
 			ContentResolver contentResolver) {
 		if (uri != null) {
@@ -53,13 +59,16 @@ public class Account extends Item {
 
 			Cursor cursor = contentResolver.query(
 					MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS, null,
-					TransactionTable.COLUMN_PARENT + "=" + id, null, null);
-			Log.w("account", "cursor movetofirst");
+					TransactionTable.COLUMN_PARENT + "=" + id, null,
+					TransactionTable.COLUMN_DATE + " ASC");
+			if (BuildConfig.DEBUG)
+				Log.w("account", "cursor movetofirst");
 			if (cursor.moveToFirst()) {
 				// clear actual list
 				listTransactions.clear();
 				while (!cursor.isAfterLast()) {
-					Log.w("account", "cursor line");
+					if (BuildConfig.DEBUG)
+						Log.w("account", "cursor line");
 					Transaction newTrans = new Transaction(cursor,
 							contentResolver);
 					listTransactions.add(newTrans);
@@ -68,7 +77,8 @@ public class Account extends Item {
 
 					cursor.moveToNext();
 				}
-				Log.w("account", "cursor close");
+				if (BuildConfig.DEBUG)
+					Log.w("account", "cursor close");
 				cursor.close();
 
 				// save new amount
@@ -91,8 +101,10 @@ public class Account extends Item {
 
 		getListTransactions(contentResolver);
 		ArrayList<Transaction> filteredTransactions = new ArrayList<Transaction>();
-		Log.w("account", "filter bounds : " + filter.getLowerBound() + " - "
-				+ filter.getUpperBound());
+		if (BuildConfig.DEBUG)
+			Log.w("account", "filter bounds : " + filter.getLowerBound()
+					+ " - " + filter.getUpperBound());
+		// filter by date
 		for (Transaction trans : listTransactions) {
 			if (filter.isSelected(trans.getDate())) {
 				filteredTransactions.add(trans);
@@ -126,9 +138,9 @@ public class Account extends Item {
 		}
 		return false;
 	}
-	
+
 	@Override
-	protected void loadFromCursor(Cursor cursor){
+	protected void loadFromCursor(Cursor cursor) {
 		this.setId(cursor.getLong(cursor
 				.getColumnIndex(AccountsTable.COLUMN_ID)));
 		this.setAmount(cursor.getDouble(cursor
@@ -173,36 +185,30 @@ public class Account extends Item {
 
 	}
 
-	public static SimpleCursorAdapter getAdapter(Context context, int layout) {
-		String[] from = new String[] { AccountsTable.COLUMN_NAME,
-				AccountsTable.COLUMN_AMOUNT };
-		int[] to = new int[] { R.id.activity_overview_name,
-				R.id.activity_overview_amount };
-
-		return new SimpleCursorAdapter(context, layout, null, from, to, 0);
-	}
-
 	public static ArrayList<Account> getListAccounts(
 			ContentResolver contentResolver) {
 		ArrayList<Account> listAccounts = new ArrayList<Account>();
 
 		Cursor cursor = contentResolver.query(
-				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, null,
-				null, null, null);
-		Log.w("account", "cursor movetofirst");
+				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, null, null,
+				null, null);
+		if (BuildConfig.DEBUG)
+			Log.w("account", "cursor movetofirst");
 		if (cursor.moveToFirst()) {
 			while (!cursor.isAfterLast()) {
-				Log.w("account", "cursor line");
-				
+				if (BuildConfig.DEBUG)
+					Log.w("account", "cursor line");
+
 				listAccounts.add(new Account(cursor));
 
 				cursor.moveToNext();
 			}
-			Log.w("account", "cursor close");
+			if (BuildConfig.DEBUG)
+				Log.w("account", "cursor close");
 			cursor.close();
 
-		} 
-		
+		}
+
 		return listAccounts;
 	}
 

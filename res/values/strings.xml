@@ -19,7 +19,7 @@
     
     
     
-    <string name="no_transaction">There isn\'t any transaction to display.</string>
+    <string name="no_transaction">There isn\'t any transaction to display for this filter.</string>
     <string name="no_account">There isn\'t any account to display.</string>
     
     <string name="edit_account_name">Account name</string>

@@ -3,6 +3,7 @@ package ch.goetschy.android.accounts.contentprovider;
 import java.util.Arrays;
 import java.util.HashSet;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.database.AccountsDatabaseHelper;
 import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.database.Table;
@@ -42,7 +43,8 @@ public class MyAccountsContentProvider extends ContentProvider {
 			+ "/items";
 	public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE
 			+ "/item";
-	public static final String CONTENT_ACCOUNT_ID_TYPE = ACCOUNTS_AUTHORITY + "/id";
+	public static final String CONTENT_ACCOUNT_ID_TYPE = ACCOUNTS_AUTHORITY
+			+ "/id";
 
 	private static final int ACCOUNTS = 10;
 	private static final int ACCOUNT_ID = 20;
@@ -108,26 +110,6 @@ public class MyAccountsContentProvider extends ContentProvider {
 			throw new IllegalArgumentException("Unknown URI : " + uri);
 		}
 
-		// switch (uriType) {
-		// case ACCOUNTS:
-		// rowDeleted = sqlDB.delete(AccountsTable.TABLE_NAME, selection,
-		// selectionArgs);
-		// break;
-		// case ACCOUNT_ID:
-		// String id = uri.getLastPathSegment();
-		// if (TextUtils.isEmpty(selection)) {
-		// rowDeleted = sqlDB.delete(AccountsTable.TABLE_NAME,
-		// AccountsTable.COLUMN_ID + "=" + id, null);
-		// } else {
-		// rowDeleted = sqlDB.delete(AccountsTable.TABLE_NAME,
-		// AccountsTable.COLUMN_ID + "=" + id + " and "
-		// + selection, selectionArgs);
-		// }
-		//
-		// throw new IllegalArgumentException("Unknown URI : " + uri);
-		// break;
-		// default:
-		// }
 		this.getContext().getContentResolver().notifyChange(uri, null);
 
 		return rowDeleted;
@@ -166,7 +148,8 @@ public class MyAccountsContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		Log.w("contentProvider", "query : " + uri);
+		if (BuildConfig.DEBUG)
+			Log.w("contentProvider", "query : " + uri);
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
 		String table = getTable(uri);
@@ -178,39 +161,16 @@ public class MyAccountsContentProvider extends ContentProvider {
 		int uriType = typeUriMatcher.match(uri);
 		switch (uriType) {
 		case ITEMS:
-			Log.w("contentProvider", "items");
+			if (BuildConfig.DEBUG)
+				Log.w("contentProvider", "items");
 			break;
 		case ITEM_ID:
-			Log.w("contentProvider", "item_id");
+			if (BuildConfig.DEBUG)
+				Log.w("contentProvider", "item_id");
 			String id = uri.getLastPathSegment();
 			queryBuilder.appendWhere(Table.COLUMN_ID + "=" + id);
 			break;
 		}
-
-		// int uriType = sUriMatcher.match(uri);
-		// String id;
-		// switch (uriType) {
-		// case ACCOUNTS:
-		// break;
-		// case ACCOUNT_ID:
-		// id = uri.getLastPathSegment();
-		// queryBuilder.appendWhere(AccountsTable.COLUMN_ID + "=" + id);
-		// break;
-		// case TRANSACTIONS:
-		// break;
-		// case TRANSACTION_ID:
-		// id = uri.getLastPathSegment();
-		// queryBuilder.appendWhere(TransactionTable.COLUMN_ID + "=" + id);
-		// break;
-		// case TYPES:
-		// break;
-		// case TYPE_ID:
-		// id = uri.getLastPathSegment();
-		// queryBuilder.appendWhere(TypeTable.COLUMN_ID + "=" + id);
-		// break;
-		// default:
-		// throw new IllegalArgumentException("Unknown URI : " + uri);
-		// }
 
 		SQLiteDatabase sqlDB = database.getWritableDatabase();
 		Cursor cursor = queryBuilder.query(sqlDB, projection, selection,
@@ -246,26 +206,7 @@ public class MyAccountsContentProvider extends ContentProvider {
 		default:
 			throw new IllegalArgumentException("Unknown URI : " + uri);
 		}
-		// switch (uriType) {
-		// case ACCOUNTS:
-		// rowUpdated = sqlDB.update(AccountsTable.TABLE_NAME, values,
-		// selection, selectionArgs);
-		// break;
-		// case ACCOUNT_ID:
-		// String id = uri.getLastPathSegment();
-		// if (TextUtils.isEmpty(selection)) {
-		// rowUpdated = sqlDB.update(AccountsTable.TABLE_NAME, values,
-		// AccountsTable.COLUMN_ID + "=" + id, null);
-		// } else {
-		// rowUpdated = sqlDB.update(AccountsTable.TABLE_NAME, values,
-		// AccountsTable.COLUMN_ID + "=" + id + " and "
-		// + selection, selectionArgs);
-		// }
-		//
-		// break;
-		// default:
-		// throw new IllegalArgumentException("Unknown URI : " + uri);
-		// }
+
 		this.getContext().getContentResolver().notifyChange(uri, null);
 
 		return rowUpdated;
@@ -296,7 +237,8 @@ public class MyAccountsContentProvider extends ContentProvider {
 		String table = uri.getPathSegments().get(0);
 		if (!table.equals(PATH_ACCOUNTS) && !table.equals(PATH_TRANSACTIONS)
 				&& !table.equals(PATH_TYPES)) {
-			Log.w("contentProvider", "path : " + table);
+			if (BuildConfig.DEBUG)
+				Log.w("contentProvider", "path : " + table);
 			throw new IllegalArgumentException("Unknown URI : " + uri);
 		}
 		return table;

@@ -2,6 +2,7 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.TypeTable;
@@ -38,17 +39,20 @@ public class ManageTypesActivity extends ListActivity {
 	private void fillData() {
 		ArrayList<Type> listTypes = Type.getTypes(getContentResolver());
 		if (listTypes != null) {
-			Log.w("typesDetail", "break1");
+			if (BuildConfig.DEBUG)
+				Log.w("typesDetail", "break1");
 			adapter = new TypesAdapter(this, listTypes);
-			Log.w("typesDetail", "list size : " + listTypes.size());
-			for (Type i : listTypes) {
-				Log.w("typesDetail", i.getName());
+			if (BuildConfig.DEBUG)
+				Log.w("typesDetail", "list size : " + listTypes.size());
+			if (BuildConfig.DEBUG) {
+				for (Type i : listTypes) {
+					Log.w("typesDetail", i.getName());
+				}
 			}
 			this.setListAdapter(adapter);
 		}
 
 	}
-	
 
 	private void createType() {
 		Intent intent = new Intent(this, EditTypeActivity.class);
@@ -81,11 +85,9 @@ public class ManageTypesActivity extends ListActivity {
 		super.onListItemClick(l, v, position, id);
 
 		Intent intent = new Intent(this, EditTypeActivity.class);
-		Uri typeUri = Uri
-				.parse(MyAccountsContentProvider.CONTENT_URI_TYPES + "/"
-						+ id);
-		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
-				typeUri);
+		Uri typeUri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_TYPES
+				+ "/" + id);
+		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, typeUri);
 
 		startActivity(intent);
 

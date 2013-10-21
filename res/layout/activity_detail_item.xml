@@ -22,7 +22,6 @@
         android:id="@+id/activity_detail_date"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|right"
         android:layout_weight="25"
         android:gravity="center_vertical|left"
         android:lines="1"

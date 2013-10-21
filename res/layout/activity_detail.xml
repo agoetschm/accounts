@@ -50,8 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="35"
             android:lines="1"
-            android:text="@string/interval"
-            android:background="#FF0000" />
+            android:text="@string/interval"/>
 
         <ImageButton
             android:id="@+id/activity_detail_next"

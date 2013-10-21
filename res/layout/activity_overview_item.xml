@@ -6,7 +6,7 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="30dp"
+        android:layout_width="0dp"
         android:layout_height="24dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="8dp"
@@ -17,24 +17,24 @@
 
     <TextView
         android:id="@+id/activity_overview_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
-        android:layout_weight="70"
+        android:layout_weight="60"
         android:lines="1"
         android:textSize="24sp" >
     </TextView>
 
     <TextView
         android:id="@+id/activity_overview_amount"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="6dp"
+        android:layout_marginRight="6dp"
         android:layout_marginTop="6dp"
         android:lines="1"
-        android:layout_weight="20"
-        android:layout_gravity="right"
-        android:textSize="24sp" >
+        android:layout_weight="30"
+        android:gravity="center_vertical|right"
+        android:textSize="22sp" >
     </TextView>
 
 </LinearLayout>

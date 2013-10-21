@@ -1,5 +1,6 @@
 package ch.goetschy.android.accounts.database;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -34,7 +35,8 @@ public class TransactionTable extends Table {
 	@Override
 	public void onUpgrade(SQLiteDatabase database, int oldVersion,
 			int newVersion) {
-		Log.w(AccountsTable.class.toString(), "Upgrading database...");
+		if (BuildConfig.DEBUG)
+			Log.w(AccountsTable.class.toString(), "Upgrading database...");
 		database.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
 		onCreate(database);
 	}
