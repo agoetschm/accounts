@@ -9,6 +9,7 @@
     <string name="title_activity_edit_transaction">New/Edit transaction</string>
     <string name="title_activity_types">Manage types</string>
     <string name="title_activity_edit_type">New/Edit type</string>
+    <string name="title_activity_filter">Set a filter</string>
     <string name="color_picker_title">Pick a color</string>
     
     <string name="previous">Previous</string>
@@ -20,7 +21,7 @@
     
     
     <string name="no_transaction">There isn\'t any transaction to display for this filter.</string>
-    <string name="no_account">There isn\'t any account to display.</string>
+    <string name="no_account">Hello !\nYou can add an account in the menu. You can also manage the different types of transactions.</string>
     
     <string name="edit_account_name">Account name</string>
     <string name="edit_account_confirm">Save</string>
@@ -44,6 +45,16 @@
     
     <string name="account_overview_delete">Delete</string>
     <string name="account_overview_edit">Edit</string>
+    <string name="activity_overview_add_footer">Add an account</string>
+    
+    <string name="activity_detail_add_footer">Add a transaction</string>
+    
+    <string name="activity_filter_cancel">Cancel</string>
+    <string name="activity_filter_confirm">Confirm</string>
+    <string name="activity_filter_date_box">Date filter</string>
+    <string name="activity_filter_type_box">Type filter</string>
+    
+    
     
 
     <string name="menu_add">ADD</string>

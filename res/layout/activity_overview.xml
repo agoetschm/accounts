@@ -13,8 +13,12 @@
     <TextView
         android:id="@android:id/empty"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" 
-        android:text="@string/no_account">
+        android:layout_height="wrap_content"
+        android:layout_margin="6dp"
+        android:text="@string/no_account"
+        android:gravity="center"
+        android:textColor="#999999"
+        android:textSize="20sp" >
     </TextView>
 
 </LinearLayout>

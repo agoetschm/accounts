@@ -1,11 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ch.goetschy.android.accounts"
-    android:versionCode="1"
-    android:versionName="1.0 alpha" >
+    android:versionCode="2"
+    android:versionName="1.1 alpha" >
 
     <uses-sdk
         android:minSdkVersion="7"
-        android:targetSdkVersion="15" />
+        android:targetSdkVersion="16" />
 
     <application
         android:icon="@drawable/ic_launcher"
@@ -38,6 +38,10 @@
             android:name=".activities.EditTypeActivity"
             android:label="@string/title_activity_edit_type"
             android:windowSoftInputMode="stateVisible|adjustResize" />
+        <activity
+            android:name=".activities.FilterActivity"
+            android:label="@string/title_activity_filter" />
+         
 
         <provider
             android:name="ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider"

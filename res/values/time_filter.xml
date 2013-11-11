@@ -6,6 +6,7 @@
         <item>WEEK</item>
         <item>MONTH</item>
         <item>YEAR</item>
+        <item>CUSTOM</item>
     </string-array>
 
 </resources>

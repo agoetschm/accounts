@@ -15,7 +15,11 @@
         android:id="@android:id/empty"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/no_transaction" >
+        android:layout_margin="6dp"
+        android:gravity="center"
+        android:text="@string/no_transaction"
+        android:textColor="#999999"
+        android:textSize="20sp" >
     </TextView>
 
     <LinearLayout
@@ -24,17 +28,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_gravity="bottom"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:background="#EEEEEE" >
 
         <ImageButton
             android:id="@+id/activity_detail_previous"
-            style="?android:borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="24dp"
+            android:layout_gravity="center"
             android:layout_weight="10"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/previous"
-            android:src="@drawable/ic_action_previous_item" 
-            android:layout_gravity="center"/>
+            android:src="@drawable/ic_action_previous_item" />
 
         <Spinner
             android:id="@+id/activity_detail_spinner"
@@ -50,17 +55,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="35"
             android:lines="1"
-            android:text="@string/interval"/>
+            android:text="@string/interval" />
 
         <ImageButton
             android:id="@+id/activity_detail_next"
-            style="?android:borderlessButtonStyle"
             android:layout_width="0dp"
             android:layout_height="24dp"
+            android:layout_gravity="center"
             android:layout_weight="10"
+            android:background="@android:color/transparent"
             android:contentDescription="@string/next"
-            android:src="@drawable/ic_action_next_item" 
-            android:layout_gravity="center"/>
+            android:src="@drawable/ic_action_next_item" />
     </LinearLayout>
 
 </RelativeLayout>

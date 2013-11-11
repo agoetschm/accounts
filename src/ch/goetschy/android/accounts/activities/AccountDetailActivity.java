@@ -6,30 +6,24 @@ import java.util.Calendar;
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
-import ch.goetschy.android.accounts.database.AccountsTable;
-import ch.goetschy.android.accounts.database.TransactionTable;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
+import android.app.ActionBar;
+import android.app.Activity;
 import android.app.ListActivity;
-import android.app.LoaderManager;
-import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.Loader;
-import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +35,9 @@ public class AccountDetailActivity extends ListActivity {
 	private Spinner timeFilter;
 	private Filter filter;
 	private TextView intervalView;
+	private View footer;
+
+	private static final int FILTER_ACTIVITY = 10;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -70,13 +67,24 @@ public class AccountDetailActivity extends ListActivity {
 		this.setContentView(R.layout.activity_detail);
 		ListView listView = getListView();
 		listView.setDividerHeight(2);
-		fillData();
 
 		// get views
 		ImageButton previous = (ImageButton) findViewById(R.id.activity_detail_previous);
 		ImageButton next = (ImageButton) findViewById(R.id.activity_detail_next);
 		timeFilter = (Spinner) findViewById(R.id.activity_detail_spinner);
 		intervalView = (TextView) findViewById(R.id.activity_detail_interval);
+
+		// ADD footer
+		footer = getLayoutInflater().inflate(R.layout.activity_detail_footer,
+				null);
+		listView.addFooterView(footer);
+		footer.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				changeFooterColor(true);
+				createTransaction();
+			}
+		});
 
 		// LISTENERS ************
 
@@ -125,6 +133,7 @@ public class AccountDetailActivity extends ListActivity {
 
 	}
 
+	// fill with the transactions
 	private void fillData() {
 		ArrayList<Transaction> transactions = account.getListTransactions(
 				getContentResolver(), filter);
@@ -136,11 +145,21 @@ public class AccountDetailActivity extends ListActivity {
 			adapter.clear();
 	}
 
+	// when new transaction is clicked
+	private void changeFooterColor(boolean dark) {
+		if (dark)
+			footer.setBackgroundColor(Color.rgb(210, 210, 210));
+		else
+			footer.setBackgroundColor(Color.rgb(220, 220, 220));
+	}
+
+	// set the text for the time interval
 	private void setDateInterval() {
 		intervalView.setText(Filter.millisToText(filter.getLowerBound())
 				+ " - " + Filter.millisToText(filter.getUpperBound() - 1));
 	}
 
+	// start
 	private void createTransaction() {
 		Intent intent = new Intent(this, EditTransactionActivity.class);
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
@@ -148,9 +167,25 @@ public class AccountDetailActivity extends ListActivity {
 		startActivity(intent);
 	}
 
+	// open the filter dialog
 	private void setFilter() {
-		// TODO Auto-generated method stub
+		// tmp
+		Intent intent = new Intent(this, FilterActivity.class);
+		intent.putExtra(Filter.class.toString(), filter);
+		startActivityForResult(intent, FILTER_ACTIVITY);
+		// end tmp
+	}
 
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case FILTER_ACTIVITY:
+			if(resultCode == Activity.RESULT_OK){
+				filter = (Filter) data.getSerializableExtra(Filter.class
+						.toString());
+			}
+		}
 	}
 
 	// ADD and FILTER BUTTON ------------------------
@@ -200,7 +235,8 @@ public class AccountDetailActivity extends ListActivity {
 
 	@Override
 	protected void onResume() {
-		super.onResume();
 		fillData();
+		changeFooterColor(false);
+		super.onResume();
 	}
 }

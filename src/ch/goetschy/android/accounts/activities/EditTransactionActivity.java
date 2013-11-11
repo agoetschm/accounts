@@ -2,7 +2,6 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
@@ -11,9 +10,6 @@ import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Type;
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -22,19 +18,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
-import android.app.DatePickerDialog;
 
-public class EditTransactionActivity extends Activity {
+//import android.app.DialogFragment;
+//import android.support.v4.app.DialogFragment;
+
+public class EditTransactionActivity extends FragmentActivity {
 
 	private EditText mName;
 	private EditText mAmount;
+	private EditText mDescription;
 	private Spinner mType;
 	private Button mDateButton;
 	private TextView mDateTextView;
@@ -53,6 +50,7 @@ public class EditTransactionActivity extends Activity {
 		// get widgets
 		mName = (EditText) findViewById(R.id.edit_transaction_name);
 		mAmount = (EditText) findViewById(R.id.edit_transaction_amount);
+		mDescription = (EditText) findViewById(R.id.edit_transaction_description);
 		mType = (Spinner) findViewById(R.id.edit_transaction_type);
 		mDateButton = (Button) findViewById(R.id.edit_transaction_date_button);
 		mDateTextView = (TextView) findViewById(R.id.edit_transaction_date);
@@ -110,6 +108,7 @@ public class EditTransactionActivity extends Activity {
 		if(BuildConfig.DEBUG)
 		Log.w("editTransaction", "2");
 		
+		
 		// date
 		mDateButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -117,6 +116,8 @@ public class EditTransactionActivity extends Activity {
 				DatePickerFragment dateFragment = new DatePickerFragment();
 				dateFragment.setParent(EditTransactionActivity.this);
 				dateFragment.setMillis(mTimeInMillis);
+				dateFragment.show(getSupportFragmentManager(), "datePicker");
+				//dateFragment.show(getFragmentManager(), "datePicker");
 			}
 		});
 
@@ -153,6 +154,8 @@ public class EditTransactionActivity extends Activity {
 		// fillData();
 		if (transaction.loadFromDB(getContentResolver())) {
 			mName.setText(transaction.getName());
+			
+			mDescription.setText(transaction.getDescription());
 
 			// amount
 			double dAmount = transaction.getAmount();
@@ -178,14 +181,6 @@ public class EditTransactionActivity extends Activity {
 		setDate();
 	}
 
-	// private void fillData() {
-	// if (transaction.loadFromDB(getContentResolver())) {
-	// mName.setText(transaction.getName());
-	// mAmount.setText(String.valueOf(transaction.getAmount()));
-	// //mType
-	//
-	// }
-	// }
 
 	private boolean validAmount(String amount) {
 		return amount.matches("-?\\d+(\\.\\d+)?");
@@ -230,11 +225,15 @@ public class EditTransactionActivity extends Activity {
 
 		if(BuildConfig.DEBUG)
 			Log.w("editTransaction", "save " + name);
+		// save in object
 		transaction.setName(name);
 		transaction.setAmount(Double.parseDouble(amount));
 		transaction.setDate(mTimeInMillis);
 		transaction.getType().setId(mType.getSelectedItemId());
+		transaction.setDescription(mDescription.getText().toString());
 		transaction.setParent(new Account(parent_id));
+		
+		// save in DB
 		transaction.saveInDB(getContentResolver());
 	}
 

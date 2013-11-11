@@ -1,5 +1,6 @@
 package ch.goetschy.android.accounts.objects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import ch.goetschy.android.accounts.BuildConfig;
@@ -13,7 +14,12 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-public class Type {
+public class Type implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2L;
+	
 	private long id;
 	private String name;
 	private Uri uri;

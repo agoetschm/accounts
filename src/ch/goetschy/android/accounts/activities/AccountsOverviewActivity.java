@@ -8,6 +8,7 @@ import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Type;
 
+import android.R.color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.app.ListActivity;
@@ -16,11 +17,13 @@ import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -30,20 +33,41 @@ public class AccountsOverviewActivity extends ListActivity {
 	private static final int DELETE_ID = 10;
 	private static final int EDIT_ID = 20;
 
-	// private SimpleCursorAdapter adapter;
+	
 	private AccountsAdapter adapter;
+	private View footer;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_overview);
 		this.getListView().setDividerHeight(2);
-		fillData();
-		this.registerForContextMenu(getListView());
+		ListView listview = getListView();
+		this.registerForContextMenu(listview);
+		
+		// ADD footer
+	    footer = getLayoutInflater().inflate(R.layout.activity_overview_footer, null);
+	    listview.addFooterView(footer);
+	    footer.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View v) {
+				changeFooterColor(true);
+				createAccount();
+			}
+	    });
 
-		// control for default types
+		// TODO control for default types
 		Type.controlDefault(this.getContentResolver());
+		
 	}
+	
+	private void changeFooterColor(boolean dark){
+		if(dark)
+			footer.setBackgroundColor(Color.rgb(210, 210, 210));
+		else
+			footer.setBackgroundColor(Color.rgb(220, 220, 220));
+	}
+	
 
 	private void fillData() {
 		ArrayList<Account> accounts = Account
@@ -59,6 +83,7 @@ public class AccountsOverviewActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		fillData();
+		changeFooterColor(false);
 		super.onResume();
 	}
 

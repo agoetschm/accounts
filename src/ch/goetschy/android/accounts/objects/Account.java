@@ -106,7 +106,7 @@ public class Account extends Item {
 					+ " - " + filter.getUpperBound());
 		// filter by date
 		for (Transaction trans : listTransactions) {
-			if (filter.isSelected(trans.getDate())) {
+			if (filter.isSelected(trans)) {
 				filteredTransactions.add(trans);
 			}
 		}

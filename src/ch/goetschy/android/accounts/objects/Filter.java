@@ -1,16 +1,23 @@
 package ch.goetschy.android.accounts.objects;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 import ch.goetschy.android.accounts.BuildConfig;
 
 import android.util.Log;
 
-public class Filter {
+public class Filter implements Serializable {
+	/**
+	 * This class allows to filter transactions by date and type
+	 */
+	private static final long serialVersionUID = 1L;
 	public static final int DAY = 0;
 	public static final int WEEK = 1;
 	public static final int MONTH = 2;
 	public static final int YEAR = 3;
+	public static final int CUSTOM = 4;
 
 	public static String millisToText(long time) {
 		Calendar c = Calendar.getInstance();
@@ -20,16 +27,22 @@ public class Filter {
 				+ c.get(Calendar.DAY_OF_MONTH);/* month begin with 0 */
 	}
 
+	private boolean dateFilter;
 	private long upperBound;
 	private long lowerBound;
 	private int interval;
-	private long typeId;
+
+	private boolean typeFilter;
+	private ArrayList<Type> typesList;
 
 	public Filter() {
+		setDateFilter(true);
 		upperBound = 0;
 		lowerBound = 0;
 		interval = 0;
-		typeId = 0;
+
+		setTypeFilter(false);
+		setTypesList(new ArrayList<Type>());
 	}
 
 	public long getUpperBound() {
@@ -48,12 +61,36 @@ public class Filter {
 		this.lowerBound = lowerBound;
 	}
 
-	public long getTypeId() {
-		return typeId;
+	public boolean isDateFilter() {
+		return dateFilter;
 	}
 
-	public void setTypeId(long typeId) {
-		this.typeId = typeId;
+	public void setDateFilter(boolean dateFilter) {
+		this.dateFilter = dateFilter;
+	}
+
+	public boolean isTypeFilter() {
+		return typeFilter;
+	}
+
+	public void setTypeFilter(boolean typeFilter) {
+		this.typeFilter = typeFilter;
+	}
+
+	public ArrayList<Type> getTypesList() {
+		return typesList;
+	}
+
+	public void setTypesList(ArrayList<Type> typesList) {
+		this.typesList = typesList;
+	}
+
+	public void addType(Type newType) {
+		this.typesList.add(newType);
+	}
+
+	public void clearTypesList() {
+		this.typesList.clear();
 	}
 
 	public int getInterval() {
@@ -106,8 +143,28 @@ public class Filter {
 		Log.w("filter", "end setInterval");
 	}
 
-	public boolean isSelected(long date) {
+	public boolean isSelected(Transaction trans) {
+		boolean dateOK = !dateFilter // not a date filter
+				|| (dateFilter && isDateSelected(trans.getDate()));
+		// or date is selected
+
+		boolean typeOK = !typeFilter
+				|| (typeFilter && isTypeSelected(trans.getType()));
+
+		return dateOK && typeOK;
+	}
+
+	private boolean isDateSelected(long date) {
 		return (date >= lowerBound && date < upperBound);
+	}
+
+	public boolean isTypeSelected(Type type) {
+		long typeId = type.getId();
+		for (Type i : typesList) {
+			if (i.getId() == typeId)
+				return true;
+		}
+		return false;
 	}
 
 	public void previous() {
