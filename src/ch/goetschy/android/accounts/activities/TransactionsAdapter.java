@@ -20,7 +20,7 @@ import android.widget.TextView;
 public class TransactionsAdapter extends ArrayAdapter<Transaction> {
 	private final Context context;
 	private ArrayList<Transaction> list;
-	private DecimalFormat amountFormat = new DecimalFormat("##.00");
+	public static DecimalFormat amountFormat = new DecimalFormat("##.00");
 
 	public TransactionsAdapter(Context context, ArrayList<Transaction> list) {
 		super(context, R.layout.activity_detail_item, list);

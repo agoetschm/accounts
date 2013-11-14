@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal" 
+    android:background="#555555">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginBottom="3dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginLeft="10dp"
+        android:gravity="left"
+        android:lines="1"
+        android:text="@string/activity_detail_total_footer"
+        android:textSize="16sp" 
+        android:textColor="#FFFFFF">
+    </TextView>
+    
+    <TextView
+        android:id="@+id/activity_detail_total_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginBottom="3dp"
+        android:layout_marginTop="3dp"
+        android:layout_marginRight="6dp"
+        android:gravity="right"
+        android:lines="1"
+        android:textSize="16sp" 
+        android:textColor="#FFFFFF">
+    </TextView>
+
+</LinearLayout>

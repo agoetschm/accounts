@@ -10,6 +10,9 @@ import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Type;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -27,7 +30,7 @@ import android.widget.Toast;
 //import android.app.DialogFragment;
 //import android.support.v4.app.DialogFragment;
 
-public class EditTransactionActivity extends FragmentActivity {
+public class EditTransactionActivity extends FragmentActivity implements DatePickerListener{
 
 	private EditText mName;
 	private EditText mAmount;
@@ -105,10 +108,9 @@ public class EditTransactionActivity extends FragmentActivity {
 			mType.setAdapter(typeAdapter);
 		}
 
-		if(BuildConfig.DEBUG)
-		Log.w("editTransaction", "2");
-		
-		
+		if (BuildConfig.DEBUG)
+			Log.w("editTransaction", "2");
+
 		// date
 		mDateButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -117,7 +119,7 @@ public class EditTransactionActivity extends FragmentActivity {
 				dateFragment.setParent(EditTransactionActivity.this);
 				dateFragment.setMillis(mTimeInMillis);
 				dateFragment.show(getSupportFragmentManager(), "datePicker");
-				//dateFragment.show(getFragmentManager(), "datePicker");
+				// dateFragment.show(getFragmentManager(), "datePicker");
 			}
 		});
 
@@ -140,13 +142,27 @@ public class EditTransactionActivity extends FragmentActivity {
 		deleteButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				setResult(RESULT_CANCELED);
-				if (transaction.getUri() == null) {
-					finish();
-				} else {
-					transaction.delete(getContentResolver());
-					finish();
-				}
+				// show confirm dialog
+				new AlertDialog.Builder(
+						EditTransactionActivity.this)
+						.setMessage(R.string.edit_transaction_delete_question)
+						.setCancelable(false)
+						.setPositiveButton(R.string.edit_transaction_yes,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										// if yes, delete
+										setResult(RESULT_CANCELED);
+										if (transaction.getUri() == null) {
+											finish();
+										} else {
+											transaction
+													.delete(getContentResolver());
+											finish();
+										}
+									}
+								}).setNegativeButton(R.string.edit_transaction_no, null).show();
+
 			}
 		});
 
@@ -154,7 +170,7 @@ public class EditTransactionActivity extends FragmentActivity {
 		// fillData();
 		if (transaction.loadFromDB(getContentResolver())) {
 			mName.setText(transaction.getName());
-			
+
 			mDescription.setText(transaction.getDescription());
 
 			// amount
@@ -180,7 +196,6 @@ public class EditTransactionActivity extends FragmentActivity {
 		// init default date
 		setDate();
 	}
-
 
 	private boolean validAmount(String amount) {
 		return amount.matches("-?\\d+(\\.\\d+)?");
@@ -212,7 +227,7 @@ public class EditTransactionActivity extends FragmentActivity {
 		String name = mName.getText().toString();
 		if (name.length() == 0)
 			return;
-		
+
 		// amount
 		String amount = mAmount.getText().toString();
 		if (!validAmount(amount))
@@ -220,10 +235,10 @@ public class EditTransactionActivity extends FragmentActivity {
 		double dAmount = Double.parseDouble(amount);
 		if (inOrOutRadio.getCheckedRadioButtonId() == R.id.edit_transaction_debit) // neg
 			dAmount *= -1;
-		
+
 		amount = String.valueOf(dAmount);
 
-		if(BuildConfig.DEBUG)
+		if (BuildConfig.DEBUG)
 			Log.w("editTransaction", "save " + name);
 		// save in object
 		transaction.setName(name);
@@ -232,7 +247,7 @@ public class EditTransactionActivity extends FragmentActivity {
 		transaction.getType().setId(mType.getSelectedItemId());
 		transaction.setDescription(mDescription.getText().toString());
 		transaction.setParent(new Account(parent_id));
-		
+
 		// save in DB
 		transaction.saveInDB(getContentResolver());
 	}
@@ -243,10 +258,11 @@ public class EditTransactionActivity extends FragmentActivity {
 			c.setTimeInMillis(mTimeInMillis);
 		else
 			mTimeInMillis = c.getTimeInMillis();
-		
+
 		mDateTextView.setText(Filter.millisToText(mTimeInMillis));
 	}
-
+	
+	@Override
 	public void setDate(int year, int month, int day) {
 		final Calendar c = Calendar.getInstance();
 		c.set(year, month, day);

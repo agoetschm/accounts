@@ -5,6 +5,8 @@ import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.objects.Account;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -33,8 +35,7 @@ public class EditAccountActivity extends Activity {
 
 		// account object
 		account = new Account();
-		
-		
+
 		// if saved instance
 		account.setUri((savedInstanceState == null) ? null
 				: (Uri) savedInstanceState
@@ -45,7 +46,6 @@ public class EditAccountActivity extends Activity {
 					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
 			fillData();
 		}
-
 
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -58,17 +58,31 @@ public class EditAccountActivity extends Activity {
 				}
 			}
 		});
-		
+
 		deleteButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				setResult(RESULT_CANCELED);
-				if (account.getUri() == null) {
-					finish();
-				} else {
-					account.delete(getContentResolver());
-					finish();
-				}
+				// show confirm dialog
+				new AlertDialog.Builder(EditAccountActivity.this)
+						.setMessage(R.string.edit_account_delete_question)
+						.setCancelable(false)
+						.setPositiveButton(R.string.edit_account_yes,
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+											int id) {
+										// if yes, delete
+										setResult(RESULT_CANCELED);
+										if (account.getUri() == null) {
+											finish();
+										} else {
+											account.delete(getContentResolver());
+											finish();
+										}
+									}
+								})
+						.setNegativeButton(R.string.edit_account_no, null)
+						.show();
+
 			}
 		});
 	}
@@ -102,7 +116,7 @@ public class EditAccountActivity extends Activity {
 
 		if (name.length() == 0)
 			return;
-		
+
 		account.setName(name);
 		account.saveInDB(getContentResolver());
 	}

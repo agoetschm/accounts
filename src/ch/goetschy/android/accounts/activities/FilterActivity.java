@@ -1,6 +1,7 @@
 package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
@@ -12,8 +13,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -21,15 +24,24 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class FilterActivity extends Activity {
+public class FilterActivity extends FragmentActivity implements
+		DatePickerListener {
 
 	private Filter filter;
 	private Spinner dateSpinner;
 	private ArrayList<CheckBox> typeBoxList;
 	private ArrayList<Type> typesList;
 
+	private Button lowerBound;
+	private Button upperBound;
+
 	private CheckBox dateCheckbox;
 	private CheckBox typeCheckbox;
+
+	static final private int LOWER = 1;
+	static final private int UPPER = 2;
+
+	private int actualBound = LOWER;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +56,9 @@ public class FilterActivity extends Activity {
 		typeCheckbox = (CheckBox) findViewById(R.id.activity_filter_type_box);
 
 		dateSpinner = (Spinner) findViewById(R.id.activity_filter_interval_spinner);
+
+		lowerBound = (Button) findViewById(R.id.activity_filter_bound1);
+		upperBound = (Button) findViewById(R.id.activity_filter_bound2);
 
 		// data from parent activity
 		Bundle extras = getIntent().getExtras();
@@ -86,11 +101,57 @@ public class FilterActivity extends Activity {
 					public void onCheckedChanged(CompoundButton box,
 							boolean isChecked) {
 						dateSpinner.setEnabled(isChecked);
+						lowerBound.setEnabled(isChecked);
+						upperBound.setEnabled(isChecked);
+					}
+
+				});
+
+		dateSpinner
+				.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+					@Override
+					public void onItemSelected(AdapterView<?> parent,
+							View view, int position, long id) {
+						filter.setInterval(position);
+						setBounds();
+
+						// upper bound only if custom
+						upperBound.setEnabled(position == Filter.CUSTOM);
+					}
+
+					@Override
+					public void onNothingSelected(AdapterView<?> arg0) {
+						// TODO Auto-generated method stub
+
 					}
 
 				});
 
 		dateSpinner.setEnabled(dateCheckbox.isChecked()); // init
+
+		// date buttons
+		lowerBound.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				actualBound = LOWER;
+				DatePickerFragment dateFragment = new DatePickerFragment();
+				dateFragment.setParent(FilterActivity.this);
+				dateFragment.setMillis(filter.getLowerBound());
+				dateFragment.show(getSupportFragmentManager(), "datePicker");
+			}
+		});
+
+		upperBound.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				actualBound = UPPER;
+				DatePickerFragment dateFragment = new DatePickerFragment();
+				dateFragment.setParent(FilterActivity.this);
+				dateFragment.setMillis(filter.getUpperBound());
+				dateFragment.show(getSupportFragmentManager(), "datePicker");
+			}
+		});
 
 		// type filter -------------
 
@@ -128,6 +189,11 @@ public class FilterActivity extends Activity {
 		fillData();
 	}
 
+	public void setBounds() {
+		lowerBound.setText(Filter.millisToText(filter.getLowerBound()));
+		upperBound.setText(Filter.millisToText(filter.getUpperBound() - 1));
+	}
+
 	private void enableTypesCheckBoxes(boolean enabled) {
 		for (CheckBox box : typeBoxList)
 			box.setEnabled(enabled);
@@ -136,7 +202,8 @@ public class FilterActivity extends Activity {
 	private void fillData() {
 		dateCheckbox.setChecked(filter.isDateFilter());
 
-		// TODO
+		dateSpinner.setSelection(filter.getInterval());
+		setBounds();
 
 		typeCheckbox.setChecked(filter.isTypeFilter());
 		int size = typesList.size();
@@ -149,7 +216,6 @@ public class FilterActivity extends Activity {
 	private void makeToast(String msg) {
 		Toast.makeText(FilterActivity.this, msg, Toast.LENGTH_LONG).show();
 	}
-
 
 	// save in filter object
 	private void save() {
@@ -169,5 +235,19 @@ public class FilterActivity extends Activity {
 					filter.addType(typesList.get(i));
 			}
 		}
+	}
+
+	@Override
+	public void setDate(int year, int month, int day) {
+		final Calendar c = Calendar.getInstance();
+		c.set(year, month, day);
+		if (actualBound == LOWER) {
+			filter.setLowerBound(c.getTimeInMillis());
+			filter.computeUpperBound();
+		} else {
+			filter.setUpperBound(c.getTimeInMillis());
+		}
+
+		setBounds();
 	}
 }

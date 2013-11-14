@@ -6,13 +6,14 @@ import android.app.DatePickerDialog;
 import android.app.Dialog;
 //import android.app.DialogFragment;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.widget.DatePicker;
 
 public class DatePickerFragment extends DialogFragment implements
 		DatePickerDialog.OnDateSetListener {
 	private long time = 0;
-	private EditTransactionActivity parent;
+	private DatePickerListener parent;
 
 	@Override
 	public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -33,7 +34,7 @@ public class DatePickerFragment extends DialogFragment implements
 		parent.setDate(year, monthOfYear, dayOfMonth);
 	}
 	
-	public void setParent(EditTransactionActivity parent){
+	public void setParent(DatePickerListener parent){
 		this.parent = parent;
 	}
 	

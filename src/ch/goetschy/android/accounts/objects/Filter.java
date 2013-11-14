@@ -39,7 +39,7 @@ public class Filter implements Serializable {
 		setDateFilter(true);
 		upperBound = 0;
 		lowerBound = 0;
-		interval = 0;
+		interval = 2;
 
 		setTypeFilter(false);
 		setTypesList(new ArrayList<Type>());
@@ -105,10 +105,16 @@ public class Filter implements Serializable {
 			Log.w("filter", "interval : " + interval);
 		}
 
-		Calendar c = getCalendar();
-
+		
+		computeUpperBound();
+		
 		if (BuildConfig.DEBUG)
-			Log.w("filter", "now : " + c.getTimeInMillis());
+		Log.w("filter", "end setInterval");
+	}
+
+	public void computeUpperBound() {
+
+		Calendar c = getCalendar();
 
 		switch (interval) {
 		case DAY:
@@ -134,13 +140,8 @@ public class Filter implements Serializable {
 			c.add(Calendar.YEAR, 1);
 			upperBound = c.getTimeInMillis();
 			break;
-		default: // month
-			c.set(Calendar.DAY_OF_MONTH, 0);
-			lowerBound = c.getTimeInMillis();
-			c.add(Calendar.MONTH, 1);
-			upperBound = c.getTimeInMillis();
+		default: // custom
 		}
-		Log.w("filter", "end setInterval");
 	}
 
 	public boolean isSelected(Transaction trans) {

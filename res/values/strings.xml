@@ -21,11 +21,14 @@
     
     
     <string name="no_transaction">There isn\'t any transaction to display for this filter.</string>
-    <string name="no_account">Hello !\nYou can add an account in the menu. You can also manage the different types of transactions.</string>
+    <string name="no_account">Hello !\n1. Create some types an accounts to manage your transactions.\n2. Add transactions in your accounts. \n3. Generate the graphics with the data collected !</string>
     
     <string name="edit_account_name">Account name</string>
     <string name="edit_account_confirm">Save</string>
     <string name="edit_account_delete">Delete</string>
+    <string name="edit_account_delete_question">Delete this account ?</string>
+    <string name="edit_account_yes">Yes</string>
+    <string name="edit_account_no">No</string>
     
     <string name="edit_type_name">Type name</string>
     <string name="edit_type_color">Set color</string>
@@ -42,6 +45,9 @@
     <string name="edit_transaction_debit">Debit</string>
     <string name="edit_transaction_confirm">Save</string>
     <string name="edit_transaction_delete">Delete</string>
+    <string name="edit_transaction_delete_question">Delete this transaction ?</string>
+    <string name="edit_transaction_yes">Yes</string>
+    <string name="edit_transaction_no">No</string>
     
     <string name="account_overview_delete">Delete</string>
     <string name="account_overview_edit">Edit</string>
@@ -49,10 +55,16 @@
     
     <string name="activity_detail_add_footer">Add a transaction</string>
     
+    <string name="activity_detail_total_footer">Total</string>
+    
+    
     <string name="activity_filter_cancel">Cancel</string>
     <string name="activity_filter_confirm">Confirm</string>
     <string name="activity_filter_date_box">Date filter</string>
     <string name="activity_filter_type_box">Type filter</string>
+    <string name="activity_filter_bound1_label">Lower bound</string>
+    <string name="activity_filter_bound2_label">Upper bound</string>
+    
     
     
     

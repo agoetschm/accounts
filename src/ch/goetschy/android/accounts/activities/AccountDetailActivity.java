@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -35,9 +36,14 @@ public class AccountDetailActivity extends ListActivity {
 	private Spinner timeFilter;
 	private Filter filter;
 	private TextView intervalView;
-	private View footer;
+	private View addFooter;
+	private ImageButton previous;
+	private ImageButton next;
+	private TextView totalView;
 
-	private static final int FILTER_ACTIVITY = 10;
+	private LinearLayout navigator;
+	
+	static final private int FILTER_ACTIVITY = 10;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,16 +75,23 @@ public class AccountDetailActivity extends ListActivity {
 		listView.setDividerHeight(2);
 
 		// get views
-		ImageButton previous = (ImageButton) findViewById(R.id.activity_detail_previous);
-		ImageButton next = (ImageButton) findViewById(R.id.activity_detail_next);
+		navigator = (LinearLayout) findViewById(R.id.activity_detail_footer);
+		previous = (ImageButton) findViewById(R.id.activity_detail_previous);
+		next = (ImageButton) findViewById(R.id.activity_detail_next);
 		timeFilter = (Spinner) findViewById(R.id.activity_detail_spinner);
 		intervalView = (TextView) findViewById(R.id.activity_detail_interval);
-
-		// ADD footer
-		footer = getLayoutInflater().inflate(R.layout.activity_detail_footer,
+		
+		// total footer
+		View totalFooter = getLayoutInflater().inflate(R.layout.activity_detail_total_footer,
 				null);
-		listView.addFooterView(footer);
-		footer.setOnClickListener(new OnClickListener() {
+		listView.addFooterView(totalFooter);
+		totalView = (TextView) findViewById(R.id.activity_detail_total_amount);
+		
+		// ADD footer
+		addFooter = getLayoutInflater().inflate(R.layout.activity_detail_add_footer,
+				null);
+		listView.addFooterView(addFooter);
+		addFooter.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				changeFooterColor(true);
@@ -115,8 +128,11 @@ public class AccountDetailActivity extends ListActivity {
 					@Override
 					public void onItemSelected(AdapterView<?> parent,
 							View view, int position, long id) {
-						filter.setInterval(timeFilter.getSelectedItemPosition());
-						setDateInterval();
+						filter.setInterval(position);
+						updateNavigator();
+						if (position == Filter.CUSTOM) {
+							setFilter();
+						}
 						fillData();
 					}
 
@@ -127,7 +143,6 @@ public class AccountDetailActivity extends ListActivity {
 					}
 
 				});
-		timeFilter.setSelection(Filter.MONTH);
 
 		// ***********************
 
@@ -143,20 +158,58 @@ public class AccountDetailActivity extends ListActivity {
 			this.setListAdapter(adapter);
 		} else if (adapter != null)
 			adapter.clear();
+		
+		// set amount of the selected transactions
+		// tmp
+		double total = 0;
+		for(Transaction i : transactions)
+			total += i.getAmount();
+		// end tmp
+		if(total < 0)
+			totalView.setTextColor(Color.RED);
+		else
+			totalView.setTextColor(Color.GREEN);
+		totalView.setText(TransactionsAdapter.amountFormat.format(total));
 	}
 
 	// when new transaction is clicked
 	private void changeFooterColor(boolean dark) {
 		if (dark)
-			footer.setBackgroundColor(Color.rgb(210, 210, 210));
+			addFooter.setBackgroundColor(Color.rgb(210, 210, 210));
 		else
-			footer.setBackgroundColor(Color.rgb(220, 220, 220));
+			addFooter.setBackgroundColor(Color.rgb(220, 220, 220));
 	}
 
 	// set the text for the time interval
 	private void setDateInterval() {
 		intervalView.setText(Filter.millisToText(filter.getLowerBound())
 				+ " - " + Filter.millisToText(filter.getUpperBound() - 1));
+	}
+
+	// update the time navigator
+	private void updateNavigator() {
+		if (filter.isDateFilter()) {
+			// visible navigator
+			navigator.setVisibility(View.VISIBLE);
+			
+			timeFilter.setSelection(filter.getInterval());
+			setDateInterval();
+
+			boolean custom = (filter.getInterval() == Filter.CUSTOM);
+			next.setEnabled(!custom);
+			previous.setEnabled(!custom);
+
+			if (custom) {
+				next.setVisibility(View.INVISIBLE);
+				previous.setVisibility(View.INVISIBLE);
+			} else {
+				next.setVisibility(View.VISIBLE);
+				previous.setVisibility(View.VISIBLE);
+			}
+		} else {
+			// invisible navigator
+			navigator.setVisibility(View.GONE);
+		}
 	}
 
 	// start
@@ -181,7 +234,7 @@ public class AccountDetailActivity extends ListActivity {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case FILTER_ACTIVITY:
-			if(resultCode == Activity.RESULT_OK){
+			if (resultCode == Activity.RESULT_OK) {
 				filter = (Filter) data.getSerializableExtra(Filter.class
 						.toString());
 			}
@@ -237,6 +290,7 @@ public class AccountDetailActivity extends ListActivity {
 	protected void onResume() {
 		fillData();
 		changeFooterColor(false);
+		updateNavigator();
 		super.onResume();
 	}
 }

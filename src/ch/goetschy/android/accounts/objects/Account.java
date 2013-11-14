@@ -99,12 +99,14 @@ public class Account extends Item {
 	public ArrayList<Transaction> getListTransactions(
 			ContentResolver contentResolver, Filter filter) {
 
-		getListTransactions(contentResolver);
+		if(getListTransactions(contentResolver) == null)
+			return null;
+		
 		ArrayList<Transaction> filteredTransactions = new ArrayList<Transaction>();
 		if (BuildConfig.DEBUG)
 			Log.w("account", "filter bounds : " + filter.getLowerBound()
 					+ " - " + filter.getUpperBound());
-		// filter by date
+		// filter
 		for (Transaction trans : listTransactions) {
 			if (filter.isSelected(trans)) {
 				filteredTransactions.add(trans);
