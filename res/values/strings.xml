@@ -21,7 +21,7 @@
     
     
     <string name="no_transaction">There isn\'t any transaction to display for this filter.</string>
-    <string name="no_account">Hello !\n1. Create some types an accounts to manage your transactions.\n2. Add transactions in your accounts. \n3. Generate the graphics with the data collected !</string>
+    <string name="no_account">Here are a few steps to use Accounts :\n1. Create some types and accounts to manage your transactions.\n2. Add transactions in your accounts. \n3. Generate the graphics with the collected data (in construction) !</string>
     
     <string name="edit_account_name">Account name</string>
     <string name="edit_account_confirm">Save</string>

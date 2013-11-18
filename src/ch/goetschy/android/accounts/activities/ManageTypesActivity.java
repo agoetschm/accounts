@@ -50,7 +50,8 @@ public class ManageTypesActivity extends ListActivity {
 				}
 			}
 			this.setListAdapter(adapter);
-		}
+		} else if(adapter != null)
+			adapter.clear();
 
 	}
 

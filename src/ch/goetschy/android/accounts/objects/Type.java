@@ -10,6 +10,7 @@ import ch.goetschy.android.accounts.database.TypeTable;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
@@ -19,7 +20,7 @@ public class Type implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 2L;
-	
+
 	private long id;
 	private String name;
 	private Uri uri;
@@ -100,16 +101,16 @@ public class Type implements Serializable {
 				MyAccountsContentProvider.CONTENT_URI_TYPES, null, null, null,
 				null);
 
-		if(BuildConfig.DEBUG)
-		Log.w("type", "cursor movetofirst");
+		if (BuildConfig.DEBUG)
+			Log.w("type", "cursor movetofirst");
 		if (cursor != null && cursor.moveToFirst()) {
 			while (!cursor.isAfterLast()) {
-				if(BuildConfig.DEBUG)
-				Log.w("type", "cursor line");
+				if (BuildConfig.DEBUG)
+					Log.w("type", "cursor line");
 				typesList.add(new Type(cursor));
 				cursor.moveToNext();
 			}
-			if(BuildConfig.DEBUG)
+			if (BuildConfig.DEBUG)
 				Log.w("type", "cursor close");
 			cursor.close();
 		} else
@@ -179,9 +180,22 @@ public class Type implements Serializable {
 	public String toString() {
 		return getName();
 	}
-
+	
+	
+	// function who adds the default types if there is no one
 	public static void controlDefault(ContentResolver contentResolver) {
 		ArrayList<Type> typesList = getTypes(contentResolver);
+
+		if (typesList == null || typesList.isEmpty()) {
+			// add default types
+			for(String i : DEFAULT_TYPES){
+				Type newType = new Type();
+				newType.setName(i);
+				newType.setColor(Color.WHITE);
+				
+				newType.saveInDB(contentResolver);
+			}
+		}
 		// TODO
 	}
 

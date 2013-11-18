@@ -42,7 +42,7 @@ public class AccountDetailActivity extends ListActivity {
 	private TextView totalView;
 
 	private LinearLayout navigator;
-	
+
 	static final private int FILTER_ACTIVITY = 10;
 
 	@Override
@@ -80,16 +80,16 @@ public class AccountDetailActivity extends ListActivity {
 		next = (ImageButton) findViewById(R.id.activity_detail_next);
 		timeFilter = (Spinner) findViewById(R.id.activity_detail_spinner);
 		intervalView = (TextView) findViewById(R.id.activity_detail_interval);
-		
+
 		// total footer
-		View totalFooter = getLayoutInflater().inflate(R.layout.activity_detail_total_footer,
-				null);
+		View totalFooter = getLayoutInflater().inflate(
+				R.layout.activity_detail_total_footer, null);
 		listView.addFooterView(totalFooter);
 		totalView = (TextView) findViewById(R.id.activity_detail_total_amount);
-		
+
 		// ADD footer
-		addFooter = getLayoutInflater().inflate(R.layout.activity_detail_add_footer,
-				null);
+		addFooter = getLayoutInflater().inflate(
+				R.layout.activity_detail_add_footer, null);
 		listView.addFooterView(addFooter);
 		addFooter.setOnClickListener(new OnClickListener() {
 			@Override
@@ -158,14 +158,16 @@ public class AccountDetailActivity extends ListActivity {
 			this.setListAdapter(adapter);
 		} else if (adapter != null)
 			adapter.clear();
-		
+
 		// set amount of the selected transactions
 		// tmp
 		double total = 0;
-		for(Transaction i : transactions)
-			total += i.getAmount();
+		if (transactions != null) {
+			for (Transaction i : transactions)
+				total += i.getAmount();
+		}
 		// end tmp
-		if(total < 0)
+		if (total < 0)
 			totalView.setTextColor(Color.RED);
 		else
 			totalView.setTextColor(Color.GREEN);
@@ -191,7 +193,7 @@ public class AccountDetailActivity extends ListActivity {
 		if (filter.isDateFilter()) {
 			// visible navigator
 			navigator.setVisibility(View.VISIBLE);
-			
+
 			timeFilter.setSelection(filter.getInterval());
 			setDateInterval();
 
