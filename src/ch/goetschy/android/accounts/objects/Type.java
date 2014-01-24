@@ -2,6 +2,7 @@ package ch.goetschy.android.accounts.objects;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
@@ -180,23 +181,65 @@ public class Type implements Serializable {
 	public String toString() {
 		return getName();
 	}
-	
-	
-	// function who adds the default types if there is no one
-	public static void controlDefault(ContentResolver contentResolver) {
-		ArrayList<Type> typesList = getTypes(contentResolver);
 
-		if (typesList == null || typesList.isEmpty()) {
-			// add default types
-			for(String i : DEFAULT_TYPES){
-				Type newType = new Type();
-				newType.setName(i);
-				newType.setColor(Color.WHITE);
-				
-				newType.saveInDB(contentResolver);
+	// function who controls if all the default types are there
+	public static boolean controlDefault(ContentResolver contentResolver) {
+		ArrayList<Type> typesList = getTypes(contentResolver);
+		ArrayList<String> sTypesList = toStringArrayList(typesList);
+		
+
+		if (sTypesList.isEmpty())
+			return false;
+		else {
+			for (String i : DEFAULT_TYPES) {
+				if (BuildConfig.DEBUG)
+					Log.w("type", "type : " + i);
+				if(!sTypesList.contains(i))
+					return false;
 			}
+			return true;
 		}
-		// TODO
 	}
 
+	// function who adds the default types
+	public static void addDefault(ContentResolver contentResolver) {
+		ArrayList<Type> typesList = getTypes(contentResolver);
+		ArrayList<String> sTypesList = toStringArrayList(typesList);
+
+		ArrayList<String> toAdd = new ArrayList<String>();
+
+		if (sTypesList.isEmpty()) {
+			// add all default types
+			for (String i : DEFAULT_TYPES) {
+				toAdd.add(i);
+			}
+		} else {
+			// add only absent default types
+			for (String i : DEFAULT_TYPES) {
+				if(!sTypesList.contains(i))
+					toAdd.add(i);
+			}
+		}
+		
+		// save all in DB
+		for(String i : toAdd){
+			Type newType = new Type();
+			newType.setName(i);
+			newType.setColor(Color.WHITE);
+	
+			newType.saveInDB(contentResolver);
+		}
+	}
+
+	// converts array to arraylist
+	public static ArrayList<String> toStringArrayList(ArrayList<Type> types) {
+		ArrayList<String> retour = new ArrayList<String>();
+
+		if (types != null) {
+			for (Type i : types)
+				retour.add(i.getName());
+		}
+
+		return retour;
+	}
 }

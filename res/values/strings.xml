@@ -52,6 +52,10 @@
     <string name="account_overview_delete">Delete</string>
     <string name="account_overview_edit">Edit</string>
     <string name="activity_overview_add_footer">Add an account</string>
+    <string name="activity_overview_default_types_question">Do you want to load the default types ?</string>
+    <string name="activity_overview_default_types_yes">Yes</string>
+    <string name="activity_overview_default_types_no">No</string>
+    
     
     <string name="activity_detail_add_footer">Add a transaction</string>
     
@@ -64,6 +68,7 @@
     <string name="activity_filter_type_box">Type filter</string>
     <string name="activity_filter_bound1_label">Lower bound</string>
     <string name="activity_filter_bound2_label">Upper bound</string>
+    
     
     
     

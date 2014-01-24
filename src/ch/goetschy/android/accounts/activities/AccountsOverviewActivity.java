@@ -2,22 +2,27 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.objects.Account;
+import ch.goetschy.android.accounts.objects.AppInfos;
 import ch.goetschy.android.accounts.objects.Type;
 
 import android.R.color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -33,7 +38,6 @@ public class AccountsOverviewActivity extends ListActivity {
 	private static final int DELETE_ID = 10;
 	private static final int EDIT_ID = 20;
 
-	
 	private AccountsAdapter adapter;
 	private View footer;
 
@@ -44,30 +48,87 @@ public class AccountsOverviewActivity extends ListActivity {
 		this.getListView().setDividerHeight(2);
 		ListView listview = getListView();
 		this.registerForContextMenu(listview);
-		
+
 		// ADD footer
-	    footer = getLayoutInflater().inflate(R.layout.activity_overview_footer, null);
-	    listview.addFooterView(footer);
-	    footer.setOnClickListener(new OnClickListener(){
+		footer = getLayoutInflater().inflate(R.layout.activity_overview_footer,
+				null);
+		listview.addFooterView(footer);
+		footer.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				changeFooterColor(true);
 				createAccount();
 			}
-	    });
+		});
 
-		// TODO control for default types
-		Type.controlDefault(this.getContentResolver());
-		
+		// AppInfos infos = new AppInfos(getContentResolver());
+		// // infos.saveInDB(AppInfos.TEST, "test2");
+		// Log.w("overview", "infos : " + infos.loadFromDB(AppInfos.TEST));
+		// infos.delete(AppInfos.TEST);
+
+		// ArrayList<String> array = new ArrayList<String>();
+		// array.add("test");
+
+		AppInfos infos = new AppInfos(getContentResolver());
+		Log.w("overview",
+				"infos : -" + infos.loadFromDB(AppInfos.CONTROL_DEFAULT_TYPES)
+						+ "-");
+
+		String strInfos = (infos.loadFromDB(AppInfos.CONTROL_DEFAULT_TYPES) == null ? "true"
+				: "false");
+		if (!(strInfos.equals("false")) // if "ask again" wasn't checked and
+										// absent default types
+				&& !Type.controlDefault(this.getContentResolver())) {
+
+			// dialog - load defaults ----------------
+			new AlertDialog.Builder(AccountsOverviewActivity.this)
+					.setTitle(R.string.activity_overview_default_types_question)
+					.setCancelable(false)
+					// checkable - ask again ?
+					.setMultiChoiceItems(R.array.askagain, null,
+							new DialogInterface.OnMultiChoiceClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog,
+										int which, boolean isChecked) {
+									if (isChecked) {
+										new AppInfos(getContentResolver())
+												.saveInDB(
+														AppInfos.CONTROL_DEFAULT_TYPES,
+														"false");
+									} else {
+										new AppInfos(getContentResolver())
+												.saveInDB(
+														AppInfos.CONTROL_DEFAULT_TYPES,
+														"true");
+									}
+								}
+							})
+					.setPositiveButton(
+							R.string.activity_overview_default_types_yes,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									// add the default types
+									Type.addDefault(getContentResolver());
+								}
+							})
+					.setNegativeButton(
+							R.string.activity_overview_default_types_no, null)
+					.create().show();
+			// ----------------
+
+			if (BuildConfig.DEBUG)
+				Log.w("overview", "not all default");
+		}
+
 	}
-	
-	private void changeFooterColor(boolean dark){
-		if(dark)
+
+	private void changeFooterColor(boolean dark) {
+		if (dark)
 			footer.setBackgroundColor(Color.rgb(210, 210, 210));
 		else
 			footer.setBackgroundColor(Color.rgb(220, 220, 220));
 	}
-	
 
 	private void fillData() {
 		ArrayList<Account> accounts = Account
@@ -155,7 +216,6 @@ public class AccountsOverviewActivity extends ListActivity {
 
 		return super.onContextItemSelected(item);
 	}
-	
 
 	// ACCOUNT DETAILS -------------------
 

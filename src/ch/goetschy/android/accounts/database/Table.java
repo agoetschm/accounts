@@ -7,6 +7,7 @@ import android.util.Log;
 public abstract class Table {
 	public String TABLE_NAME;
 	public static final String COLUMN_ID = "_id";
+	public static final String COLUMN_NAME = "name";
 
 	public abstract void onCreate(SQLiteDatabase database);
 

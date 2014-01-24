@@ -6,9 +6,11 @@ import java.util.HashSet;
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.database.AccountsDatabaseHelper;
 import ch.goetschy.android.accounts.database.AccountsTable;
+import ch.goetschy.android.accounts.database.AppInfosTable;
 import ch.goetschy.android.accounts.database.Table;
 import ch.goetschy.android.accounts.database.TransactionTable;
 import ch.goetschy.android.accounts.database.TypeTable;
+import ch.goetschy.android.accounts.objects.AppInfos;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -28,6 +30,7 @@ public class MyAccountsContentProvider extends ContentProvider {
 	private static final String PATH_ACCOUNTS = AccountsTable.TABLE_NAME;
 	private static final String PATH_TRANSACTIONS = TransactionTable.TABLE_NAME;
 	private static final String PATH_TYPES = TypeTable.TABLE_NAME;
+	private static final String PATH_APP_INFOS = AppInfosTable.TABLE_NAME;
 
 	public static final String ACCOUNTS_AUTHORITY = AUTHORITY + "/"
 			+ PATH_ACCOUNTS;
@@ -38,6 +41,8 @@ public class MyAccountsContentProvider extends ContentProvider {
 			+ AUTHORITY + "/" + PATH_TRANSACTIONS);
 	public final static Uri CONTENT_URI_TYPES = Uri.parse("content://"
 			+ AUTHORITY + "/" + PATH_TYPES);
+	public final static Uri CONTENT_URI_APP_INFOS = Uri.parse("content://"
+			+ AUTHORITY + "/" + PATH_APP_INFOS);
 
 	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
 			+ "/items";
@@ -55,6 +60,9 @@ public class MyAccountsContentProvider extends ContentProvider {
 	private static final int TYPES = 50;
 	private static final int TYPE_ID = 60;
 
+	private static final int APP_INFOS = 70;
+	private static final int APP_INFOS_ID = 80;
+
 	private static final UriMatcher sUriMatcher = new UriMatcher(
 			UriMatcher.NO_MATCH);
 	static {
@@ -66,20 +74,26 @@ public class MyAccountsContentProvider extends ContentProvider {
 
 		sUriMatcher.addURI(AUTHORITY, PATH_TYPES, TYPES);
 		sUriMatcher.addURI(AUTHORITY, PATH_TYPES + "/#", TYPE_ID);
+
+		sUriMatcher.addURI(AUTHORITY, PATH_APP_INFOS, APP_INFOS);
+		sUriMatcher.addURI(AUTHORITY, PATH_APP_INFOS + "/#", APP_INFOS_ID);
 	}
 
-	private static final int ITEMS = 70;
-	private static final int ITEM_ID = 80;
+	private static final int ITEMS = 100;
+	private static final int ITEM_ID = 110;
 	private static final UriMatcher typeUriMatcher = new UriMatcher(
 			UriMatcher.NO_MATCH);
 	static {
 		typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS, ITEMS);
 		typeUriMatcher.addURI(AUTHORITY, PATH_TRANSACTIONS, ITEMS);
 		typeUriMatcher.addURI(AUTHORITY, PATH_TYPES, ITEMS);
+		typeUriMatcher.addURI(AUTHORITY, PATH_APP_INFOS, ITEMS);
 
 		typeUriMatcher.addURI(AUTHORITY, PATH_ACCOUNTS + "/#", ITEM_ID);
 		typeUriMatcher.addURI(AUTHORITY, PATH_TRANSACTIONS + "/#", ITEM_ID);
 		typeUriMatcher.addURI(AUTHORITY, PATH_TYPES + "/#", ITEM_ID);
+		typeUriMatcher.addURI(AUTHORITY, PATH_APP_INFOS + "/#", ITEM_ID);
+
 	}
 
 	private AccountsDatabaseHelper database;
@@ -91,6 +105,9 @@ public class MyAccountsContentProvider extends ContentProvider {
 		int rowDeleted = 0;
 
 		String table = getTable(uri);
+		
+		if (BuildConfig.DEBUG)
+			Log.w("contentProvider", "delete in " + table + " : " + selection);
 
 		switch (uriType) {
 		case ITEMS:
@@ -132,8 +149,11 @@ public class MyAccountsContentProvider extends ContentProvider {
 		SQLiteDatabase sqlDB = database.getWritableDatabase();
 		long id = 0;
 		String table = getTable(uri);
-
-		id = sqlDB.insert(table, null, values);
+		
+		if (BuildConfig.DEBUG && values.containsKey(AppInfosTable.COLUMN_VALUE))
+			Log.w("contentProvider", "insert in " + table + " : " + values.getAsString(AppInfosTable.COLUMN_VALUE));
+		
+		id = sqlDB.insertOrThrow(table, null, values);
 		this.getContext().getContentResolver().notifyChange(uri, null);
 
 		return Uri.parse(table + "/" + id);
@@ -162,11 +182,11 @@ public class MyAccountsContentProvider extends ContentProvider {
 		switch (uriType) {
 		case ITEMS:
 			if (BuildConfig.DEBUG)
-				Log.w("contentProvider", "items");
+				Log.w("contentProvider", "type : items");
 			break;
 		case ITEM_ID:
 			if (BuildConfig.DEBUG)
-				Log.w("contentProvider", "item_id");
+				Log.w("contentProvider", "type : item_id");
 			String id = uri.getLastPathSegment();
 			queryBuilder.appendWhere(Table.COLUMN_ID + "=" + id);
 			break;
@@ -220,6 +240,8 @@ public class MyAccountsContentProvider extends ContentProvider {
 			available = TransactionTable.available;
 		} else if (table.equals(PATH_TYPES)) {
 			available = TypeTable.available;
+		} else if (table.equals(PATH_APP_INFOS)) {
+			available = AppInfosTable.available;
 		}
 		if (projection != null) {
 			HashSet<String> requestedCols = new HashSet<String>(
@@ -227,6 +249,13 @@ public class MyAccountsContentProvider extends ContentProvider {
 			HashSet<String> availableCols = new HashSet<String>(
 					Arrays.asList(available));
 			if (!availableCols.containsAll(requestedCols)) {
+				Log.w("contentProvider", "column error");
+				if (BuildConfig.DEBUG) {
+					for (String i : requestedCols) 
+						Log.w("contentProvider", "requested : " + i);
+					for (String i : availableCols) 
+						Log.w("contentProvider", "available : " + i);
+				}
 				throw new IllegalArgumentException(
 						"Unknown columns in projection");
 			}
@@ -236,7 +265,7 @@ public class MyAccountsContentProvider extends ContentProvider {
 	private String getTable(Uri uri) {
 		String table = uri.getPathSegments().get(0);
 		if (!table.equals(PATH_ACCOUNTS) && !table.equals(PATH_TRANSACTIONS)
-				&& !table.equals(PATH_TYPES)) {
+				&& !table.equals(PATH_TYPES) && !table.equals(PATH_APP_INFOS)) {
 			if (BuildConfig.DEBUG)
 				Log.w("contentProvider", "path : " + table);
 			throw new IllegalArgumentException("Unknown URI : " + uri);
