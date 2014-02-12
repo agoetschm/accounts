@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 import android.widget.SimpleCursorAdapter;
 import ch.goetschy.android.accounts.BuildConfig;
@@ -123,6 +124,7 @@ public class Account extends Item {
 		this.order = order;
 	}
 
+
 	@Override
 	public void delete(ContentResolver contentResolver) {
 		if (uri != null)
@@ -154,6 +156,7 @@ public class Account extends Item {
 		if (parent != null)
 			parent.setId(cursor.getLong(cursor
 					.getColumnIndex(AccountsTable.COLUMN_PARENT)));
+		uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/" + id);
 	}
 
 	@Override
@@ -212,6 +215,13 @@ public class Account extends Item {
 		}
 
 		return listAccounts;
+	}
+	
+
+	@Override
+	public String toString() {
+		// for the list adapter
+		return getName();
 	}
 
 }

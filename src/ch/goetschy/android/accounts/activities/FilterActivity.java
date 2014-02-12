@@ -102,7 +102,10 @@ public class FilterActivity extends FragmentActivity implements
 							boolean isChecked) {
 						dateSpinner.setEnabled(isChecked);
 						lowerBound.setEnabled(isChecked);
-						upperBound.setEnabled(isChecked);
+
+						upperBound.setEnabled(isChecked
+								&& dateSpinner.getSelectedItemPosition() == Filter.CUSTOM);
+						// upper bound only if custom
 					}
 
 				});

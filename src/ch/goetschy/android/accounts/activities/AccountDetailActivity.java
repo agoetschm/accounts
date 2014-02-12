@@ -9,7 +9,6 @@ import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;

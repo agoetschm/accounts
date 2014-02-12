@@ -10,15 +10,24 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@android:style/Theme.Light" >
         <activity
-            android:name=".activities.AccountsOverviewActivity"
+            android:name=".activities.MenuActivity"
             android:label="@string/title_activity_accounts_overview" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".activities.AccountsOverviewActivity"
+            android:label="@string/title_activity_accounts_overview" >
+<!--             <intent-filter> -->
+<!--                 <action android:name="android.intent.action.MAIN" /> -->
+
+<!--                 <category android:name="android.intent.category.LAUNCHER" /> -->
+<!--             </intent-filter> -->
         </activity>
         <activity
             android:name=".activities.EditAccountActivity"
@@ -41,6 +50,13 @@
         <activity
             android:name=".activities.FilterActivity"
             android:label="@string/title_activity_filter" />
+        <activity
+            android:name=".activities.SaveRestoreActivity"
+            android:label="@string/title_activity_save" />
+         
+        <activity
+            android:name=".activities.FileExplore"
+            android:label="@string/file_explore_title" />
          
 
         <provider
@@ -49,5 +65,9 @@
             android:multiprocess="true" >
         </provider>
     </application>
+    
+    
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
 </manifest>

@@ -1,4 +1,7 @@
 <resources>
+    
+    <string name="hello_file_explore">Hello World, FileExplore!</string>
+    <string name="file_explore_title">File Explore</string>
 
     <string name="app_name">Accounts</string>
     <string name="hello_world">Hello world!</string>
@@ -10,6 +13,7 @@
     <string name="title_activity_types">Manage types</string>
     <string name="title_activity_edit_type">New/Edit type</string>
     <string name="title_activity_filter">Set a filter</string>
+    <string name="title_activity_save">Save/ restore accounts</string>
     <string name="color_picker_title">Pick a color</string>
     
     <string name="previous">Previous</string>
@@ -17,6 +21,11 @@
     <string name="icon">Icon</string>
     <string name="interval">interval</string>
     
+    
+    <string name="menu_overview">Accounts overview</string>
+    <string name="menu_manage_types">Manage types</string>
+    <string name="menu_quit">Quit</string>
+    <string name="menu_save_restore">Save/restore accounts</string>
     
     
     
@@ -55,6 +64,20 @@
     <string name="activity_overview_default_types_question">Do you want to load the default types ?</string>
     <string name="activity_overview_default_types_yes">Yes</string>
     <string name="activity_overview_default_types_no">No</string>
+    
+    
+    <string name="activity_save_title_save">Save an account</string>
+    <string name="activity_save_text_save">Select an account to save :</string>
+    <string name="activity_save_text_location_save">Select the location :</string>
+    <string name="activity_save_button_choose_location">Browse...</string>
+    <string name="activity_save_button_save">Save</string>
+    <string name="activity_save_title_restore">Restore an account</string>
+    <string name="activity_save_text_restore">Select a file to restore :</string>
+    <string name="activity_save_button_restore">Restore</string>
+    
+    <string name="dialog_file_select">Select</string>
+    <string name="dialog_file_cancel">Cancel</string>
+    
     
     
     <string name="activity_detail_add_footer">Add a transaction</string>

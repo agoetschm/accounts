@@ -15,11 +15,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.app.LoaderManager;
-import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.util.Log;
@@ -29,6 +26,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -48,18 +46,22 @@ public class AccountsOverviewActivity extends ListActivity {
 		this.getListView().setDividerHeight(2);
 		ListView listview = getListView();
 		this.registerForContextMenu(listview);
+		
+		
+		Button addBut = (Button) findViewById(R.id.activity_overview_add);
+		Button returnBut = (Button) findViewById(R.id.activity_overview_return);
 
 		// ADD footer
-		footer = getLayoutInflater().inflate(R.layout.activity_overview_footer,
-				null);
-		listview.addFooterView(footer);
-		footer.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				changeFooterColor(true);
-				createAccount();
-			}
-		});
+//		footer = getLayoutInflater().inflate(R.layout.activity_overview_footer,
+//				null);
+//		listview.addFooterView(footer);
+//		footer.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				changeFooterColor(true);
+//				createAccount();
+//			}
+//		});
 
 		// AppInfos infos = new AppInfos(getContentResolver());
 		// // infos.saveInDB(AppInfos.TEST, "test2");
@@ -120,6 +122,26 @@ public class AccountsOverviewActivity extends ListActivity {
 			if (BuildConfig.DEBUG)
 				Log.w("overview", "not all default");
 		}
+		
+		
+		// LISTENERS -----------------------
+		
+		addBut.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				createAccount();
+			}
+		});
+		
+
+		returnBut.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				finish();
+			}
+		});
+		
+		// -----------------------------
 
 	}
 
@@ -144,7 +166,7 @@ public class AccountsOverviewActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		fillData();
-		changeFooterColor(false);
+//		changeFooterColor(false);
 		super.onResume();
 	}
 
@@ -153,32 +175,27 @@ public class AccountsOverviewActivity extends ListActivity {
 		startActivity(intent);
 	}
 
-	private void manageTypes() {
-		Intent intent = new Intent(this, ManageTypesActivity.class);
-		startActivity(intent);
-	}
-
 	// ADD and TYPES BUTTON ------------------------
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_overview, menu);
-		return true;
-	}
-
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case R.id.menu_add:
-			createAccount();
-			return true;
-		case R.id.menu_types:
-			manageTypes();
-			return true;
-		}
-
-		return super.onOptionsItemSelected(item);
-	}
+//	@Override
+//	public boolean onCreateOptionsMenu(Menu menu) {
+//		getMenuInflater().inflate(R.menu.activity_overview, menu);
+//		return true;
+//	}
+//
+//	@Override
+//	public boolean onOptionsItemSelected(MenuItem item) {
+//		switch (item.getItemId()) {
+//		case R.id.menu_add:
+//			createAccount();
+//			return true;
+//		case R.id.menu_types:
+//			manageTypes();
+//			return true;
+//		}
+//
+//		return super.onOptionsItemSelected(item);
+//	}
 
 	// DELETE and EDIT BUTTONs -----------
 

@@ -26,7 +26,7 @@ public class Transaction extends Item {
 		setDate(0);
 		if (cursor != null){
 			loadFromCursor(cursor);
-			type.loadColorFromDB(contentResolver);
+			type.loadNameAndColorFromDB(contentResolver);
 		}
 		else
 			throw new NullPointerException("Null cursor");
@@ -103,6 +103,7 @@ public class Transaction extends Item {
 		}
 		return false;
 	}
+	
 	
 	@Override
 	protected void loadFromCursor(Cursor cursor) {

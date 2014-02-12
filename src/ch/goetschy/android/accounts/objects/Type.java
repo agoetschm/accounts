@@ -152,14 +152,16 @@ public class Type implements Serializable {
 		// control if transaction is connected
 	}
 
-	public boolean loadColorFromDB(ContentResolver contentResolver) {
-		String[] projection = new String[] { TypeTable.COLUMN_COLOR };
+	public boolean loadNameAndColorFromDB(ContentResolver contentResolver) {
+		String[] projection = new String[] { TypeTable.COLUMN_COLOR , TypeTable.COLUMN_NAME};
 		Cursor cursor = contentResolver.query(
 				MyAccountsContentProvider.CONTENT_URI_TYPES, projection,
 				TypeTable.COLUMN_ID + "=" + id, null, null);
 		if (cursor.moveToFirst()) {
 			this.setColor(cursor.getInt(cursor
 					.getColumnIndex(TypeTable.COLUMN_COLOR)));
+			this.setName(cursor.getString(cursor
+					.getColumnIndex(TypeTable.COLUMN_NAME)));
 			cursor.close();
 			return true;
 		}

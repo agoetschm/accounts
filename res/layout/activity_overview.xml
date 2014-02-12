@@ -4,10 +4,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <Button
+        android:id="@+id/activity_overview_return"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        android:text="return" />
+
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_weight="90" >
     </ListView>
 
     <TextView
@@ -15,10 +23,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
-        android:text="@string/no_account"
+        android:layout_weight="90"
         android:gravity="left"
+        android:text="@string/no_account"
         android:textColor="#999999"
         android:textSize="20sp" >
     </TextView>
+
+    <Button
+        android:id="@+id/activity_overview_add"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="5"
+        android:text="@string/activity_overview_add_footer" />
 
 </LinearLayout>

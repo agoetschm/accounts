@@ -3,7 +3,6 @@ package ch.goetschy.android.accounts.activities;
 import ch.goetschy.android.accounts.R;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
 
