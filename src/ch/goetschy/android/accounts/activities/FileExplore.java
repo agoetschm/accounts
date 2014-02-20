@@ -48,13 +48,17 @@ public class FileExplore extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
-		
+
 		// data from parent activity
 		Bundle extras = getIntent().getExtras();
-		if (extras != null){
+		if (extras != null) {
 			File tmp = (File) extras.getSerializable(File.class.toString());
-			if(tmp.exists()) // if valid path in extras
-				path = tmp;
+			if (tmp.exists()) { // if valid path in extras
+				if (!tmp.isDirectory()) // if it's a file
+					path = tmp.getParentFile();
+				else
+					path = tmp;
+			}
 		}
 
 		loadFileList();
@@ -215,30 +219,30 @@ public class FileExplore extends Activity {
 					else {
 						Intent resultIntent = new Intent();
 						resultIntent.putExtra(File.class.toString(), sel);
-						setResult(RESULT_OK, resultIntent);	// return file
+						setResult(RESULT_OK, resultIntent); // return file
 						finish();
 					}
 
 				}
 			});
 			// button select
-			builder.setPositiveButton(R.string.dialog_file_select, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog,
-						int id) {
-					Intent resultIntent = new Intent();
-					resultIntent.putExtra(File.class.toString(), path);
-					setResult(RESULT_OK, resultIntent); 	// return path
-					finish();
-				}
-			});
+			builder.setPositiveButton(R.string.dialog_file_select,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							Intent resultIntent = new Intent();
+							resultIntent.putExtra(File.class.toString(), path);
+							setResult(RESULT_OK, resultIntent); // return path
+							finish();
+						}
+					});
 			// button cancel
-			builder.setNegativeButton(R.string.dialog_file_cancel, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog,
-						int id) {
-					setResult(RESULT_CANCELED);				// cancel
-					finish();
-				}
-			});
+			builder.setNegativeButton(R.string.dialog_file_cancel,
+					new DialogInterface.OnClickListener() {
+						public void onClick(DialogInterface dialog, int id) {
+							setResult(RESULT_CANCELED); // cancel
+							finish();
+						}
+					});
 			break;
 		}
 		dialog = builder.show();

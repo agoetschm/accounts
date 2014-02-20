@@ -20,6 +20,8 @@ public class EditAccountActivity extends Activity {
 	private EditText mName;
 	private Account account;
 
+	private boolean mDelete = false;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -71,6 +73,7 @@ public class EditAccountActivity extends Activity {
 									public void onClick(DialogInterface dialog,
 											int id) {
 										// if yes, delete
+										mDelete = true; // do not save
 										setResult(RESULT_CANCELED);
 										if (account.getUri() == null) {
 											finish();
@@ -112,12 +115,15 @@ public class EditAccountActivity extends Activity {
 	}
 
 	private void save() {
-		String name = mName.getText().toString();
+		if (!mDelete) {
+			String name = mName.getText().toString();
 
-		if (name.length() == 0)
-			return;
+			if (name.length() == 0)
+				return;
 
-		account.setName(name);
-		account.saveInDB(getContentResolver());
+			account.setName(name);
+			account.saveInDB(getContentResolver());
+		}
 	}
+	
 }

@@ -127,8 +127,15 @@ public class Account extends Item {
 
 	@Override
 	public void delete(ContentResolver contentResolver) {
-		if (uri != null)
+		if (uri != null){
+			// delete all transactions
+			getListTransactions(contentResolver);
+			for(Transaction trans : listTransactions)
+				trans.delete(contentResolver);
+			
+			// delete account itself
 			contentResolver.delete(uri, null, null);
+		}
 	}
 
 	@Override

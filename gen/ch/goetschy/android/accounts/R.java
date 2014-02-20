@@ -58,6 +58,7 @@ public final class R {
         public static final int activity_overview_return=0x7f08002b;
         public static final int activity_save_button_choose_location=0x7f080035;
         public static final int activity_save_button_restore=0x7f08003a;
+        public static final int activity_save_button_restore_location=0x7f080039;
         public static final int activity_save_button_save=0x7f080036;
         public static final int activity_save_spinner_save=0x7f080033;
         public static final int activity_save_text_location_save=0x7f080034;
@@ -69,7 +70,6 @@ public final class R {
         public static final int edit_account_confirm=0x7f08000b;
         public static final int edit_account_delete=0x7f08000c;
         public static final int edit_account_name=0x7f08000a;
-        public static final int edit_account_name2=0x7f080039;
         public static final int edit_transaction_amount=0x7f08000e;
         public static final int edit_transaction_confirm=0x7f080016;
         public static final int edit_transaction_credit=0x7f080010;

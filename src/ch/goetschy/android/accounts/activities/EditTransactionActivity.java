@@ -30,7 +30,8 @@ import android.widget.Toast;
 //import android.app.DialogFragment;
 //import android.support.v4.app.DialogFragment;
 
-public class EditTransactionActivity extends FragmentActivity implements DatePickerListener{
+public class EditTransactionActivity extends FragmentActivity implements
+		DatePickerListener {
 
 	private EditText mName;
 	private EditText mAmount;
@@ -43,6 +44,8 @@ public class EditTransactionActivity extends FragmentActivity implements DatePic
 
 	private Transaction transaction;
 	private long parent_id;
+
+	private boolean mDelete = false; // do not save -> delete
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -143,8 +146,7 @@ public class EditTransactionActivity extends FragmentActivity implements DatePic
 			@Override
 			public void onClick(View v) {
 				// show confirm dialog
-				new AlertDialog.Builder(
-						EditTransactionActivity.this)
+				new AlertDialog.Builder(EditTransactionActivity.this)
 						.setMessage(R.string.edit_transaction_delete_question)
 						.setCancelable(false)
 						.setPositiveButton(R.string.edit_transaction_yes,
@@ -153,6 +155,7 @@ public class EditTransactionActivity extends FragmentActivity implements DatePic
 											int id) {
 										// if yes, delete
 										setResult(RESULT_CANCELED);
+										mDelete = true;
 										if (transaction.getUri() == null) {
 											finish();
 										} else {
@@ -161,7 +164,9 @@ public class EditTransactionActivity extends FragmentActivity implements DatePic
 											finish();
 										}
 									}
-								}).setNegativeButton(R.string.edit_transaction_no, null).show();
+								})
+						.setNegativeButton(R.string.edit_transaction_no, null)
+						.show();
 
 			}
 		});
@@ -223,33 +228,35 @@ public class EditTransactionActivity extends FragmentActivity implements DatePic
 	}
 
 	private void save() {
-		// name
-		String name = mName.getText().toString();
-		if (name.length() == 0)
-			return;
+		if (!mDelete) { // if not delete
+			// name
+			String name = mName.getText().toString();
+			if (name.length() == 0)
+				return;
 
-		// amount
-		String amount = mAmount.getText().toString();
-		if (!validAmount(amount))
-			return;
-		double dAmount = Double.parseDouble(amount);
-		if (inOrOutRadio.getCheckedRadioButtonId() == R.id.edit_transaction_debit) // neg
-			dAmount *= -1;
+			// amount
+			String amount = mAmount.getText().toString();
+			if (!validAmount(amount))
+				return;
+			double dAmount = Double.parseDouble(amount);
+			if (inOrOutRadio.getCheckedRadioButtonId() == R.id.edit_transaction_debit) // neg
+				dAmount *= -1;
 
-		amount = String.valueOf(dAmount);
+			amount = String.valueOf(dAmount);
 
-		if (BuildConfig.DEBUG)
-			Log.w("editTransaction", "save " + name);
-		// save in object
-		transaction.setName(name);
-		transaction.setAmount(Double.parseDouble(amount));
-		transaction.setDate(mTimeInMillis);
-		transaction.getType().setId(mType.getSelectedItemId());
-		transaction.setDescription(mDescription.getText().toString());
-		transaction.setParent(new Account(parent_id));
+			if (BuildConfig.DEBUG)
+				Log.w("editTransaction", "save " + name);
+			// save in object
+			transaction.setName(name);
+			transaction.setAmount(Double.parseDouble(amount));
+			transaction.setDate(mTimeInMillis);
+			transaction.getType().setId(mType.getSelectedItemId());
+			transaction.setDescription(mDescription.getText().toString());
+			transaction.setParent(new Account(parent_id));
 
-		// save in DB
-		transaction.saveInDB(getContentResolver());
+			// save in DB
+			transaction.saveInDB(getContentResolver());
+		}
 	}
 
 	public void setDate() {
@@ -261,7 +268,7 @@ public class EditTransactionActivity extends FragmentActivity implements DatePic
 
 		mDateTextView.setText(Filter.millisToText(mTimeInMillis));
 	}
-	
+
 	@Override
 	public void setDate(int year, int month, int day) {
 		final Calendar c = Calendar.getInstance();

@@ -6,6 +6,8 @@ import ch.goetschy.android.accounts.database.TransactionTable;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
+import android.util.Log;
 
 public class Transaction extends Item {
 	private Type type;
@@ -66,8 +68,11 @@ public class Transaction extends Item {
 
 	@Override
 	public void delete(ContentResolver contentResolver) {
+		Log.w("transaction", "delete " + name);
 		if (uri != null)
 			contentResolver.delete(uri, null, null);
+		else
+			Log.w("transaction", "delete failed : no uri");
 	}
 
 	@Override
@@ -123,6 +128,8 @@ public class Transaction extends Item {
 		if (parent != null)
 			parent.setId(cursor.getLong(cursor
 					.getColumnIndex(TransactionTable.COLUMN_PARENT)));
+		
+		uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS + "/" + id);
 	}
 
 }

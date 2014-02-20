@@ -38,6 +38,7 @@ public class AccountsOverviewActivity extends ListActivity {
 
 	private AccountsAdapter adapter;
 	private View footer;
+	private Account actAccount; // actual account -> delete
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -210,24 +211,37 @@ public class AccountsOverviewActivity extends ListActivity {
 
 	@Override
 	public boolean onContextItemSelected(MenuItem item) {
-		Account account = new Account();
+		actAccount = new Account();
 
 		// get id
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
-		account.setUri(Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
+		actAccount.setUri(Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
 				+ "/" + info.id));
 
 		// delete or edit
 		switch (item.getItemId()) {
 		case DELETE_ID:
-			account.delete(getContentResolver());
-			fillData();
+			// show confirm dialog
+			new AlertDialog.Builder(AccountsOverviewActivity.this)
+					.setMessage(R.string.edit_account_delete_question)
+					.setCancelable(false)
+					.setPositiveButton(R.string.edit_account_yes,
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int id) {
+									// if yes, delete
+									actAccount.delete(getContentResolver());
+									fillData(); // and refresh
+								}
+							})
+					.setNegativeButton(R.string.edit_account_no, null)
+					.show();
 			return true;
 		case EDIT_ID:
 			Intent intent = new Intent(this, EditAccountActivity.class);
 			intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
-					account.getUri());
+					actAccount.getUri());
 			startActivity(intent);
 		}
 
