@@ -1,12 +1,19 @@
 package ch.goetschy.android.accounts.activities;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Set;
 
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
+import ch.goetschy.android.accounts.objects.Savable;
 import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Type;
 import android.app.Activity;
@@ -32,37 +39,45 @@ public class SaveRestoreActivity extends Activity {
 	private File mSaveFile;
 	private File mRestoreFile;
 
+	private ArrayList<Account> accountsList;
+
 	static final private int SAVE_FILE_ACTIVITY = 10;
 	static final private int RESTORE_FILE_ACTIVITY = 20;
-	
+
+	static final private String FILE_ENDING = ".accnt";
+
+	// account id representing all accounts
+	static final private int ALL_ACCOUNTS = -1;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		this.setContentView(R.layout.activity_save_restore);
-		
+
 		// get views
 		mSaveSpinnerAccounts = (Spinner) findViewById(R.id.activity_save_spinner_save);
 		mChooseSaveLocation = (Button) findViewById(R.id.activity_save_button_choose_location);
 		mChooseRestoreLocation = (Button) findViewById(R.id.activity_save_button_restore_location);
 		mSave = (Button) findViewById(R.id.activity_save_button_save);
 		mRestore = (Button) findViewById(R.id.activity_save_button_restore);
-		
-		
+
 		// init file vars
 		mSaveFile = new File(""); // void path
-		mRestoreFile = new File(""); 
-		
-		
+		mRestoreFile = new File("");
+
 		// SAVE --------
-		
-		// account spinner 
-		ArrayList<Account> accountsList = Account
-				.getListAccounts(getContentResolver());
+
+		// account spinner
+		accountsList = Account.getListAccounts(getContentResolver());
 		if (accountsList != null) {
 			ArrayAdapter<Account> accountsAdapter = new AccountsAdapter(this,
 					accountsList);
+			// "save all" item
+			// test
+			accountsAdapter.add(new Account(ALL_ACCOUNTS,
+					"All accounts and types", 0));
+			// end test
 
 			accountsAdapter
 					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -84,10 +99,9 @@ public class SaveRestoreActivity extends Activity {
 				saveFile();
 			}
 		});
-		
-		
+
 		// RESTORE --------
-		
+
 		// button choose restore file location
 		mChooseRestoreLocation.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -96,9 +110,9 @@ public class SaveRestoreActivity extends Activity {
 			}
 
 		});
-		
+
 		// restore button
-		mSave.setOnClickListener(new View.OnClickListener() {
+		mRestore.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				restoreFile();
@@ -148,40 +162,49 @@ public class SaveRestoreActivity extends Activity {
 					makeToast("The selection is not a directory.");
 			}
 			break;
-		case RESTORE_FILE_ACTIVITY: // selection for the location of the saved file
+		case RESTORE_FILE_ACTIVITY: // selection for the location of the saved
+									// file
 			if (resultCode == Activity.RESULT_OK) {
 				File tmp = (File) data.getSerializableExtra(File.class
 						.toString());
 				if (tmp.isFile()) {
 					mRestoreFile = tmp;
-					mChooseRestoreLocation.setText(mRestoreFile.getAbsolutePath());
+					mChooseRestoreLocation.setText(mRestoreFile
+							.getAbsolutePath());
 				} else
 					makeToast("The selection is not a file.");
 			}
 		}
-		
+
 	}
 
 	// restore file
-	private void restoreFile(){
+	private void restoreFile() {
 		// verifiy file
 		if (!mRestoreFile.isFile()) {
 			makeToast("The selection is not a file.");
 			return;
 		}
-		
-		
+
 	}
-	
+
 	// save file
 	private void saveFile() {
+
+		// get account
 		Account selectedAccount = (Account) mSaveSpinnerAccounts
 				.getSelectedItem();
+
 		// verifiy account
 		if (selectedAccount == null) {
 			makeToast("There is no valid account selected.");
 			return;
 		}
+
+		// if all accounts
+		boolean allAccounts = false;
+		if (selectedAccount.getId() == ALL_ACCOUNTS)
+			allAccounts = true;
 
 		// verify external storage for write
 		if (!isExternalStorageWritable()) {
@@ -196,58 +219,107 @@ public class SaveRestoreActivity extends Activity {
 		}
 
 		// create path
-		String filename = selectedAccount.getName() + ".accnt";
+		String filename = selectedAccount.getName() + FILE_ENDING;
+		if (allAccounts)
+			filename = "allAccounts" + FILE_ENDING;
 		File path = new File(mSaveFile, filename);
+
+		// delete, in case it already exists
+		path.delete();
 
 		Log.w("saveRestore", "filename : " + filename);
 
+		makeToast("Saving " + filename + "...");
+
 		try {
 			// open stream
-			FileOutputStream outputStream = new FileOutputStream(path);
+			BufferedWriter outWriter = new BufferedWriter(new FileWriter(path,
+					true)); // writer in append mode
 
-			ArrayList<Transaction> transactions = selectedAccount
-					.getListTransactions(getContentResolver());
-
-			Log.w("saveRestore",
-					selectedAccount.getName() + " -> id = "
-							+ selectedAccount.getId() + ", uri -> "
-							+ selectedAccount.getUri());
-			// for each transaction
-			for (Transaction trans : transactions) {
-				// open trans
-				writeToStream(outputStream, "transaction", null, false);
-
-				Log.w("saveRestore", "transaction : " + trans.getName());
-
-				// id
-				writeToStream(outputStream, "id",
-						String.valueOf(trans.getId()), false);
-				// name
-				writeToStream(outputStream, "name", trans.getName(), false);
-				// amount
-				writeToStream(outputStream, "amount",
-						String.valueOf(trans.getAmount()), false);
-				// description
-				writeToStream(outputStream, "description",
-						trans.getDescription(), false);
-				// date
-				writeToStream(outputStream, "date",
-						String.valueOf(trans.getDate()), false);
-				// type
-
-				writeToStream(outputStream, "type", trans.getType().getName(),
-						false);
-
-				// close trans
-				writeToStream(outputStream, "transaction", null, true);
+			// list of accounts to save (one or all)
+			ArrayList<Account> accountsToSave;
+			if (allAccounts) {
+				accountsToSave = accountsList;
+			} else {
+				accountsToSave = new ArrayList<Account>();
+				accountsToSave.add(selectedAccount);
 			}
 
-			outputStream.close();
+			// for all accounts to save
+			for (Account acc : accountsToSave) {
+				if (acc.getId() != ALL_ACCOUNTS) { // ignore "all accounts" pseudo account
+
+					// get transactions
+					ArrayList<Transaction> transactions = acc
+							.getListTransactions(getContentResolver());
+
+					// open account
+					writeToFile(outWriter, "account name=\"" + acc.getName()
+							+ "\"", null, false);
+
+					Log.w("saveRestore",
+							acc.getName() + " -> id = " + acc.getId()
+									+ ", uri -> " + acc.getUri());
+
+					// for each transaction
+					for (Transaction trans : transactions)
+						saveElement(outWriter, "transaction", trans);
+
+					// close account
+					writeToFile(outWriter, "account", null, true);
+				}
+			}
+
+			outWriter.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		makeToast(filename + " has been saved");
+	}
+
+	private void saveElement(BufferedWriter writer, String type, Savable obj) {
+		// get fields
+		HashMap<String, String> fields = obj.getFields();
+
+		// open element
+		writeToFile(writer, type, null, false);
+
+		Log.w("saveRestore", "saveElement : " + type);
+		Log.w("saveRestore", "fields : " + fields.keySet().toString());
+
+		// each field
+		Set<String> keys = fields.keySet();
+		for (String key : keys) {
+			Log.w("saveRestore", "\t field : " + key);
+
+			writeToFile(writer, key, fields.get(key), false);
+		}
+
+		// close element
+		writeToFile(writer, type, null, true);
+	}
+
+	// write a single element in the file
+	private void writeToFile(BufferedWriter writer, String key, String value,
+			boolean close) {
+		String buffer;
+		// format
+		if (close) // closing tag
+			buffer = "</" + key + ">\n";
+		else { // open + close tag
+			buffer = "<" + key + ">";
+			if (value != null) {
+				buffer += value + "</" + key + ">";
+			}
+		}
+		// write
+		try {
+			Log.w("saveRestore", "write : " + buffer);
+			writer.write(buffer);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// make toast
@@ -262,26 +334,5 @@ public class SaveRestoreActivity extends Activity {
 			return true;
 		}
 		return false;
-	}
-	
-	// write a single element in the file
-	private void writeToStream(FileOutputStream stream, String key,
-			String value, boolean close) {
-		String buffer;
-		if (close)
-			buffer = "</" + key + ">\n";
-		else {
-			buffer = "<" + key + ">";
-			if (value != null) {
-				buffer += value + "</" + key + ">";
-			}
-		}
-		try {
-			Log.w("saveRestore", "write : " + buffer);
-			byte[] bytesBuffer = buffer.getBytes();
-			stream.write(bytesBuffer, 0, bytesBuffer.length);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }

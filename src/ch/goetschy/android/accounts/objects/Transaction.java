@@ -1,5 +1,7 @@
 package ch.goetschy.android.accounts.objects;
 
+import java.util.HashMap;
+
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.database.TransactionTable;
@@ -9,7 +11,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-public class Transaction extends Item {
+public class Transaction extends Item implements Savable{
 	private Type type;
 	private String description;
 	private long date;
@@ -130,6 +132,19 @@ public class Transaction extends Item {
 					.getColumnIndex(TransactionTable.COLUMN_PARENT)));
 		
 		uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS + "/" + id);
+	}
+
+	@Override
+	public HashMap<String, String> getFields() {
+		HashMap<String, String> fields = new HashMap<String, String>();
+		
+		fields.put("name", getName());
+		fields.put("amount", String.valueOf(getAmount()));
+		fields.put("description", getDescription());
+		fields.put("date", String.valueOf(getDate()));
+		fields.put("type", getType().getName());
+		
+		return fields;
 	}
 
 }

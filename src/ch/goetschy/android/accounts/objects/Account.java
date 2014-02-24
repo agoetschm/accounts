@@ -37,6 +37,12 @@ public class Account extends Item {
 		listTransactions = new ArrayList<Transaction>();
 		setOrder(0);
 	}
+	
+	// for the "all accounts" item in save-restore
+	public Account(int p_id, String p_name, int p_amount) {
+		super(p_id, p_amount, p_name, null);
+		setOrder(0);
+	}
 
 	public Account(Cursor cursor) {
 		super();
