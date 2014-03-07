@@ -142,7 +142,7 @@ public class Transaction extends Item implements Savable{
 		fields.put("amount", String.valueOf(getAmount()));
 		fields.put("description", getDescription());
 		fields.put("date", String.valueOf(getDate()));
-		fields.put("type", getType().getName());
+		fields.put("typeName", getType().getName());
 		
 		return fields;
 	}

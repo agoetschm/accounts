@@ -3,6 +3,7 @@ package ch.goetschy.android.accounts.objects;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
@@ -16,7 +17,7 @@ import android.net.Uri;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 
-public class Type implements Serializable {
+public class Type implements Serializable, Savable {
 	/**
 	 * 
 	 */
@@ -153,7 +154,8 @@ public class Type implements Serializable {
 	}
 
 	public boolean loadNameAndColorFromDB(ContentResolver contentResolver) {
-		String[] projection = new String[] { TypeTable.COLUMN_COLOR , TypeTable.COLUMN_NAME};
+		String[] projection = new String[] { TypeTable.COLUMN_COLOR,
+				TypeTable.COLUMN_NAME };
 		Cursor cursor = contentResolver.query(
 				MyAccountsContentProvider.CONTENT_URI_TYPES, projection,
 				TypeTable.COLUMN_ID + "=" + id, null, null);
@@ -188,7 +190,6 @@ public class Type implements Serializable {
 	public static boolean controlDefault(ContentResolver contentResolver) {
 		ArrayList<Type> typesList = getTypes(contentResolver);
 		ArrayList<String> sTypesList = toStringArrayList(typesList);
-		
 
 		if (sTypesList.isEmpty())
 			return false;
@@ -196,7 +197,7 @@ public class Type implements Serializable {
 			for (String i : DEFAULT_TYPES) {
 				if (BuildConfig.DEBUG)
 					Log.w("type", "type : " + i);
-				if(!sTypesList.contains(i))
+				if (!sTypesList.contains(i))
 					return false;
 			}
 			return true;
@@ -218,17 +219,17 @@ public class Type implements Serializable {
 		} else {
 			// add only absent default types
 			for (String i : DEFAULT_TYPES) {
-				if(!sTypesList.contains(i))
+				if (!sTypesList.contains(i))
 					toAdd.add(i);
 			}
 		}
-		
+
 		// save all in DB
-		for(String i : toAdd){
+		for (String i : toAdd) {
 			Type newType = new Type();
 			newType.setName(i);
 			newType.setColor(Color.WHITE);
-	
+
 			newType.saveInDB(contentResolver);
 		}
 	}
@@ -243,5 +244,16 @@ public class Type implements Serializable {
 		}
 
 		return retour;
+	}
+
+	@Override
+	public HashMap<String, String> getFields() {
+		HashMap<String, String> fields = new HashMap<String, String>();
+
+		fields.put("name", getName());
+		fields.put("order", String.valueOf(getOrder()));
+		fields.put("color", String.valueOf(getColor()));
+
+		return fields;
 	}
 }

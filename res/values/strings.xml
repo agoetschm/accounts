@@ -73,6 +73,7 @@
     <string name="activity_save_button_save">Save</string>
     <string name="activity_save_title_restore">Restore an account</string>
     <string name="activity_save_text_restore">Select a file to restore :</string>
+    <string name="activity_save_button_preview">Preview</string>
     <string name="activity_save_button_restore">Restore</string>
     
     <string name="dialog_file_select">Select</string>

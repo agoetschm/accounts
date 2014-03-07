@@ -1,95 +1,126 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical" >
-		
-		<!-- title -->
-        <TextView
-            android:id="@+id/activity_save_title_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_save_title_save" 
-            android:textSize="20dp">
-        </TextView>
-        
-        <!-- label -->
-        <TextView
-            android:id="@+id/activity_save_text_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_save_text_save" >
-        </TextView>
 
-        <Spinner
-            android:id="@+id/activity_save_spinner_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-        
-        <!-- label -->
-        <TextView
-            android:id="@+id/activity_save_text_location_save"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/activity_save_text_location_save" >
-        </TextView>
-        
-        <Button
-            android:id="@+id/activity_save_button_choose_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_save_button_choose_location" >
-        </Button>
+            android:orientation="vertical" >
 
-        <Button
-            android:id="@+id/activity_save_button_save"
-            android:layout_width="wrap_content"
+            <!-- title -->
+
+            <TextView
+                android:id="@+id/activity_save_title_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_title_save"
+                android:textSize="20dp" >
+            </TextView>
+
+            <!-- label -->
+
+            <TextView
+                android:id="@+id/activity_save_text_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_text_save" >
+            </TextView>
+
+            <Spinner
+                android:id="@+id/activity_save_spinner_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <!-- label -->
+
+            <TextView
+                android:id="@+id/activity_save_text_location_save"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_text_location_save" >
+            </TextView>
+
+            <Button
+                android:id="@+id/activity_save_button_choose_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_button_choose_location" >
+            </Button>
+
+            <Button
+                android:id="@+id/activity_save_button_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_button_save" >
+            </Button>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/activity_save_button_save" >
-        </Button>
+            android:orientation="vertical" >
+
+            <!-- title -->
+
+            <TextView
+                android:id="@+id/activity_save_title_restore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_title_restore"
+                android:textSize="20dp" >
+            </TextView>
+
+            <!-- label -->
+
+            <TextView
+                android:id="@+id/activity_save_text_restore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_text_restore" >
+            </TextView>
+
+            <!-- browse -->
+
+            <Button
+                android:id="@+id/activity_save_button_restore_location"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_button_choose_location" >
+            </Button>
+
+            <!-- preview -->
+
+            <Button
+                android:id="@+id/activity_save_button_preview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/activity_save_button_preview" >
+            </Button>
+
+            <LinearLayout
+                android:id="@+id/activity_save_preview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <!-- restore -->
+
+            <Button
+                android:id="@+id/activity_save_button_restore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:text="@string/activity_save_button_restore" >
+            </Button>
+        </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" >
-		
-        <!-- title -->
-        <TextView
-            android:id="@+id/activity_save_title_restore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_save_title_restore" 
-            android:textSize="20dp">
-        </TextView>
-        
-        <!-- label -->
-        <TextView
-            android:id="@+id/activity_save_text_restore"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_save_text_restore" >
-        </TextView>
-
-        <Button
-            android:id="@+id/activity_save_button_restore_location"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_save_button_choose_location" >
-        </Button>
-
-        <Button
-            android:id="@+id/activity_save_button_restore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_save_button_restore" >
-        </Button>
-    </LinearLayout>
-
-</LinearLayout>
+</ScrollView>

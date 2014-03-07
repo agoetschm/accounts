@@ -53,7 +53,9 @@ public class FileExplore extends Activity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			File tmp = (File) extras.getSerializable(File.class.toString());
+			Log.w("fileExplore", "file...");
 			if (tmp.exists()) { // if valid path in extras
+				Log.w("fileExplore", " exists !");
 				if (!tmp.isDirectory()) // if it's a file
 					path = tmp.getParentFile();
 				else

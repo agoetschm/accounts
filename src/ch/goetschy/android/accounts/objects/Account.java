@@ -64,6 +64,9 @@ public class Account extends Item {
 		if (uri != null) {
 			double tmpAmount = 0;
 
+			// clear actual list
+			listTransactions.clear();
+
 			Cursor cursor = contentResolver.query(
 					MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS, null,
 					TransactionTable.COLUMN_PARENT + "=" + id, null,
@@ -71,8 +74,6 @@ public class Account extends Item {
 			if (BuildConfig.DEBUG)
 				Log.w("account", "cursor movetofirst");
 			if (cursor.moveToFirst()) {
-				// clear actual list
-				listTransactions.clear();
 				while (!cursor.isAfterLast()) {
 					if (BuildConfig.DEBUG)
 						Log.w("account", "cursor line");
@@ -95,8 +96,6 @@ public class Account extends Item {
 				// save zero amount
 				amount = 0;
 				saveAmountInDB(contentResolver);
-
-				return null;
 			}
 		}
 		return listTransactions;
