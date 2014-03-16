@@ -2,6 +2,7 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.concurrent.Callable;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
@@ -16,9 +17,11 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
@@ -27,6 +30,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 
 public class AccountDetailActivity extends ListActivity {
 
@@ -42,7 +46,15 @@ public class AccountDetailActivity extends ListActivity {
 
 	private LinearLayout navigator;
 
-	static final private int FILTER_ACTIVITY = 10;
+	boolean firstFill = true;
+
+	private static final int FILTER_ACTIVITY = 10;
+
+	private static final int DELETE_ID = 20;
+	private static final int EDIT_ID = 30;
+	private static final int MOVE_TO_ID = 40;
+
+	private static final int DEFAULT_TIME_INTERVAL = Filter.MONTH;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,11 +79,13 @@ public class AccountDetailActivity extends ListActivity {
 		// init filter
 		filter = new Filter();
 		filter.setLowerBound(Calendar.getInstance().getTimeInMillis());
+		filter.setInterval(DEFAULT_TIME_INTERVAL);
 
 		// listview
 		this.setContentView(R.layout.activity_detail);
 		ListView listView = getListView();
 		listView.setDividerHeight(2);
+		this.registerForContextMenu(listView); // register for context menu
 
 		// get views
 		navigator = (LinearLayout) findViewById(R.id.activity_detail_footer);
@@ -97,6 +111,11 @@ public class AccountDetailActivity extends ListActivity {
 				createTransaction();
 			}
 		});
+
+		// first fill
+		// fillData();
+		// TODO optimize the filling of the data : not three times when creating
+		// the activity !
 
 		// LISTENERS ************
 
@@ -127,11 +146,19 @@ public class AccountDetailActivity extends ListActivity {
 					@Override
 					public void onItemSelected(AdapterView<?> parent,
 							View view, int position, long id) {
+						Log.w("accountDetail", "time filter selected = "
+								+ position);
 						filter.setInterval(position);
 						updateNavigator();
-						if (position == Filter.CUSTOM) {
+						if (position == Filter.CUSTOM)
 							setFilter();
-						}
+
+						// if no filter, no navigation
+						if (position == Filter.NONE) {
+							enableNavigation(false);
+						} else
+							enableNavigation(true);
+
 						fillData();
 					}
 
@@ -147,14 +174,42 @@ public class AccountDetailActivity extends ListActivity {
 
 	}
 
+	//
+	private void enableNavigation(boolean b) {
+		filter.setDateFilter(b);
+		updateNavigator();
+	}
+
 	// fill with the transactions
 	private void fillData() {
+		Log.w("accountDetail", "fill data");
+
 		ArrayList<Transaction> transactions = account.getListTransactions(
 				getContentResolver(), filter);
 
 		if (transactions != null) {
+
+			Log.w("accountDetail", "num of trans " + transactions.size());
+			for (Transaction trans : transactions)
+				Log.w("accountDetail", "trans " + trans.getName());
+
+			// adapt filter if no trans
+			if (firstFill) {
+				Log.w("accountDetail", "first fill");
+				if (transactions.size() == 0) {
+					Log.w("accountDetail",
+							"num of trans " + transactions.size());
+					filter.setInterval(Filter.NONE);
+					transactions = account.getListTransactions(
+							getContentResolver(), filter);
+				}
+				firstFill = false;
+			}
+
+			// set adapter
 			adapter = new TransactionsAdapter(this, transactions);
 			this.setListAdapter(adapter);
+
 		} else if (adapter != null)
 			adapter.clear();
 
@@ -171,6 +226,7 @@ public class AccountDetailActivity extends ListActivity {
 		else
 			totalView.setTextColor(Color.GREEN);
 		totalView.setText(TransactionsAdapter.amountFormat.format(total));
+
 	}
 
 	// when new transaction is clicked
@@ -213,11 +269,27 @@ public class AccountDetailActivity extends ListActivity {
 		}
 	}
 
-	// start
+	// create trans
 	private void createTransaction() {
 		Intent intent = new Intent(this, EditTransactionActivity.class);
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
 				account.getId());
+		startActivity(intent);
+	}
+
+	// edit trans
+	private void editTransaction(long id) {
+		Intent intent = new Intent(this, EditTransactionActivity.class);
+		Uri transactionUri = Uri
+				.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS + "/"
+						+ id);
+		if (BuildConfig.DEBUG)
+			Log.w("accountDetail", "transactionUri : " + transactionUri);
+		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
+				transactionUri);
+		intent.putExtra(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
+				account.getId());
+
 		startActivity(intent);
 	}
 
@@ -264,24 +336,63 @@ public class AccountDetailActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	// CONTEXT MENU : DELETE and EDIT BUTTONs -----------
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.add(Menu.NONE, DELETE_ID, Menu.NONE,
+				R.string.activity_detail_delete);
+		menu.add(Menu.NONE, EDIT_ID, Menu.NONE, R.string.activity_detail_edit);
+		menu.add(Menu.NONE, MOVE_TO_ID, Menu.NONE,
+				R.string.activity_detail_move_to);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		final Transaction actTransaction = new Transaction();
+
+		// get id
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+		actTransaction.setUri(Uri
+				.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS + "/"
+						+ info.id));
+
+		// delete or edit
+		switch (item.getItemId()) {
+		case DELETE_ID:
+			// show confirm dialog
+			MyDialog.confirm(this, R.string.edit_account_delete_question, // TODO modify text
+					new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							// if yes, delete
+							actTransaction.delete(getContentResolver());
+							fillData(); // and refresh
+							return null;
+						}
+					}, null);
+			return false;
+		case EDIT_ID:
+			editTransaction(info.id);
+			return false;
+		case MOVE_TO_ID:
+			// TODO implement moving to an other account
+			return false;
+		}
+
+		return super.onContextItemSelected(item);
+	}
+
 	// TRANSACTION DETAILS -------------------
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 
-		Intent intent = new Intent(this, EditTransactionActivity.class);
-		Uri transactionUri = Uri
-				.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS + "/"
-						+ id);
-		if (BuildConfig.DEBUG)
-			Log.w("accountDetail", "transactionUri : " + transactionUri);
-		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
-				transactionUri);
-		intent.putExtra(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
-				account.getId());
-
-		startActivity(intent);
+		editTransaction(id);
 
 	}
 
@@ -289,6 +400,7 @@ public class AccountDetailActivity extends ListActivity {
 
 	@Override
 	protected void onResume() {
+		Log.w("accountDetail", "on resume");
 		fillData();
 		changeFooterColor(false);
 		updateNavigator();

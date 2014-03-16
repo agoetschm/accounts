@@ -18,6 +18,7 @@ public class Filter implements Serializable {
 	public static final int MONTH = 2;
 	public static final int YEAR = 3;
 	public static final int CUSTOM = 4;
+	public static final int NONE = 5;
 
 	public static String millisToText(long time) {
 		Calendar c = Calendar.getInstance();
@@ -98,18 +99,22 @@ public class Filter implements Serializable {
 	}
 
 	public void setInterval(int interval) {
-		this.interval = interval;
-
+		
 		if (BuildConfig.DEBUG) {
 			Log.w("filter", "begin setInterval");
 			Log.w("filter", "interval : " + interval);
 		}
 
-		
-		computeUpperBound();
-		
+		// for none filter
+		if (interval == NONE)
+			this.setDateFilter(false);
+		else{
+			this.interval = interval;
+			computeUpperBound(); // update the upper bound
+		}
+
 		if (BuildConfig.DEBUG)
-		Log.w("filter", "end setInterval");
+			Log.w("filter", "end setInterval");
 	}
 
 	public void computeUpperBound() {

@@ -2,16 +2,18 @@ package ch.goetschy.android.accounts.objects;
 
 import java.util.HashMap;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.database.TransactionTable;
+import ch.goetschy.android.accounts.database.TypeTable;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
-public class Transaction extends Item implements Savable{
+public class Transaction extends Item implements Savable {
 	private Type type;
 	private String description;
 	private long date;
@@ -28,11 +30,10 @@ public class Transaction extends Item implements Savable{
 		setType(new Type());
 		setDescription("");
 		setDate(0);
-		if (cursor != null){
+		if (cursor != null) {
 			loadFromCursor(cursor);
 			type.loadNameAndColorFromDB(contentResolver);
-		}
-		else
+		} else
 			throw new NullPointerException("Null cursor");
 	}
 
@@ -79,6 +80,8 @@ public class Transaction extends Item implements Savable{
 
 	@Override
 	public void saveInDB(ContentResolver contentResolver) {
+		if (BuildConfig.DEBUG)
+			Log.w("transaction", "saveInDB");
 
 		ContentValues values = new ContentValues();
 		values.put(TransactionTable.COLUMN_NAME, name);
@@ -86,15 +89,23 @@ public class Transaction extends Item implements Savable{
 
 		values.put(TransactionTable.COLUMN_DESCRIPTION, description);
 		values.put(TransactionTable.COLUMN_DATE, date);
-		values.put(TransactionTable.COLUMN_TYPE, type.getId());
-		if (parent != null)
+		if (type != null)
+			values.put(TransactionTable.COLUMN_TYPE, type.getId());
+		if (parent != null) {
 			values.put(TransactionTable.COLUMN_PARENT, parent.getId());
+			Log.w("transaction", "parent id : " + parent.getId());
+		} else {
+			Log.w("transaction", "no parent");
+			return;
+		}
 
 		if (uri == null)
-			contentResolver.insert(
+			uri = contentResolver.insert(
 					MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS, values);
 		else
 			contentResolver.update(uri, values, null, null);
+
+		Log.w("transaction", "saveInDB end");
 	}
 
 	@Override
@@ -110,8 +121,7 @@ public class Transaction extends Item implements Savable{
 		}
 		return false;
 	}
-	
-	
+
 	@Override
 	protected void loadFromCursor(Cursor cursor) {
 		this.setId(cursor.getLong(cursor
@@ -130,21 +140,71 @@ public class Transaction extends Item implements Savable{
 		if (parent != null)
 			parent.setId(cursor.getLong(cursor
 					.getColumnIndex(TransactionTable.COLUMN_PARENT)));
-		
-		uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS + "/" + id);
+
+		uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS
+				+ "/" + id);
 	}
 
+	public Long getTypeIdFromDB(ContentResolver contentResolver) {
+		if (uri != null) {
+			String[] projection = new String[] { TransactionTable.COLUMN_TYPE };
+			Cursor cursor = contentResolver.query(uri, projection, null, null, null);
+
+			if (cursor.moveToFirst()) {
+				return cursor.getLong(cursor
+						.getColumnIndex(TransactionTable.COLUMN_TYPE));
+			}
+		}
+		return DEFAULT_ID;
+	}
+
+	// methods from Savable --------------
 	@Override
 	public HashMap<String, String> getFields() {
 		HashMap<String, String> fields = new HashMap<String, String>();
-		
+
 		fields.put("name", getName());
 		fields.put("amount", String.valueOf(getAmount()));
 		fields.put("description", getDescription());
 		fields.put("date", String.valueOf(getDate()));
-		fields.put("typeName", getType().getName());
-		
+		fields.put("typeName", getType().getName()); // can be null
+
 		return fields;
 	}
 
+	@Override
+	public boolean setFields(HashMap<String, String> fields) {
+		Log.w("transaction", "setFields");
+
+		Log.w("transaction", "name");
+		if (fields.get("name") == null)
+			return false;
+		setName(fields.get("name"));
+
+		Log.w("transaction", "amount");
+		if (fields.get("amount") == null)
+			return false;
+		Log.w("transaction", fields.get("amount"));
+		setAmount(Double.valueOf(fields.get("amount")));
+
+		Log.w("transaction", "description");
+		if (fields.get("description") != null) {
+			Log.w("transaction", fields.get("description"));
+			setDescription(fields.get("description"));
+		}
+
+		Log.w("transaction", "date");
+		if (fields.get("date") == null)
+			return false;
+		Log.w("transaction", fields.get("date"));
+		setDate(Long.valueOf(fields.get("date")));
+
+		Log.w("transaction", "typeName");
+		if (fields.get("typeName") == null)
+			return false;
+		setType(null); // temp
+
+		return true;
+	}
+	// ----------------------------------
 }

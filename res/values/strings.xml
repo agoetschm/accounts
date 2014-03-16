@@ -15,6 +15,8 @@
     <string name="title_activity_filter">Set a filter</string>
     <string name="title_activity_save">Save/ restore accounts</string>
     <string name="color_picker_title">Pick a color</string>
+    <string name="title_coin_detect">Coin recognition</string>
+    
     
     <string name="previous">Previous</string>
     <string name="next">Next</string>
@@ -26,6 +28,7 @@
     <string name="menu_manage_types">Manage types</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_save_restore">Save/restore accounts</string>
+    <string name="menu_save_coin_detect">Coin recognition</string>
     
     
     
@@ -43,6 +46,8 @@
     <string name="edit_type_color">Set color</string>
     <string name="edit_type_confirm">Save</string>
     <string name="edit_type_delete">Delete</string>
+    <string name="edit_type_delete_question">Delete this type ?</string>
+    
     
     <string name="edit_transaction_name">Name</string>
     <string name="edit_transaction_amount">0.0</string>
@@ -75,6 +80,7 @@
     <string name="activity_save_text_restore">Select a file to restore :</string>
     <string name="activity_save_button_preview">Preview</string>
     <string name="activity_save_button_restore">Restore</string>
+    <string name="activity_save_change_name">This account already exits, type an other name (cancel will ignore this account) :</string>
     
     <string name="dialog_file_select">Select</string>
     <string name="dialog_file_cancel">Cancel</string>
@@ -82,8 +88,11 @@
     
     
     <string name="activity_detail_add_footer">Add a transaction</string>
-    
+    <string name="activity_detail_edit">Edit</string>
+    <string name="activity_detail_delete">Delete</string>
+    <string name="activity_detail_move_to">Move to an other account</string>
     <string name="activity_detail_total_footer">Total</string>
+    <string name="activity_detail_delete_question">Delete this transaction ?</string>
     
     
     <string name="activity_filter_cancel">Cancel</string>
@@ -94,7 +103,10 @@
     <string name="activity_filter_bound2_label">Upper bound</string>
     
     
-    
+    <string name="confirm_dialog_yes">Yes</string>
+    <string name="confirm_dialog_no">No</string>
+    <string name="confirm_dialog_confirm">Enter</string>
+    <string name="confirm_dialog_cancel">Cancel</string>
     
     
 

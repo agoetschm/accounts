@@ -1,12 +1,18 @@
 package ch.goetschy.android.accounts.activities;
 
+import java.util.concurrent.Callable;
+
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
+import ch.goetschy.android.accounts.database.AccountsTable;
+import ch.goetschy.android.accounts.database.TypeTable;
 import ch.goetschy.android.accounts.objects.Account;
+import ch.goetschy.android.accounts.objects.Type;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -21,6 +27,9 @@ public class EditAccountActivity extends Activity {
 	private Account account;
 
 	private boolean mDelete = false;
+	private boolean editing;
+
+	private String baseName = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +56,15 @@ public class EditAccountActivity extends Activity {
 			account.setUri((Uri) extras
 					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
 			fillData();
-		}
+			editing = true;
+		} else
+			editing = false;
 
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				if (TextUtils.isEmpty(mName.getText().toString())) {
-					makeToast();
+					makeToast("Please enter a name");
 				} else {
 					setResult(RESULT_OK);
 					finish();
@@ -65,39 +76,40 @@ public class EditAccountActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// show confirm dialog
-				new AlertDialog.Builder(EditAccountActivity.this)
-						.setMessage(R.string.edit_account_delete_question)
-						.setCancelable(false)
-						.setPositiveButton(R.string.edit_account_yes,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int id) {
-										// if yes, delete
-										mDelete = true; // do not save
-										setResult(RESULT_CANCELED);
-										if (account.getUri() == null) {
-											finish();
-										} else {
-											account.delete(getContentResolver());
-											finish();
-										}
-									}
-								})
-						.setNegativeButton(R.string.edit_account_no, null)
-						.show();
+				MyDialog.confirm(EditAccountActivity.this,
+						R.string.edit_account_delete_question,
+						new Callable<Object>() {
+							@Override
+							public Object call() throws Exception {
+								// if yes, delete
+								mDelete = true; // do not save
+								setResult(RESULT_CANCELED);
+								if (account.getUri() == null) {
+									finish();
+								} else {
+									account.delete(getContentResolver());
+									finish();
+								}
+								return null;
+							}
+						}, null);
 
 			}
 		});
 	}
 
 	private void fillData() {
-		if (account.loadFromDB(getContentResolver()))
+		if (account.loadFromDB(getContentResolver())) {
 			mName.setText(account.getName());
+
+			// detecting name changing
+			baseName = account.getName();
+		}
 	}
 
-	private void makeToast() {
-		Toast.makeText(EditAccountActivity.this, "Please enter a name",
-				Toast.LENGTH_LONG).show();
+	private void makeToast(String message) {
+		Toast.makeText(EditAccountActivity.this, message, Toast.LENGTH_LONG)
+				.show();
 	}
 
 	@Override
@@ -121,9 +133,27 @@ public class EditAccountActivity extends Activity {
 			if (name.length() == 0)
 				return;
 
+			// complexe condition
+			boolean conditionAlreadyExits = false;
+			int occurences = Account.accountNameExists(getContentResolver(),
+					name);
+			if (occurences > 0) {
+				if (editing && name.equals(baseName)) { // editing + no change
+														// -> already exists
+														// once in db
+					if (occurences > 1) // more than once
+						conditionAlreadyExits = true;
+				} else
+					conditionAlreadyExits = true;
+			}
+			if (conditionAlreadyExits) { // if name exists in DB
+				makeToast("This account name already exists");
+				return; // do not save
+			}
+
 			account.setName(name);
 			account.saveInDB(getContentResolver());
 		}
 	}
-	
+
 }

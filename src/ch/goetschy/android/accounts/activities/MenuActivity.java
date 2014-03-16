@@ -17,11 +17,14 @@ public class MenuActivity extends Activity {
 		Button overviewBut = (Button) findViewById(R.id.activity_menu_button_overview);
 		Button typesBut = (Button) findViewById(R.id.activity_menu_button_types);
 		Button saveBut = (Button) findViewById(R.id.activity_menu_button_save);
+		Button coinBut = (Button) findViewById(R.id.activity_menu_button_coin_detect);
 		Button quitBut = (Button) findViewById(R.id.activity_menu_button_quit);
+		
 		
 		
 		// LISTENERS -----------------------
 		
+		// overview
 		overviewBut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -30,6 +33,7 @@ public class MenuActivity extends Activity {
 			}
 		});
 		
+		// type manager
 		typesBut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -38,6 +42,7 @@ public class MenuActivity extends Activity {
 			}
 		});
 		
+		// save - restore activity
 		saveBut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -46,7 +51,16 @@ public class MenuActivity extends Activity {
 			}
 		});
 		
+		// coin recognition activity
+		coinBut.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(MenuActivity.this, CoinDetectionActivity.class);
+				startActivity(intent);
+			}
+		});
 		
+		// quit button
 		quitBut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {

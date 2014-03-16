@@ -65,6 +65,17 @@ public class Tree {
 		return children.get(at);
 	}
 
+	public Tree getChild(String childName) {
+		int size = children.size();
+		for (int i = 0; i < size; i++) {
+			if (getChild(i).getType().equals(childName)) {
+				return getChild(i);
+			}
+		}
+		// if not found
+		return null;
+	}
+
 	public List<Tree> getChildren() {
 		return children;
 	}
@@ -90,14 +101,11 @@ public class Tree {
 	}
 
 	public String getChildData(String childName) {
-		int size = children.size();
-		for (int i = 0; i < size; i++) {
-			if (getChild(i).getType().equals(childName)) {
-				String data = getChild(i).getData();
-				if (data != null)
-					return data;
-			}
+		Tree child = getChild(childName);
+		if(child != null && child.getData() != null){
+			return child.getData();
 		}
+		
 		// if not found
 		return null;
 	}

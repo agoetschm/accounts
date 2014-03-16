@@ -32,6 +32,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/menu_save_restore" />
+    
+    <Button
+        android:id="@+id/activity_menu_button_coin_detect"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/menu_save_coin_detect" />
 
     <Button
         android:id="@+id/activity_menu_button_quit"

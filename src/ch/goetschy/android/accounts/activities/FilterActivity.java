@@ -100,6 +100,10 @@ public class FilterActivity extends FragmentActivity implements
 					@Override
 					public void onCheckedChanged(CompoundButton box,
 							boolean isChecked) {
+						// if before was none filter
+						if(dateSpinner.getSelectedItemPosition() == Filter.NONE && isChecked)
+							dateSpinner.setSelection(Filter.CUSTOM);
+						
 						dateSpinner.setEnabled(isChecked);
 						lowerBound.setEnabled(isChecked);
 
@@ -116,11 +120,18 @@ public class FilterActivity extends FragmentActivity implements
 					@Override
 					public void onItemSelected(AdapterView<?> parent,
 							View view, int position, long id) {
-						filter.setInterval(position);
-						setBounds();
+						if (position == Filter.NONE) { // disable date filter
+							dateCheckbox.setChecked(false);
+							dateSpinner.setEnabled(false);
+							lowerBound.setEnabled(false);
+							upperBound.setEnabled(false);
+						} else {
+							filter.setInterval(position);
+							setBounds();
 
-						// upper bound only if custom
-						upperBound.setEnabled(position == Filter.CUSTOM);
+							// upper bound only if custom
+							upperBound.setEnabled(position == Filter.CUSTOM);
+						}
 					}
 
 					@Override

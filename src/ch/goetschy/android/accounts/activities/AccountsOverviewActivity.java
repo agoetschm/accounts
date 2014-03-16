@@ -1,6 +1,7 @@
 package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
@@ -47,22 +48,22 @@ public class AccountsOverviewActivity extends ListActivity {
 		this.getListView().setDividerHeight(2);
 		ListView listview = getListView();
 		this.registerForContextMenu(listview);
-		
-		
+
 		Button addBut = (Button) findViewById(R.id.activity_overview_add);
 		Button returnBut = (Button) findViewById(R.id.activity_overview_return);
 
 		// ADD footer
-//		footer = getLayoutInflater().inflate(R.layout.activity_overview_footer,
-//				null);
-//		listview.addFooterView(footer);
-//		footer.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				changeFooterColor(true);
-//				createAccount();
-//			}
-//		});
+		// footer =
+		// getLayoutInflater().inflate(R.layout.activity_overview_footer,
+		// null);
+		// listview.addFooterView(footer);
+		// footer.setOnClickListener(new OnClickListener() {
+		// @Override
+		// public void onClick(View v) {
+		// changeFooterColor(true);
+		// createAccount();
+		// }
+		// });
 
 		// AppInfos infos = new AppInfos(getContentResolver());
 		// // infos.saveInDB(AppInfos.TEST, "test2");
@@ -123,17 +124,15 @@ public class AccountsOverviewActivity extends ListActivity {
 			if (BuildConfig.DEBUG)
 				Log.w("overview", "not all default");
 		}
-		
-		
+
 		// LISTENERS -----------------------
-		
+
 		addBut.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				createAccount();
 			}
 		});
-		
 
 		returnBut.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -141,7 +140,7 @@ public class AccountsOverviewActivity extends ListActivity {
 				finish();
 			}
 		});
-		
+
 		// -----------------------------
 
 	}
@@ -167,7 +166,7 @@ public class AccountsOverviewActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		fillData();
-//		changeFooterColor(false);
+		// changeFooterColor(false);
 		super.onResume();
 	}
 
@@ -178,27 +177,27 @@ public class AccountsOverviewActivity extends ListActivity {
 
 	// ADD and TYPES BUTTON ------------------------
 
-//	@Override
-//	public boolean onCreateOptionsMenu(Menu menu) {
-//		getMenuInflater().inflate(R.menu.activity_overview, menu);
-//		return true;
-//	}
-//
-//	@Override
-//	public boolean onOptionsItemSelected(MenuItem item) {
-//		switch (item.getItemId()) {
-//		case R.id.menu_add:
-//			createAccount();
-//			return true;
-//		case R.id.menu_types:
-//			manageTypes();
-//			return true;
-//		}
-//
-//		return super.onOptionsItemSelected(item);
-//	}
+	// @Override
+	// public boolean onCreateOptionsMenu(Menu menu) {
+	// getMenuInflater().inflate(R.menu.activity_overview, menu);
+	// return true;
+	// }
+	//
+	// @Override
+	// public boolean onOptionsItemSelected(MenuItem item) {
+	// switch (item.getItemId()) {
+	// case R.id.menu_add:
+	// createAccount();
+	// return true;
+	// case R.id.menu_types:
+	// manageTypes();
+	// return true;
+	// }
+	//
+	// return super.onOptionsItemSelected(item);
+	// }
 
-	// DELETE and EDIT BUTTONs -----------
+	// CONTEXT MENU : DELETE and EDIT BUTTONs -----------
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -216,27 +215,24 @@ public class AccountsOverviewActivity extends ListActivity {
 		// get id
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
-		actAccount.setUri(Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS
-				+ "/" + info.id));
+		actAccount.setUri(Uri
+				.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/"
+						+ info.id));
 
 		// delete or edit
 		switch (item.getItemId()) {
 		case DELETE_ID:
 			// show confirm dialog
-			new AlertDialog.Builder(AccountsOverviewActivity.this)
-					.setMessage(R.string.edit_account_delete_question)
-					.setCancelable(false)
-					.setPositiveButton(R.string.edit_account_yes,
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									// if yes, delete
-									actAccount.delete(getContentResolver());
-									fillData(); // and refresh
-								}
-							})
-					.setNegativeButton(R.string.edit_account_no, null)
-					.show();
+			MyDialog.confirm(this, R.string.edit_account_delete_question,
+					new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							// if yes, delete
+							actAccount.delete(getContentResolver());
+							fillData(); // and refresh
+							return null;
+						}
+					}, null);
 			return true;
 		case EDIT_ID:
 			Intent intent = new Intent(this, EditAccountActivity.class);

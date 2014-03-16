@@ -12,10 +12,12 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.concurrent.Callable;
 
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.objects.Account;
@@ -26,6 +28,7 @@ import ch.goetschy.android.accounts.objects.Tree;
 import ch.goetschy.android.accounts.objects.Type;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
@@ -35,6 +38,9 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -145,7 +151,7 @@ public class SaveRestoreActivity extends Activity {
 		mRestore.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				restoreFile();
+				restoreFile(0);
 			}
 		});
 
@@ -223,20 +229,13 @@ public class SaveRestoreActivity extends Activity {
 
 	// preview before restoring
 	private void loadFilePreview() {
-		previewLoaded = false; // if file changed
+		mPreviewLayout.removeAllViews(); // clear preview
+		previewLoaded = false;
+		mRestore.setEnabled(false);
 
-		// verifiy file
-		if (!mRestoreFile.isFile()) {
-			makeToast("The selection is not a file.");
+		// controls
+		if (controlFileBeforePreview() == false)
 			return;
-		}
-
-		// verify file type
-		String pattern = ".+\\" + FILE_ENDING + "$";
-		if (!mRestoreFile.getName().matches(pattern)) {
-			makeToast("The selected file is not an account file (.accnt).");
-			return;
-		}
 
 		// load file
 		Tree root = restoreTreeFromFile(mRestoreFile);
@@ -265,75 +264,145 @@ public class SaveRestoreActivity extends Activity {
 				previewContent.add(actNode);
 		}
 
-		// checkboxes list
+		// checkboxes list and check if types
+		boolean isAnyType = false;
 		previewCheckboxes = new ArrayList<CheckBox>();
-		for (Tree node : previewContent)
+		for (int i = 0; i < previewContent.size(); i++) {
 			previewCheckboxes.add(new CheckBox(this));
+			// check for type
+			if (previewContent.get(i).getType().equals(TAG_TYPE))
+				isAnyType = true;
+		}
 
 		// display loaded nodes
 		int size = previewContent.size();
+
 		// TYPES
-		// label
-		TextView labelTypes = new TextView(this);
-		labelTypes.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT));
-		labelTypes.setText("TYPES");
-		mPreviewLayout.addView(labelTypes);
+		if (isAnyType) {
+			// title
+			mPreviewLayout.addView(constructPreviewTitleElement("TYPES",
+					new OnCheckedChangeListener() {
+						@Override
+						public void onCheckedChanged(CompoundButton buttonView,
+								boolean isChecked) {
+							checkPreviewCheckboxes(TAG_TYPE, isChecked);
+						}
+					}));
 
-		for (int i = 0; i < size; i++) {
-			Tree node = previewContent.get(i);
-			if (node.getType().equals(TAG_TYPE)) {
-				Log.w("saveRestore", "preview : " + node.getType());
+			// elements
+			for (int i = 0; i < size; i++) {
+				Tree node = previewContent.get(i);
+				if (node.getType().equals(TAG_TYPE)) { // only for types
+					Log.w("saveRestore", "preview : " + node.getType());
 
-				// new element layout
-				LinearLayout elementLayout = new LinearLayout(this);
-				elementLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-				// name
-				TextView name = new TextView(this);
-				name.setLayoutParams(new LayoutParams(
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-				name.setText(node.getChildData(TAG_NAME));
-
-				// add views
-				elementLayout.addView(name);
-				elementLayout.addView(previewCheckboxes.get(i));
-				mPreviewLayout.addView(elementLayout);
+					// construct element
+					mPreviewLayout.addView(constructPreviewElement(node,
+							previewCheckboxes.get(i)));
+				}
 			}
+
+			// title for accounts
+			mPreviewLayout.addView(constructPreviewTitleElement("ACCOUNTS",
+					new OnCheckedChangeListener() {
+						@Override
+						public void onCheckedChanged(CompoundButton buttonView,
+								boolean isChecked) {
+							checkPreviewCheckboxes(TAG_ACCOUNT, isChecked);
+						}
+					}));
 		}
-		
-		
-		
-		
+
 		// ACCOUNTS
-		// label
-		TextView labelAccounts = new TextView(this);
-		labelAccounts.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.WRAP_CONTENT));
-		labelAccounts.setText("ACCOUNTS");
-		mPreviewLayout.addView(labelAccounts);
-		
 		for (int i = 0; i < size; i++) {
 			Tree node = previewContent.get(i);
-			if (node.getType().equals(TAG_ACCOUNT)) {
+			if (node.getType().equals(TAG_ACCOUNT)) { // only for accounts
 				Log.w("saveRestore", "preview : " + node.getType());
 
-				// new element layout
-				LinearLayout elementLayout = new LinearLayout(this);
-				elementLayout.setOrientation(LinearLayout.HORIZONTAL);
-
-				// name
-				TextView name = new TextView(this);
-				name.setLayoutParams(new LayoutParams(
-						LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
-				name.setText(node.getChildData(TAG_NAME));
-
-				// add views
-				elementLayout.addView(name);
-				elementLayout.addView(previewCheckboxes.get(i));
-				mPreviewLayout.addView(elementLayout);
+				// construct element
+				mPreviewLayout.addView(constructPreviewElement(node,
+						previewCheckboxes.get(i)));
 			}
 		}
+
+		// set preview loaded
+		previewLoaded = true;
+		mRestore.setEnabled(true);
+	}
+
+	// construct preview element
+	private LinearLayout constructPreviewElement(Tree node, CheckBox checkbox) {
+		// new element layout
+		LinearLayout elementLayout = new LinearLayout(this);
+		elementLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+		// name
+		TextView name = new TextView(this);
+		name.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT));
+		String text = node.getChildData(TAG_NAME);
+		if (text == null) {
+			makeToast("Preview failed : no element name.");
+		}
+		name.setText(text);
+
+		// add views
+		elementLayout.addView(name);
+		elementLayout.addView(checkbox);
+
+		return elementLayout;
+	}
+
+	// construct preview title element
+	private LinearLayout constructPreviewTitleElement(String text,
+			OnCheckedChangeListener listener) {
+		// new element layout
+		LinearLayout elementLayout = new LinearLayout(this);
+		elementLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+		// name
+		TextView name = new TextView(this);
+		name.setTypeface(Typeface.DEFAULT_BOLD);
+		name.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.WRAP_CONTENT));
+		name.setText(text);
+
+		// checkbox
+		CheckBox checkbox = new CheckBox(this);
+		checkbox.setOnCheckedChangeListener(listener);
+		checkbox.setChecked(true); // default : checked
+
+		// add views
+		elementLayout.addView(name);
+		elementLayout.addView(checkbox);
+
+		return elementLayout;
+	}
+
+	// check or uncheck preview checkboxes
+	private void checkPreviewCheckboxes(String tagType, boolean check) {
+		for (int i = 0; i < previewContent.size(); i++) {
+			Tree node = previewContent.get(i);
+			if (node.getType().equals(tagType)) { // only for tagType
+				previewCheckboxes.get(i).setChecked(check);
+			}
+		}
+	}
+
+	private boolean controlFileBeforePreview() {
+		// verifiy file
+		if (!mRestoreFile.isFile()) {
+			makeToast("The selection is not a file.");
+			return false;
+		}
+
+		// verify file type
+		String pattern = ".+\\" + FILE_ENDING + "$";
+		if (!mRestoreFile.getName().matches(pattern)) {
+			makeToast("The selected file is not an account file (.accnt).");
+			return false;
+		}
+
+		return true;
 	}
 
 	private Tree restoreTreeFromFile(File file) {
@@ -388,8 +457,7 @@ public class SaveRestoreActivity extends Activity {
 						closingTag = true;
 
 				} else if (charac == '>') { // end of tag
-					String tagStr = actWord.toString().toLowerCase(); // lower
-																		// case
+					String tagStr = actWord.toString();
 					if (closingTag) {
 						if (tagStr.equals(actNode.getType())) {
 							Log.w("saveRestore",
@@ -439,30 +507,205 @@ public class SaveRestoreActivity extends Activity {
 			Log.w("saveRestore", "restore error : IOException");
 		}
 
-		makeToast(file.getName() + " loaded.");
-
 		return rootNode;
 	}
 
 	// restore file
-	private void restoreFile() {
+	private void restoreFile(int from) {
 		// file loaded
-		if (previewLoaded) {
+		if (!previewLoaded) {
 			makeToast("There is no file loaded (preview).");
 			return;
 		}
+		Log.w("saveRestore", "restore from " + from);
 
-		// ...
+		// retore each element checked
+		int size = previewContent.size();
+		boolean onlyOne = false;
+		int i;
+		for (i = from; i < size; i++) {
+			if (previewCheckboxes.get(i).isChecked()) { // if checked
+				Tree node = previewContent.get(i);
+				if (node.getType().equals(TAG_ACCOUNT))
+					onlyOne = !restoreAccount(node, i + 1);
+				else if (node.getType().equals(TAG_TYPE))
+					restoreType(node);
+				else
+					Log.w("saveRestore",
+							"error : restore node " + node.getType());
+			}
+			if (onlyOne) // interrupt id dialog is called
+				break;
+		}
+
+		// restoring finished
+		if (i >= size) {
+			makeToast("File restored with succes.");
+
+			mPreviewLayout.removeAllViews(); // clear preview
+			previewLoaded = false;
+			mRestore.setEnabled(false);
+		}
 	}
 
-	private Object tagToObj(String str) {
-		String[] parts = str.split(" ");
-		Object obj = null;
+	// returns whether the next accounts should be restored
+	private boolean restoreAccount(Tree node, final int next) {
+		// final node for inner class
+		final Tree fNode = node;
 
-		if (parts[0] == "account") {
-			obj = new Account();
+		// set name
+		final String name = node.getChildData(TAG_NAME);
+		if (name == null) {
+			makeToast("Restoring failed : no account name.");
+			return true;
+		} else if (Account.accountNameExists(getContentResolver(), name) > 0) { // account
+																				// name
+																				// already
+																				// exits
+			Log.w("saveRestore", "restore account : name exists");
+			// edit text
+			final EditText input = new EditText(this);
+			input.setHint(name); // with hint
+
+			MyDialog.nameAlreadyExists(this,
+					R.string.activity_save_change_name, input,
+					new Callable<Object>() { // confirm
+						@Override
+						public Object call() throws Exception {
+							String newName = input.getText().toString();
+							if (newName.length() > 0
+									&& !newName.equals(name)
+									&& Account.accountNameExists(
+											getContentResolver(), newName) == 0) { // valid
+																					// new
+																					// name
+								Log.w("saveRestore",
+										"restore account : new name valid");
+								restoreAccountWithValidName(fNode, newName);
+							} else {
+								Log.w("saveRestore",
+										"restore account : new name invalid");
+								makeToast("Invalid new name : account ignored.");
+							}
+
+							restoreFile(next); // continue restoring
+
+							return null;
+						}
+					}, new Callable<Object>() { // cancel
+						@Override
+						public Object call() throws Exception {
+							restoreFile(next); // continue restoring
+							return null;
+						}
+					});
+
+			return false; // only one
+		} else { // all ok
+			restoreAccountWithValidName(node, name);
+			return true;
 		}
-		return obj;
+	}
+
+	private void restoreAccountWithValidName(Tree node, String name) {
+		Log.w("saveRestore", "restore with name " + name);
+
+		Account newAccount = new Account();
+		newAccount.setName(name);
+		// save account
+		newAccount.saveInDB(getContentResolver());
+
+		// transactions
+		Tree transactionsNode = node.getChild(TAG_TRANSACTIONS);
+		if (transactionsNode == null) {
+			makeToast("Restoring info : no transactions in " + name);
+			return;
+		}
+		List<Tree> transactionsNodeList = transactionsNode.getChildren();
+		if (transactionsNodeList.isEmpty()) {
+			// makeToast("Restoring info : no transactions in " + name);
+			return;
+		}
+
+		// account amount
+		double amount = 0;
+
+		for (Tree transNode : transactionsNodeList) {
+			Log.w("saveRestore", "transNode");
+
+			if (!transNode.getType().equals(TAG_TRANSACTION)) {
+				Log.w("saveRestore", "transNode type " + transNode.getType());
+				continue; // jump
+			}
+
+			// map of fields
+			HashMap<String, String> fields = new HashMap<String, String>();
+			for (Tree field : transNode.getChildren()) {
+				fields.put(field.getType(), field.getData());
+				Log.w("saveRestore", "put field " + field.getType());
+			}
+
+			// construct transaction
+			Transaction trans = new Transaction();
+			Log.w("saveRestore", "setFields");
+			if (!trans.setFields(fields)) {
+				Log.w("saveRestore", "restore transaction fields failed");
+				continue; // jump this trans
+			}
+			Log.w("saveRestore", "fields set");
+			// set parent
+			trans.setParent(newAccount);
+			// set type (special case bacause it needs the content resolver)
+			trans.setType(Type.getOrCreateType(getContentResolver(),
+					fields.get("typeName")));
+
+			// cumulate amount
+			amount += trans.getAmount();
+
+			Log.w("saveRestore", "save trans");
+			// save trans
+			trans.saveInDB(getContentResolver());
+		}
+
+		// save amount
+		Log.w("saveRestore", "set account amount");
+		newAccount.setAmount(amount);
+		Log.w("saveRestore", "save account amount");
+		newAccount.saveAmountInDB(getContentResolver());
+		Log.w("saveRestore", "save account amount");
+	}
+
+	private void restoreType(Tree node) {
+		// set name
+		String name = node.getChildData(TAG_NAME);
+		if (name == null) {
+			makeToast("Restoring failed : no type name.");
+			return;
+		}
+		if (Type.typeNameExists(getContentResolver(), name) > 0) {
+			makeToast("Restoring failed : type " + name + " already exists.");
+			return;
+		}
+
+		// fields
+		HashMap<String, String> fields = new HashMap<String, String>();
+		for (Tree field : node.getChildren()) {
+			fields.put(field.getType(), field.getData());
+			Log.w("saveRestore", "put field " + field.getType());
+		}
+
+		// new Type
+		Type newType = new Type();
+		newType.setFields(fields);
+
+		if (!newType.setFields(fields)) {
+			Log.w("saveRestore", "restore type fields failed");
+			return; // jump this type
+		}
+
+		Log.w("saveRestore", "save type");
+		newType.saveInDB(getContentResolver());
+		Log.w("saveRestore", "type saved");
 	}
 
 	// save file
@@ -557,6 +800,13 @@ public class SaveRestoreActivity extends Activity {
 					Tree transNode = thisAccount.addChild(TAG_TRANSACTIONS);
 					// for each transaction
 					for (Transaction trans : transactions) {
+						// type if doesn't exist
+						if (trans.getType().getName() == null)
+							trans.getType()
+									.setName( // set the id as name
+											String.valueOf(trans
+													.getTypeIdFromDB(getContentResolver())));
+
 						transNode.addChild(TAG_TRANSACTION, trans);
 						Log.w("saveRestore", "transaction " + trans.getName());
 					}
@@ -603,8 +853,11 @@ public class SaveRestoreActivity extends Activity {
 			writeToFile(writer, node.getType(), null, true, indentLevel);
 
 		} else { // if no children
-			writeToFile(writer, node.getType(), node.getData(), false,
-					indentLevel);
+			String data = node.getData();
+			// no null data (else there is no closing tag)
+			if (data == null)
+				data = "";
+			writeToFile(writer, node.getType(), data, false, indentLevel);
 		}
 	}
 

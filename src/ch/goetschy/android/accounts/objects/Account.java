@@ -37,7 +37,7 @@ public class Account extends Item {
 		listTransactions = new ArrayList<Transaction>();
 		setOrder(0);
 	}
-	
+
 	// for the "all accounts" item in save-restore
 	public Account(int p_id, String p_name, int p_amount) {
 		super(p_id, p_amount, p_name, null);
@@ -52,10 +52,6 @@ public class Account extends Item {
 
 	public ArrayList<Transaction> getListTransactions() {
 		return listTransactions;
-	}
-
-	public void updateAmount(ContentResolver contentResolver) {
-
 	}
 
 	// also updates amount
@@ -105,9 +101,9 @@ public class Account extends Item {
 	public ArrayList<Transaction> getListTransactions(
 			ContentResolver contentResolver, Filter filter) {
 
-		if(getListTransactions(contentResolver) == null)
+		if (getListTransactions(contentResolver) == null)
 			return null;
-		
+
 		ArrayList<Transaction> filteredTransactions = new ArrayList<Transaction>();
 		if (BuildConfig.DEBUG)
 			Log.w("account", "filter bounds : " + filter.getLowerBound()
@@ -129,15 +125,14 @@ public class Account extends Item {
 		this.order = order;
 	}
 
-
 	@Override
 	public void delete(ContentResolver contentResolver) {
-		if (uri != null){
+		if (uri != null) {
 			// delete all transactions
 			getListTransactions(contentResolver);
-			for(Transaction trans : listTransactions)
+			for (Transaction trans : listTransactions)
 				trans.delete(contentResolver);
-			
+
 			// delete account itself
 			contentResolver.delete(uri, null, null);
 		}
@@ -168,11 +163,14 @@ public class Account extends Item {
 		if (parent != null)
 			parent.setId(cursor.getLong(cursor
 					.getColumnIndex(AccountsTable.COLUMN_PARENT)));
-		uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/" + id);
+		uri = Uri.parse(MyAccountsContentProvider.CONTENT_URI_ACCOUNTS + "/"
+				+ id);
 	}
 
 	@Override
 	public void saveInDB(ContentResolver contentResolver) {
+		if (BuildConfig.DEBUG)
+			Log.w("account", "saveInDB");
 
 		ContentValues values = new ContentValues();
 		values.put(AccountsTable.COLUMN_NAME, name);
@@ -182,11 +180,12 @@ public class Account extends Item {
 		if (parent != null)
 			values.put(AccountsTable.COLUMN_PARENT, parent.getId());
 
-		if (uri == null)
-			contentResolver.insert(
+		if (uri == null){
+			uri = contentResolver.insert(
 					MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, values);
+			id = Integer.valueOf(uri.getLastPathSegment());
+		}
 		else
-
 			contentResolver.update(uri, values, null, null);
 
 	}
@@ -196,7 +195,8 @@ public class Account extends Item {
 		ContentValues values = new ContentValues();
 
 		values.put(AccountsTable.COLUMN_AMOUNT, amount);
-
+		
+		Log.w("account", "save amount; uri = " + uri);
 		if (uri != null)
 			contentResolver.update(uri, values, null, null);
 
@@ -228,7 +228,22 @@ public class Account extends Item {
 
 		return listAccounts;
 	}
-	
+
+	// checks if an account name exists in the db
+	public static int accountNameExists(ContentResolver contentResolver,
+			String name) {
+		String[] projection = new String[] { AccountsTable.COLUMN_NAME };
+		// query for account
+		Cursor cursor = contentResolver.query(
+				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, projection,
+				AccountsTable.COLUMN_NAME + "='" + name + "'", null, null);
+		// if already exists
+		if (cursor.moveToFirst()) {
+			return cursor.getColumnCount();
+		}
+		// else
+		return 0;
+	}
 
 	@Override
 	public String toString() {

@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
+import ch.goetschy.android.accounts.database.AccountsTable;
 import ch.goetschy.android.accounts.database.TransactionTable;
 import ch.goetschy.android.accounts.database.TypeTable;
 import android.content.ContentResolver;
@@ -19,9 +20,11 @@ import android.widget.ArrayAdapter;
 
 public class Type implements Serializable, Savable {
 	/**
-	 * 
+	 * class representing a account type oject
 	 */
 	private static final long serialVersionUID = 2L;
+	public static final int DEFAULT_COLOR = Color.WHITE;
+	public static final int DEFAULT_ID = -1;
 
 	private long id;
 	private String name;
@@ -33,10 +36,10 @@ public class Type implements Serializable, Savable {
 			"clothes", "food", "loan", "salary", "leisure" };
 
 	public Type() {
-		setId(0);
+		setId(DEFAULT_ID);
 		setName(null);
 		setUri(null);
-		setColor(0);
+		setColor(DEFAULT_COLOR);
 		setOrder(0);
 	}
 
@@ -48,11 +51,11 @@ public class Type implements Serializable, Savable {
 			throw new NullPointerException("Null cursor");
 	}
 
-	public Type(long p_id, String p_name) {
-		setId(p_id);
+	public Type(String p_name) {
+		setId(DEFAULT_ID);
 		setName(p_name);
 		setUri(null);
-		setColor(0);
+		setColor(DEFAULT_COLOR);
 		setOrder(0);
 	}
 
@@ -128,10 +131,11 @@ public class Type implements Serializable, Savable {
 		values.put(TypeTable.COLUMN_COLOR, color);
 		values.put(TypeTable.COLUMN_ORDER, order);
 
-		if (uri == null)
-			contentResolver.insert(MyAccountsContentProvider.CONTENT_URI_TYPES,
-					values);
-		else
+		if (uri == null) {
+			uri = contentResolver.insert(
+					MyAccountsContentProvider.CONTENT_URI_TYPES, values);
+			id = Long.valueOf(uri.getLastPathSegment());
+		} else
 			contentResolver.update(uri, values, null, null);
 	}
 
@@ -234,6 +238,65 @@ public class Type implements Serializable, Savable {
 		}
 	}
 
+	// checks if a type name exists in the db
+	public static int typeNameExists(ContentResolver contentResolver,
+			String name) {
+		String[] projection = new String[] { TypeTable.COLUMN_NAME };
+		// query for type
+		Cursor cursor = contentResolver.query(
+				MyAccountsContentProvider.CONTENT_URI_TYPES, projection,
+				TypeTable.COLUMN_NAME + "='" + name + "'", null, null);
+		// if already exists
+		if (cursor.moveToFirst()) {
+			return cursor.getColumnCount();
+		}
+		// else
+		return 0;
+	}
+
+	// return type if exists
+	public static Type getTypeByName(ContentResolver contentResolver,
+			String name) {
+		String[] projection = new String[] { TypeTable.COLUMN_NAME,
+				TypeTable.COLUMN_ID };
+		// query for type
+		Cursor cursor = contentResolver.query(
+				MyAccountsContentProvider.CONTENT_URI_TYPES, projection,
+				TypeTable.COLUMN_NAME + "='" + name + "'", null, null);
+		// if already exists
+		if (cursor.moveToFirst()) {
+			return new Type(cursor);
+		} else
+			return null;
+	}
+
+	// create new type only with name if does not exist
+	public static Type getOrCreateType(ContentResolver contentResolver,
+			String name) {
+		Type newType = getTypeByName(contentResolver, name);
+
+		if (newType == null) {
+			newType = new Type(name);
+			newType.saveInDB(contentResolver);
+		}
+
+		return newType;
+	}
+
+	// checks if a type is attached to a transaction or not
+	public boolean isAttached(ContentResolver contentResolver) {
+		
+		// TODO
+		for(Account account : Account.getListAccounts(contentResolver)){
+			for(Transaction trans : account.getListTransactions(contentResolver)){
+				
+			}
+		}
+		// .....
+		
+		return false;
+	}
+
 	// converts array to arraylist
 	public static ArrayList<String> toStringArrayList(ArrayList<Type> types) {
 		ArrayList<String> retour = new ArrayList<String>();
@@ -246,6 +309,7 @@ public class Type implements Serializable, Savable {
 		return retour;
 	}
 
+	// methods from Savable --------------
 	@Override
 	public HashMap<String, String> getFields() {
 		HashMap<String, String> fields = new HashMap<String, String>();
@@ -256,4 +320,22 @@ public class Type implements Serializable, Savable {
 
 		return fields;
 	}
+
+	@Override
+	public boolean setFields(HashMap<String, String> fields) {
+		if (fields.get("name") == null)
+			return false;
+		setName(fields.get("name"));
+
+		if (fields.get("order") != null)
+			setOrder(Integer.valueOf(fields.get("order")));
+
+		if (fields.get("color") != null)
+			setColor(Integer.valueOf(fields.get("color")));
+		else
+			setColor(Color.WHITE);
+
+		return true;
+	}
+	// ----------------------------------
 }

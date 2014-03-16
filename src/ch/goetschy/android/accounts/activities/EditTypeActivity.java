@@ -1,11 +1,17 @@
 package ch.goetschy.android.accounts.activities;
 
+import java.util.concurrent.Callable;
+
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.activities.ColorPickerDialog.OnColorChangedListener;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
+import ch.goetschy.android.accounts.database.AccountsTable;
+import ch.goetschy.android.accounts.database.TypeTable;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Type;
 import android.app.Activity;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +29,11 @@ public class EditTypeActivity extends Activity implements
 	private Button mColor;
 	private Type type;
 	private Paint mPaint;
+
+	private boolean mDelete = false;
+	private boolean editing;
+
+	private String baseName = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +53,7 @@ public class EditTypeActivity extends Activity implements
 		type = new Type();
 		// paint object
 		mPaint = new Paint();
+		mPaint.setColor(Type.DEFAULT_COLOR);
 
 		// if saved instance
 		type.setUri((savedInstanceState == null) ? null
@@ -51,8 +63,11 @@ public class EditTypeActivity extends Activity implements
 		if (extras != null) {
 			type.setUri((Uri) extras
 					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
+
 			fillData();
-		}
+			editing = true;
+		} else
+			editing = false;
 
 		// color
 		mColor.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +85,7 @@ public class EditTypeActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				if (TextUtils.isEmpty(mName.getText().toString())) {
-					makeToast();
+					makeToast("Please enter a name");
 				} else {
 					setResult(RESULT_OK);
 					finish();
@@ -86,8 +101,17 @@ public class EditTypeActivity extends Activity implements
 				if (type.getUri() == null) {
 					finish();
 				} else {
-					type.delete(getContentResolver());
-					finish();
+					MyDialog.confirm(EditTypeActivity.this,
+							R.string.edit_type_delete_question, new Callable() {
+								@Override
+								public Object call() throws Exception {
+									// if yes, delete
+									mDelete = true; // do not save
+									type.delete(getContentResolver());
+									finish();
+									return null;
+								}
+							}, null);
 				}
 			}
 		});
@@ -98,12 +122,16 @@ public class EditTypeActivity extends Activity implements
 			mName.setText(type.getName());
 			mPaint.setColor(type.getColor());
 			mColor.setBackgroundColor(type.getColor());
+			
+
+			// detecting name changing
+			baseName = type.getName();
 		}
 	}
 
-	private void makeToast() {
-		Toast.makeText(EditTypeActivity.this, "Please enter a name",
-				Toast.LENGTH_LONG).show();
+	private void makeToast(String message) {
+		Toast.makeText(EditTypeActivity.this, message, Toast.LENGTH_LONG)
+				.show();
 	}
 
 	@Override
@@ -121,15 +149,34 @@ public class EditTypeActivity extends Activity implements
 	}
 
 	private void save() {
-		String name = mName.getText().toString();
-		int color = mPaint.getColor();
+		if (!mDelete) {
+			String name = mName.getText().toString();
+			int color = mPaint.getColor();
 
-		if (name.length() == 0)
-			return;
+			if (name.length() == 0) // if no name
+				return;
+			
+			// complexe condition
+			boolean conditionAlreadyExits = false;
+			int occurences = Type.typeNameExists(getContentResolver(), name);
+			if (occurences > 0) {
+				if (editing && name.equals(baseName)) { // editing + no change
+														// -> already exists
+														// once in db
+					if (occurences > 1) // more than once
+						conditionAlreadyExits = true;
+				} else
+					conditionAlreadyExits = true;
+			}
+			if (conditionAlreadyExits) { // if name exists in DB
+				makeToast("This type name already exists");
+				return; // do not save
+			}
 
-		type.setName(name);
-		type.setColor(color);
-		type.saveInDB(getContentResolver());
+			type.setName(name);
+			type.setColor(color);
+			type.saveInDB(getContentResolver());
+		}
 	}
 
 	@Override

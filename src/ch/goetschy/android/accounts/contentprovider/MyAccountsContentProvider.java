@@ -43,6 +43,9 @@ public class MyAccountsContentProvider extends ContentProvider {
 			+ AUTHORITY + "/" + PATH_TYPES);
 	public final static Uri CONTENT_URI_APP_INFOS = Uri.parse("content://"
 			+ AUTHORITY + "/" + PATH_APP_INFOS);
+	
+	public final static Uri CONTENT_URI_BASE = Uri.parse("content://"
+			+ AUTHORITY);
 
 	public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE
 			+ "/items";
@@ -155,8 +158,8 @@ public class MyAccountsContentProvider extends ContentProvider {
 		
 		id = sqlDB.insertOrThrow(table, null, values);
 		this.getContext().getContentResolver().notifyChange(uri, null);
-
-		return Uri.parse(table + "/" + id);
+		
+		return Uri.parse(CONTENT_URI_BASE + "/" + table + "/" + id);
 	}
 
 	@Override
