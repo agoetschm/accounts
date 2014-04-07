@@ -1,5 +1,3 @@
 # cache for current jar dependency. DO NOT EDIT.
 # format is <lastModified> <length> <SHA-1> <path>
 # Encoding is UTF-8
-1394933747000 621451 5896b0a4e377ac4242eb2bc785220c1c4fc052f4 /Users/goetschy/Documents/workspace/opencv/OpenCV-2.4.8-android-sdk/sdk/java/libs/android-support-v4.jar
-1378503455000 349252 612846c9857077a039b533718f72db3bc041d389 /Users/goetschy/Documents/workspace/ch.goetschy.android.accounts/libs/android-support-v4.jar

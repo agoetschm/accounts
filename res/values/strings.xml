@@ -15,7 +15,7 @@
     <string name="title_activity_filter">Set a filter</string>
     <string name="title_activity_save">Save/ restore accounts</string>
     <string name="color_picker_title">Pick a color</string>
-    <string name="title_coin_detect">Coin recognition</string>
+    <string name="title_coin_detect">Coins recognition</string>
     
     
     <string name="previous">Previous</string>
@@ -28,7 +28,7 @@
     <string name="menu_manage_types">Manage types</string>
     <string name="menu_quit">Quit</string>
     <string name="menu_save_restore">Save/restore accounts</string>
-    <string name="menu_save_coin_detect">Coin recognition</string>
+    <string name="menu_save_coin_detect">Coins recognition</string>
     
     
     
@@ -101,6 +101,15 @@
     <string name="activity_filter_type_box">Type filter</string>
     <string name="activity_filter_bound1_label">Lower bound</string>
     <string name="activity_filter_bound2_label">Upper bound</string>
+    
+    <string name="coin_detect_button_start">Start coins recognition</string>
+    <string name="coin_detect_button_quit">Quit</string>
+    <string name="coin_detect_button_settings_on">Hide settings</string>
+    <string name="coin_detect_button_settings_off">Show settings</string>
+    <string name="coin_detect_biggest_value_text">Enter the value of the biggest coin :</string>
+    <string name="coin_detect_torch_text">Torch :</string>    
+    
+    
     
     
     <string name="confirm_dialog_yes">Yes</string>

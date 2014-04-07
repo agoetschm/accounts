@@ -1,48 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:layout_height="match_parent" >
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
 
-    <TextView
-        android:id="@+id/activity_menu_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="6dp"
-        android:gravity="center"
-        android:text="@string/title_activity_accounts_overview"
-        android:textSize="30sp" >
-    </TextView>
+        <TextView
+            android:id="@+id/activity_menu_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:gravity="center"
+            android:text="@string/title_activity_accounts_overview"
+            android:textSize="30sp" >
+        </TextView>
 
-    <Button
-        android:id="@+id/activity_menu_button_overview"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/menu_overview" />
+        <Button
+            android:id="@+id/activity_menu_button_overview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_overview" />
 
-    <Button
-        android:id="@+id/activity_menu_button_types"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/menu_manage_types" />
-    
-    <Button
-        android:id="@+id/activity_menu_button_save"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/menu_save_restore" />
-    
-    <Button
-        android:id="@+id/activity_menu_button_coin_detect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/menu_save_coin_detect" />
+        <Button
+            android:id="@+id/activity_menu_button_types"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_manage_types" />
 
-    <Button
-        android:id="@+id/activity_menu_button_quit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/menu_quit" />
+        <Button
+            android:id="@+id/activity_menu_button_save"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_save_restore" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/activity_menu_button_coin_detect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_save_coin_detect" />
+
+        <Button
+            android:id="@+id/activity_menu_button_quit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/menu_quit" />
+    </LinearLayout>
+
+</ScrollView>
