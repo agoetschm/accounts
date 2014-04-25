@@ -1,8 +1,24 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_detail_add"
-        android:title="@string/menu_add"
-        android:showAsAction="always" />
-    <item android:id="@+id/menu_detail_filter"
-        android:title="@string/menu_filter"
-        android:showAsAction="always" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_detail_add"
+        android:icon="@drawable/ic_action_new"
+        android:showAsAction="always|withText"
+        android:title="@string/action_add_trans"/>
+    <item
+        android:id="@+id/menu_detail_filter"
+        android:icon="@drawable/ic_action_settings"
+        android:showAsAction="always|withText"
+        android:title="@string/action_set_filter"/>
+    <item
+        android:id="@+id/menu_detail_transfert"
+        android:icon="@drawable/ic_action_forward"
+        android:showAsAction="never|withText"
+        android:title="@string/action_transfer_trans"/>
+    <item
+        android:id="@+id/menu_detail_help"
+        android:icon="@drawable/ic_action_help"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/action_help"/>
+
 </menu>

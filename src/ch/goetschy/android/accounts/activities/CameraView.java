@@ -160,8 +160,8 @@ public class CameraView extends JavaCameraView{
 
 				// radius
 				canvas.drawText(String.valueOf(Math.round(circle[2])),
-						(float) circle[0] + offsetLeft, (float) circle[1]
-								+ offsetTop, paint);
+						(float) (circle[0] * scale + offsetLeft), (float) (circle[1] * scale
+								+ offsetTop), paint);
 
 				paint.setStrokeWidth(3); // thickness
 

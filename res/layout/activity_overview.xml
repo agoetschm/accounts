@@ -1,21 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/BaseLayout"
     android:orientation="vertical" >
-
-    <Button
-        android:id="@+id/activity_overview_return"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="5"
-        android:text="return" />
 
     <ListView
         android:id="@android:id/list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="90" >
+        android:dividerHeight="3sp">
     </ListView>
 
     <TextView
@@ -23,18 +15,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="6dp"
-        android:layout_weight="90"
         android:gravity="left"
         android:text="@string/no_account"
         android:textColor="#999999"
         android:textSize="20sp" >
     </TextView>
-
-    <Button
-        android:id="@+id/activity_overview_add"
+    
+    
+    <com.haarman.supertooltips.ToolTipRelativeLayout
+        android:id="@+id/activity_overview_tooltiplayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="5"
-        android:text="@string/activity_overview_add_footer" />
+        android:layout_height="match_parent" />
 
-</LinearLayout>
+</RelativeLayout>

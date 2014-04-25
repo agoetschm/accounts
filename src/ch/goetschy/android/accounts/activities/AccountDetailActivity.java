@@ -1,8 +1,14 @@
 package ch.goetschy.android.accounts.activities;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.Callable;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
@@ -11,19 +17,20 @@ import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
 import android.app.Activity;
-import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnClickListener;
+import android.view.ViewConfiguration;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -32,7 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-public class AccountDetailActivity extends ListActivity {
+public class AccountDetailActivity extends SherlockListActivity {
 
 	private TransactionsAdapter adapter;
 	private Account account;
@@ -111,6 +118,21 @@ public class AccountDetailActivity extends ListActivity {
 				createTransaction();
 			}
 		});
+
+		// ACTION BAR ------------------
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		// force overflow
+		try {
+			ViewConfiguration config = ViewConfiguration.get(this);
+			Field menuKeyField = ViewConfiguration.class
+					.getDeclaredField("sHasPermanentMenuKey");
+			if (menuKeyField != null) {
+				menuKeyField.setAccessible(true);
+				menuKeyField.setBoolean(config, false);
+			}
+		} catch (Exception e) {
+		}
 
 		// first fill
 		// fillData();
@@ -314,11 +336,11 @@ public class AccountDetailActivity extends ListActivity {
 		}
 	}
 
-	// ADD and FILTER BUTTON ------------------------
+	// ADD and FILTER BUTTON IN ACTION BAR ------------------------
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_account_detail, menu);
+		getSupportMenuInflater().inflate(R.menu.activity_account_detail, menu);
 		return true;
 	}
 
@@ -331,12 +353,15 @@ public class AccountDetailActivity extends ListActivity {
 		case R.id.menu_detail_filter:
 			setFilter();
 			return true;
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
 		}
 
 		return super.onOptionsItemSelected(item);
 	}
 
-	// CONTEXT MENU : DELETE and EDIT BUTTONs -----------
+	// CONTEXT MENU : DELETE, EDIT and TRANSFER BUTTONS -----------
 
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
@@ -346,11 +371,11 @@ public class AccountDetailActivity extends ListActivity {
 				R.string.activity_detail_delete);
 		menu.add(Menu.NONE, EDIT_ID, Menu.NONE, R.string.activity_detail_edit);
 		menu.add(Menu.NONE, MOVE_TO_ID, Menu.NONE,
-				R.string.activity_detail_move_to);
+				R.string.activity_detail_transfer);
 	}
 
 	@Override
-	public boolean onContextItemSelected(MenuItem item) {
+	public boolean onContextItemSelected(android.view.MenuItem item) {
 		final Transaction actTransaction = new Transaction();
 
 		// get id
@@ -364,7 +389,7 @@ public class AccountDetailActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case DELETE_ID:
 			// show confirm dialog
-			MyDialog.confirm(this, R.string.edit_account_delete_question, // TODO modify text
+			MyDialog.confirm(this, R.string.activity_detail_delete_question,
 					new Callable<Object>() {
 						@Override
 						public Object call() throws Exception {
@@ -379,7 +404,28 @@ public class AccountDetailActivity extends ListActivity {
 			editTransaction(info.id);
 			return false;
 		case MOVE_TO_ID:
-			// TODO implement moving to an other account
+			// account spinner
+			final ArrayList<Account> accountsList = Account
+					.getListAccounts(getContentResolver());
+			if (accountsList == null) {
+				Log.w("transfer transaction", "accounts list is null");
+				return false;
+			}
+			ArrayAdapter<Account> accountsAdapter = new AccountsAdapter(this,
+					accountsList);
+			accountsAdapter
+					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			
+			// dialog to choose the target account
+			MyDialog.chooseAccount(this,
+					R.string.activity_detail_transfer_question,
+					accountsAdapter, new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							actTransaction.transfer(accountsList.get(which));
+						}
+					});
+			
 			return false;
 		}
 

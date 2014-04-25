@@ -23,17 +23,18 @@
     <uses-feature
         android:name="android.hardware.camera.front.autofocus"
         android:required="false" />
-    
-    <supports-screens android:resizeable="true"
-                      android:smallScreens="true"
-                      android:normalScreens="true"
-                      android:largeScreens="true"
-                      android:anyDensity="true" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true" />
 
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.Light" >
+        android:theme="@style/Theme.Styled" >
         <activity
             android:name=".activities.MenuActivity"
             android:label="@string/title_activity_accounts_overview" >
@@ -45,32 +46,71 @@
         </activity>
         <activity
             android:name=".activities.AccountsOverviewActivity"
-            android:label="@string/title_activity_accounts_overview" >
+            android:label="@string/title_activity_accounts_overview"
+            android:parentActivityName="ch.goetschy.android.accounts.activities.MenuActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.MenuActivity" />
         </activity>
         <activity
             android:name=".activities.EditAccountActivity"
             android:label="@string/title_activity_edit_accounts"
-            android:windowSoftInputMode="stateVisible|adjustResize" />
+            android:parentActivityName="ch.goetschy.android.accounts.activities.AccountsOverviewActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.AccountsOverviewActivity" />
+        </activity>
         <activity
             android:name=".activities.AccountDetailActivity"
-            android:label="@string/title_activity_account_detail" />
+            android:label="@string/title_activity_account_detail"
+            android:parentActivityName="ch.goetschy.android.accounts.activities.AccountsOverviewActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.AccountsOverviewActivity" />
+        </activity>
         <activity
             android:name=".activities.EditTransactionActivity"
             android:label="@string/title_activity_edit_transaction"
-            android:windowSoftInputMode="stateVisible|adjustResize" />
+            android:parentActivityName="ch.goetschy.android.accounts.activities.AccountDetailActivity"
+            android:windowSoftInputMode="stateVisible|adjustResize" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.AccountDetailActivity" />
+        </activity>
         <activity
             android:name=".activities.ManageTypesActivity"
-            android:label="@string/title_activity_types" />
+            android:label="@string/title_activity_types"
+            android:parentActivityName="ch.goetschy.android.accounts.activities.MenuActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.MenuActivity" />
+        </activity>
         <activity
             android:name=".activities.EditTypeActivity"
             android:label="@string/title_activity_edit_type"
-            android:windowSoftInputMode="stateVisible|adjustResize" />
+            android:windowSoftInputMode="stateVisible|adjustResize" 
+            android:parentActivityName="ch.goetschy.android.accounts.activities.ManageTypesActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.ManageTypesActivity" />
+        </activity>
         <activity
             android:name=".activities.FilterActivity"
-            android:label="@string/title_activity_filter" />
+            android:label="@string/title_activity_filter" 
+            android:parentActivityName="ch.goetschy.android.accounts.activities.AccountDetailActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.AccountDetailActivity" />
+        </activity>
         <activity
             android:name=".activities.SaveRestoreActivity"
-            android:label="@string/title_activity_save" />
+            android:label="@string/title_activity_save"
+            android:parentActivityName="ch.goetschy.android.accounts.activities.MenuActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.MenuActivity" />
+        </activity>
         <activity
             android:name=".activities.FileExplore"
             android:label="@string/file_explore_title" />
@@ -78,14 +118,20 @@
             android:name=".activities.CoinDetectionActivity"
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/title_coin_detect"
+            android:parentActivityName="ch.goetschy.android.accounts.activities.MenuActivity"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" />
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.MenuActivity" />
+        </activity>
 
         <provider
             android:name="ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider"
             android:authorities="ch.goetschy.android.accounts.contentprovider"
             android:multiprocess="true" >
         </provider>
+
     </application>
 
 </manifest>

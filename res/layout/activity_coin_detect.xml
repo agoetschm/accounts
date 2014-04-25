@@ -113,6 +113,29 @@
             android:layout_width="100dp"
             android:layout_height="wrap_content" />
         
+
+        <TextView
+            android:id="@+id/coin_detect_button_seekbar4_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#000000" />
+
+        <SeekBar
+            android:id="@+id/coin_detect_button_seekbar4"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/coin_detect_button_seekbar5_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#000000" />
+
+        <SeekBar
+            android:id="@+id/coin_detect_button_seekbar5"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content" />
+        
         
 
         <TextView

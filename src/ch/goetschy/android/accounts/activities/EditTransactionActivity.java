@@ -3,6 +3,11 @@ package ch.goetschy.android.accounts.activities;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
@@ -14,7 +19,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NavUtils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -29,7 +34,7 @@ import android.widget.Toast;
 //import android.app.DialogFragment;
 //import android.support.v4.app.DialogFragment;
 
-public class EditTransactionActivity extends FragmentActivity implements
+public class EditTransactionActivity extends SherlockFragmentActivity implements
 		DatePickerListener {
 
 	private EditText mName;
@@ -92,7 +97,18 @@ public class EditTransactionActivity extends FragmentActivity implements
 			parent_id = extras
 					.getLong(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE);
 		}
+		
+		
+		
+		
 
+
+		// ACTION BAR ------------------
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		
+		
+		// LISTENERS -----------------------------
 		// radio
 		inOrOutRadio.check(R.id.edit_transaction_credit);
 
@@ -145,28 +161,7 @@ public class EditTransactionActivity extends FragmentActivity implements
 			@Override
 			public void onClick(View v) {
 				// show confirm dialog
-				new AlertDialog.Builder(EditTransactionActivity.this)
-						.setMessage(R.string.edit_transaction_delete_question)
-						.setCancelable(false)
-						.setPositiveButton(R.string.edit_transaction_yes,
-								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int id) {
-										// if yes, delete
-										setResult(RESULT_CANCELED);
-										mDelete = true;
-										if (transaction.getUri() == null) {
-											finish();
-										} else {
-											transaction
-													.delete(getContentResolver());
-											finish();
-										}
-									}
-								})
-						.setNegativeButton(R.string.edit_transaction_no, null)
-						.show();
-
+				confirmDelete();
 			}
 		});
 
@@ -200,6 +195,31 @@ public class EditTransactionActivity extends FragmentActivity implements
 		// init default date
 		setDate();
 	}
+	
+	
+	private void confirmDelete(){
+		new AlertDialog.Builder(EditTransactionActivity.this)
+		.setMessage(R.string.edit_transaction_delete_question)
+		.setCancelable(false)
+		.setPositiveButton(R.string.edit_transaction_yes,
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog,
+							int id) {
+						// if yes, delete
+						setResult(RESULT_CANCELED);
+						mDelete = true;
+						if (transaction.getUri() == null) {
+							finish();
+						} else {
+							transaction
+									.delete(getContentResolver());
+							finish();
+						}
+					}
+				})
+		.setNegativeButton(R.string.edit_transaction_no, null)
+		.show();
+	}
 
 	private boolean validAmount(String amount) {
 		return amount.matches("-?\\d+(\\.\\d+)?");
@@ -225,6 +245,22 @@ public class EditTransactionActivity extends FragmentActivity implements
 		outState.putLong(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
 				parent_id);
 	}
+	
+
+
+	// ACTION BAR ------------------------
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish(); // simply do as return
+			return true;
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+	
+	// -------------------
 
 	private void save() {
 		if (!mDelete) { // if not delete

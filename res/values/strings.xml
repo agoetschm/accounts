@@ -29,6 +29,7 @@
     <string name="menu_quit">Quit</string>
     <string name="menu_save_restore">Save/restore accounts</string>
     <string name="menu_save_coin_detect">Coins recognition</string>
+    <string name="menu_see_tooltips">Display tooltips</string>
     
     
     
@@ -90,7 +91,8 @@
     <string name="activity_detail_add_footer">Add a transaction</string>
     <string name="activity_detail_edit">Edit</string>
     <string name="activity_detail_delete">Delete</string>
-    <string name="activity_detail_move_to">Move to an other account</string>
+    <string name="activity_detail_transfer">Transfer to an other account</string>
+    <string name="activity_detail_transfer_question">Select a target account :</string>
     <string name="activity_detail_total_footer">Total</string>
     <string name="activity_detail_delete_question">Delete this transaction ?</string>
     
@@ -122,5 +124,16 @@
     <string name="menu_add">ADD</string>
     <string name="menu_filter">FILTER</string>
     <string name="menu_types">TYPES</string>
+    
+    <string name="action_manage_types">Manage types</string>
+    <string name="action_add_account">Add account</string>
+    
+    <string name="action_add_trans">Add transaction</string>
+    <string name="action_set_filter">Set filter</string>
+    
+    <string name="action_add_type">Add transaction</string>
+    
+    <string name="action_transfer_trans">Transfer</string>
+    <string name="action_help">Help</string>
     
 </resources>

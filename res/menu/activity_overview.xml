@@ -1,8 +1,19 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_add"
-        android:title="@string/menu_add"
-        android:showAsAction="always" />
-    <item android:id="@+id/menu_types"
-        android:title="@string/menu_types"
-        android:showAsAction="always" />
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_overview_add"
+        android:icon="@drawable/ic_action_new_event"
+        android:showAsAction="always|withText"
+        android:title="@string/action_add_account"/>
+    <item
+        android:id="@+id/menu_overview_types"
+        android:icon="@drawable/ic_action_storage"
+        android:showAsAction="always|withText"
+        android:title="@string/action_manage_types"/>
+    <item
+        android:id="@+id/menu_overview_help"
+        android:icon="@drawable/ic_action_help"
+        android:showAsAction="always|withText"
+        android:title="@string/action_help"/>
+
 </menu>

@@ -1,53 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    style="@style/BaseLayout" >
 
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical" >
+        android:layout_height="match_parent" >
 
-        <TextView
-            android:id="@+id/activity_menu_title"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            android:gravity="center"
-            android:text="@string/title_activity_accounts_overview"
-            android:textSize="30sp" >
-        </TextView>
+            android:layout_height="wrap_content" >
 
-        <Button
-            android:id="@+id/activity_menu_button_overview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/menu_overview" />
+            <TextView
+                android:id="@+id/activity_menu_title"
+                style="@style/MenuTitle"
+                android:text="@string/title_activity_accounts_overview" >
+            </TextView>
 
-        <Button
-            android:id="@+id/activity_menu_button_types"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/menu_manage_types" />
+            <Button
+                android:id="@+id/activity_menu_button_overview"
+                style="@style/MenuButton"
+                android:layout_below="@+id/activity_menu_title"
+                android:text="@string/menu_overview" />
 
-        <Button
-            android:id="@+id/activity_menu_button_save"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/menu_save_restore" />
+            <Button
+                android:id="@+id/activity_menu_button_types"
+                style="@style/MenuButton"
+                android:layout_below="@+id/activity_menu_button_overview"
+                android:text="@string/menu_manage_types" />
 
-        <Button
-            android:id="@+id/activity_menu_button_coin_detect"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/menu_save_coin_detect" />
+            <Button
+                android:id="@+id/activity_menu_button_save"
+                style="@style/MenuButton"
+                android:layout_below="@+id/activity_menu_button_types"
+                android:text="@string/menu_save_restore" />
 
-        <Button
-            android:id="@+id/activity_menu_button_quit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/menu_quit" />
-    </LinearLayout>
+            <Button
+                android:id="@+id/activity_menu_button_coin_detect"
+                style="@style/MenuButton"
+                android:layout_below="@+id/activity_menu_button_save"
+                android:text="@string/menu_save_coin_detect" />
 
-</ScrollView>
+            <Button
+                android:id="@+id/activity_menu_button_quit"
+                style="@style/MenuButton"
+                android:layout_below="@+id/activity_menu_button_coin_detect"
+                android:text="@string/menu_quit" />
+            
+            <Button
+                android:id="@+id/activity_menu_button_tooltips"
+                style="@style/TooltipsButton"
+                android:layout_below="@+id/activity_menu_button_quit"
+                android:text="@string/menu_see_tooltips" />
+        </RelativeLayout>
+    </ScrollView>
+
+    <com.haarman.supertooltips.ToolTipRelativeLayout
+        android:id="@+id/activity_menu_tooltiplayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>

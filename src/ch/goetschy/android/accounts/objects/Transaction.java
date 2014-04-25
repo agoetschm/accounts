@@ -69,6 +69,14 @@ public class Transaction extends Item implements Savable {
 		this.date = date;
 	}
 
+	/*
+	 * transfert this transaction to the selected account
+	 */
+	public void transfer(Account targetAccount) {
+		// TODO Auto-generated method stub
+
+	}
+
 	@Override
 	public void delete(ContentResolver contentResolver) {
 		Log.w("transaction", "delete " + name);
@@ -148,7 +156,8 @@ public class Transaction extends Item implements Savable {
 	public Long getTypeIdFromDB(ContentResolver contentResolver) {
 		if (uri != null) {
 			String[] projection = new String[] { TransactionTable.COLUMN_TYPE };
-			Cursor cursor = contentResolver.query(uri, projection, null, null, null);
+			Cursor cursor = contentResolver.query(uri, projection, null, null,
+					null);
 
 			if (cursor.moveToFirst()) {
 				return cursor.getLong(cursor
@@ -207,4 +216,5 @@ public class Transaction extends Item implements Savable {
 		return true;
 	}
 	// ----------------------------------
+
 }
