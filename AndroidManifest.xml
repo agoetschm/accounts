@@ -61,7 +61,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.goetschy.android.accounts.activities.AccountsOverviewActivity" />
         </activity>
+<!--         needs a spinner with dark background -->
         <activity
+            android:theme="@style/Theme.Styled.WithDarkSpinner"
             android:name=".activities.AccountDetailActivity"
             android:label="@string/title_activity_account_detail"
             android:parentActivityName="ch.goetschy.android.accounts.activities.AccountsOverviewActivity" >

@@ -23,6 +23,7 @@ public class AccountsAdapter extends ArrayAdapter<Account> {
 		super(context, R.layout.activity_overview_item, list);
 		this.context = context;
 		this.list = list;
+		Log.w("accountsAdapter", "created");
 	}
 
 	@Override

@@ -54,7 +54,10 @@ public class Account extends Item {
 		return listTransactions;
 	}
 
-	// also updates amount
+	
+	/*
+	 * Returns a list of trans. Also updates amount.
+	 */
 	public ArrayList<Transaction> getListTransactions(
 			ContentResolver contentResolver) {
 		if (uri != null) {
@@ -209,19 +212,19 @@ public class Account extends Item {
 		Cursor cursor = contentResolver.query(
 				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, null, null,
 				null, null);
-		if (BuildConfig.DEBUG)
-			Log.w("account", "cursor movetofirst");
+//		if (BuildConfig.DEBUG)
+//			Log.w("account", "cursor movetofirst");
 		if (cursor.moveToFirst()) {
 			while (!cursor.isAfterLast()) {
-				if (BuildConfig.DEBUG)
-					Log.w("account", "cursor line");
+//				if (BuildConfig.DEBUG)
+//					Log.w("account", "cursor line");
 
 				listAccounts.add(new Account(cursor));
 
 				cursor.moveToNext();
 			}
-			if (BuildConfig.DEBUG)
-				Log.w("account", "cursor close");
+//			if (BuildConfig.DEBUG)
+//				Log.w("account", "cursor close");
 			cursor.close();
 
 		}

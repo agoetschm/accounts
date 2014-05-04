@@ -99,7 +99,7 @@ public class Filter implements Serializable {
 	}
 
 	public void setInterval(int interval) {
-		
+
 		if (BuildConfig.DEBUG) {
 			Log.w("filter", "begin setInterval");
 			Log.w("filter", "interval : " + interval);
@@ -108,7 +108,7 @@ public class Filter implements Serializable {
 		// for none filter
 		if (interval == NONE)
 			this.setDateFilter(false);
-		else{
+		else {
 			this.interval = interval;
 			computeUpperBound(); // update the upper bound
 		}
@@ -223,6 +223,15 @@ public class Filter implements Serializable {
 		c.clear(Calendar.MILLISECOND);
 
 		return c;
+	}
+
+	/*
+	 * Adapts the filter to display transactions in the filter (with the last),
+	 * but not too many of them.
+	 */
+	public void adaptToAccount(Account account){
+		// TODO
+		setInterval(Filter.NONE);
 	}
 
 }

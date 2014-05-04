@@ -69,10 +69,10 @@ public abstract class MyDialog {
 						}).show();
 	}
 
-	static void chooseAccount(Context context, int messageId,
-			ArrayAdapter<Account> accountsAdapter, OnClickListener onClickListener) {
-		new AlertDialog.Builder(context).setMessage(messageId)
+	static <T> void chooseInList(Context context, int messageId,
+			ArrayAdapter<T> adapter, OnClickListener onClickListener) {
+		new AlertDialog.Builder(context).setTitle(messageId)
 				.setCancelable(true)
-				.setAdapter(accountsAdapter, onClickListener).show();
+				.setAdapter(adapter, onClickListener).show();
 	}
 }

@@ -72,9 +72,30 @@ public class Transaction extends Item implements Savable {
 	/*
 	 * transfert this transaction to the selected account
 	 */
-	public void transfer(Account targetAccount) {
-		// TODO Auto-generated method stub
+	public void transfer(ContentResolver contentResolver, Account targetAccount) {
+		// security
+		if (loadFromDB(contentResolver) == false)
+			return;
 
+		// change parent
+		this.setParent(targetAccount);
+		// save change
+		saveInDB(contentResolver);
+	}
+	
+	
+	/*
+	 * change the type and save
+	 */
+	public void changeType(ContentResolver contentResolver, Type targetType){
+		// security
+		if (loadFromDB(contentResolver) == false)
+			return;
+
+		// change type
+		this.setType(targetType);
+		// save change
+		saveInDB(contentResolver);
 	}
 
 	@Override

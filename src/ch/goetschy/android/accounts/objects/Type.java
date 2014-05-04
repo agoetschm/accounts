@@ -175,6 +175,7 @@ public class Type implements Serializable, Savable {
 	}
 
 	private void loadFromCursor(Cursor cursor) {
+		Log.w("type", "begin loadfromcursor");
 		this.setId(cursor.getLong(cursor.getColumnIndex(TypeTable.COLUMN_ID)));
 		this.setName(cursor.getString(cursor
 				.getColumnIndex(TypeTable.COLUMN_NAME)));
@@ -183,6 +184,7 @@ public class Type implements Serializable, Savable {
 				.getColumnIndex(TypeTable.COLUMN_ORDER)));
 		this.setColor(cursor.getInt(cursor
 				.getColumnIndex(TypeTable.COLUMN_COLOR)));
+		Log.w("type", "end loadfromcursor");
 	}
 
 	@Override
@@ -257,28 +259,38 @@ public class Type implements Serializable, Savable {
 	// return type if exists
 	public static Type getTypeByName(ContentResolver contentResolver,
 			String name) {
-		String[] projection = new String[] { TypeTable.COLUMN_NAME,
-				TypeTable.COLUMN_ID };
+		Log.w("getTypeByName", "begin func");
+		
+		// TODO projection not used because all columns are needed for loadFromCursor
+//		String[] projection = new String[] { TypeTable.COLUMN_NAME,
+//				TypeTable.COLUMN_ID };
 		// query for type
 		Cursor cursor = contentResolver.query(
-				MyAccountsContentProvider.CONTENT_URI_TYPES, projection,
+				MyAccountsContentProvider.CONTENT_URI_TYPES, null,
 				TypeTable.COLUMN_NAME + "='" + name + "'", null, null);
+
+		Log.w("getTypeByName", "query done");
 		// if already exists
 		if (cursor.moveToFirst()) {
+			Log.w("getTypeByName", "return the type");
 			return new Type(cursor);
-		} else
+		} else{
+			Log.w("getTypeByName", "return null");
 			return null;
+		}
 	}
 
 	// create new type only with name if does not exist
 	public static Type getOrCreateType(ContentResolver contentResolver,
 			String name) {
+		Log.w("getOrCreateType", "begin func");
 		Type newType = getTypeByName(contentResolver, name);
-
+		Log.w("getOrCreateType", "type got");
 		if (newType == null) {
 			newType = new Type(name);
 			newType.saveInDB(contentResolver);
 		}
+		Log.w("getOrCreateType", "return the type");
 
 		return newType;
 	}

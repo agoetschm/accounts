@@ -93,6 +93,9 @@
     <string name="activity_detail_delete">Delete</string>
     <string name="activity_detail_transfer">Transfer to an other account</string>
     <string name="activity_detail_transfer_question">Select a target account :</string>
+    <string name="activity_detail_transfer_confirm">Transfer this transaction(s) ?</string>
+    <string name="activity_detail_change_type_question">Select a target type :</string>
+    <string name="activity_detail_change_type_confirm">Change the type of this transactions ?</string>
     <string name="activity_detail_total_footer">Total</string>
     <string name="activity_detail_delete_question">Delete this transaction ?</string>
     
@@ -133,6 +136,7 @@
     
     <string name="action_add_type">Add transaction</string>
     
+    <string name="action_change_type">Change type</string>
     <string name="action_transfer_trans">Transfer</string>
     <string name="action_help">Help</string>
     

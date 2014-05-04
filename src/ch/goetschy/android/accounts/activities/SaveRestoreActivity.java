@@ -686,6 +686,8 @@ public class SaveRestoreActivity extends Activity {
 			makeToast("Restoring failed : type " + name + " already exists.");
 			return;
 		}
+		
+		Log.w("restore type", "type " + name + " doesn't exist");
 
 		// fields
 		HashMap<String, String> fields = new HashMap<String, String>();

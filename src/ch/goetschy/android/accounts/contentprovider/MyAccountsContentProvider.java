@@ -171,8 +171,8 @@ public class MyAccountsContentProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
 			String[] selectionArgs, String sortOrder) {
-		if (BuildConfig.DEBUG)
-			Log.w("contentProvider", "query : " + uri);
+//		if (BuildConfig.DEBUG)
+//			Log.w("contentProvider", "query : " + uri);
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
 		String table = getTable(uri);

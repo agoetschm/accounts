@@ -5,22 +5,31 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.concurrent.Callable;
 
+import org.opencv.core.Mat;
+
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockListActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuItem;
+import com.haarman.supertooltips.ToolTip;
+import com.haarman.supertooltips.ToolTipRelativeLayout;
+import com.haarman.supertooltips.ToolTipView;
 
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
+import ch.goetschy.android.accounts.engine.DetectCoinsTask;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
+import ch.goetschy.android.accounts.objects.Type;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.util.Log;
@@ -39,12 +48,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
-public class AccountDetailActivity extends SherlockListActivity {
+public class AccountDetailActivity extends SherlockListActivity implements
+		ToolTipView.OnToolTipViewClickedListener {
 
-	private TransactionsAdapter adapter;
-	private Account account;
+	private TransactionsAdapter mAdapter;
+	private Account mAccount;
 	private Spinner timeFilter;
-	private Filter filter;
+	private Filter mFilter;
 	private TextView intervalView;
 	private View addFooter;
 	private ImageButton previous;
@@ -61,21 +71,34 @@ public class AccountDetailActivity extends SherlockListActivity {
 	private static final int EDIT_ID = 30;
 	private static final int MOVE_TO_ID = 40;
 
+	// default interval for the filter
 	private static final int DEFAULT_TIME_INTERVAL = Filter.MONTH;
+
+	// task object
+	private FillDataTask mFillDataTask = null;
+
+	// tooltips
+	private ToolTipView mTooltipAddTrans = null;
+	private ToolTipView mTooltipFilter = null;
+	private ToolTipView mTooltipArrows = null;
+	private ToolTipView mTooltipInterval = null;
+	private ToolTipView mTooltipTotal = null;
+	private ToolTipRelativeLayout mTooltipLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+
 		// data from parent activity
-		account = new Account();
+		mAccount = new Account();
 		Bundle extras = getIntent().getExtras();
 
 		if (extras != null) {
-			account.setUri((Uri) extras
+			mAccount.setUri((Uri) extras
 					.getParcelable(MyAccountsContentProvider.CONTENT_ITEM_TYPE));
-			account.loadFromDB(getContentResolver());
-			this.setTitle(account.getName());
+			mAccount.loadFromDB(getContentResolver());
+			this.setTitle(mAccount.getName());
 		} else {
 			Toast.makeText(AccountDetailActivity.this, "No uri in bundle",
 					Toast.LENGTH_LONG).show();
@@ -84,9 +107,9 @@ public class AccountDetailActivity extends SherlockListActivity {
 		}
 
 		// init filter
-		filter = new Filter();
-		filter.setLowerBound(Calendar.getInstance().getTimeInMillis());
-		filter.setInterval(DEFAULT_TIME_INTERVAL);
+		mFilter = new Filter();
+		mFilter.setLowerBound(Calendar.getInstance().getTimeInMillis());
+		mFilter.setInterval(DEFAULT_TIME_INTERVAL);
 
 		// listview
 		this.setContentView(R.layout.activity_detail);
@@ -118,6 +141,10 @@ public class AccountDetailActivity extends SherlockListActivity {
 				createTransaction();
 			}
 		});
+		
+
+		// tooltip layout
+		mTooltipLayout = (ToolTipRelativeLayout) findViewById(R.id.activity_detail_tooltiplayout);
 
 		// ACTION BAR ------------------
 		ActionBar actionBar = getSupportActionBar();
@@ -145,7 +172,7 @@ public class AccountDetailActivity extends SherlockListActivity {
 		previous.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				filter.previous();
+				mFilter.previous();
 				setDateInterval();
 				fillData();
 			}
@@ -155,7 +182,7 @@ public class AccountDetailActivity extends SherlockListActivity {
 		next.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				filter.next();
+				mFilter.next();
 				setDateInterval();
 				fillData();
 			}
@@ -170,7 +197,7 @@ public class AccountDetailActivity extends SherlockListActivity {
 							View view, int position, long id) {
 						Log.w("accountDetail", "time filter selected = "
 								+ position);
-						filter.setInterval(position);
+						mFilter.setInterval(position);
 						updateNavigator();
 						if (position == Filter.CUSTOM)
 							setFilter();
@@ -186,7 +213,6 @@ public class AccountDetailActivity extends SherlockListActivity {
 
 					@Override
 					public void onNothingSelected(AdapterView<?> arg0) {
-						// TODO Auto-generated method stub
 
 					}
 
@@ -198,56 +224,125 @@ public class AccountDetailActivity extends SherlockListActivity {
 
 	//
 	private void enableNavigation(boolean b) {
-		filter.setDateFilter(b);
+		mFilter.setDateFilter(b);
 		updateNavigator();
 	}
 
-	// fill with the transactions
+	/*
+	 * Fill the listview with transactions. If the actual filter doesn't select
+	 * any transaction, adapt it.
+	 */
 	private void fillData() {
-		Log.w("accountDetail", "fill data");
-
-		ArrayList<Transaction> transactions = account.getListTransactions(
-				getContentResolver(), filter);
-
-		if (transactions != null) {
-
-			Log.w("accountDetail", "num of trans " + transactions.size());
-			for (Transaction trans : transactions)
-				Log.w("accountDetail", "trans " + trans.getName());
-
-			// adapt filter if no trans
-			if (firstFill) {
-				Log.w("accountDetail", "first fill");
-				if (transactions.size() == 0) {
-					Log.w("accountDetail",
-							"num of trans " + transactions.size());
-					filter.setInterval(Filter.NONE);
-					transactions = account.getListTransactions(
-							getContentResolver(), filter);
-				}
-				firstFill = false;
-			}
-
-			// set adapter
-			adapter = new TransactionsAdapter(this, transactions);
-			this.setListAdapter(adapter);
-
-		} else if (adapter != null)
-			adapter.clear();
-
-		// set amount of the selected transactions
-		// tmp
-		double total = 0;
-		if (transactions != null) {
-			for (Transaction i : transactions)
-				total += i.getAmount();
+		Log.w("fill data", "called");
+		// only one filling
+		if (mFillDataTask == null) {
+			Log.w("fill data", "executed");
+			mFillDataTask = new FillDataTask(this, mAccount, mFilter, mAdapter,
+					firstFill);
+			mFillDataTask.execute();
 		}
-		// end tmp
+	}
+
+	private void afterFillDataTask(ArrayList<Transaction> transactions,
+			double total) {
+		Log.w("fill data", "finished");
+
+		// set adapter
+		if (transactions != null) {
+			Log.w("fill data", "trans bot null");
+			mAdapter = new TransactionsAdapter(this, transactions);
+			this.setListAdapter(mAdapter);
+		}
+
+		// set total footer
 		if (total < 0)
 			totalView.setTextColor(Color.RED);
 		else
 			totalView.setTextColor(Color.GREEN);
 		totalView.setText(TransactionsAdapter.amountFormat.format(total));
+
+		// set task to null
+		mFillDataTask = null;
+	}
+
+	private static class FillDataTask extends AsyncTask<Void, Void, Void> {
+
+		private ProgressDialog progressDialog;
+		private double tTotal = 0;
+		private ArrayList<Transaction> tTransactions; // t for task
+		private AccountDetailActivity tContext;
+
+		// copy all vars to keep task independant
+		private Account tAccount;
+		private Filter tFilter;
+		private TransactionsAdapter tAdapter;
+		private boolean tShouldAdapt;
+
+		public FillDataTask(AccountDetailActivity context, Account account,
+				Filter filter, TransactionsAdapter adapter, boolean shouldAdapt) {
+			tContext = context;
+			tAccount = account;
+			tFilter = filter;
+			tAdapter = adapter;
+			tShouldAdapt = shouldAdapt;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			super.onPreExecute();
+			progressDialog = new ProgressDialog(tContext,
+					ProgressDialog.STYLE_SPINNER);
+			progressDialog.setMessage("Loading...");
+			progressDialog.show();
+		}
+
+		@Override
+		protected Void doInBackground(Void... arg0) {
+			Log.w("accountDetail", "fill data");
+
+			// get transactions
+			tTransactions = tAccount.getListTransactions(
+					tContext.getContentResolver(), tFilter);
+
+			if (tTransactions != null) {
+
+				Log.w("accountDetail", "num of trans " + tTransactions.size());
+				for (Transaction trans : tTransactions)
+					Log.w("accountDetail", "trans " + trans.getName());
+
+				// adapt filter if no trans
+				if (tShouldAdapt) {
+					Log.w("accountDetail", "first fill");
+					if (tTransactions.size() == 0) {
+						Log.w("accountDetail",
+								"num of trans " + tTransactions.size());
+						tFilter.adaptToAccount(tAccount);
+						tTransactions = tAccount.getListTransactions(
+								tContext.getContentResolver(), tFilter);
+					}
+					tShouldAdapt = false;
+				}
+
+			} else if (tAdapter != null)
+				tAdapter.clear();
+
+			// set amount of the selected transactions
+			// tmp TODO
+			if (tTransactions != null) {
+				for (Transaction i : tTransactions)
+					tTotal += i.getAmount();
+			}
+			// end tmp
+
+			return null;
+
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			progressDialog.dismiss();
+			tContext.afterFillDataTask(tTransactions, tTotal);
+		}
 
 	}
 
@@ -261,20 +356,20 @@ public class AccountDetailActivity extends SherlockListActivity {
 
 	// set the text for the time interval
 	private void setDateInterval() {
-		intervalView.setText(Filter.millisToText(filter.getLowerBound())
-				+ " - " + Filter.millisToText(filter.getUpperBound() - 1));
+		intervalView.setText(Filter.millisToText(mFilter.getLowerBound())
+				+ " - " + Filter.millisToText(mFilter.getUpperBound() - 1));
 	}
 
 	// update the time navigator
 	private void updateNavigator() {
-		if (filter.isDateFilter()) {
+		if (mFilter.isDateFilter()) {
 			// visible navigator
 			navigator.setVisibility(View.VISIBLE);
 
-			timeFilter.setSelection(filter.getInterval());
+			timeFilter.setSelection(mFilter.getInterval());
 			setDateInterval();
 
-			boolean custom = (filter.getInterval() == Filter.CUSTOM);
+			boolean custom = (mFilter.getInterval() == Filter.CUSTOM);
 			next.setEnabled(!custom);
 			previous.setEnabled(!custom);
 
@@ -295,7 +390,7 @@ public class AccountDetailActivity extends SherlockListActivity {
 	private void createTransaction() {
 		Intent intent = new Intent(this, EditTransactionActivity.class);
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
-				account.getId());
+				mAccount.getId());
 		startActivity(intent);
 	}
 
@@ -310,7 +405,7 @@ public class AccountDetailActivity extends SherlockListActivity {
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
 				transactionUri);
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
-				account.getId());
+				mAccount.getId());
 
 		startActivity(intent);
 	}
@@ -319,9 +414,89 @@ public class AccountDetailActivity extends SherlockListActivity {
 	private void setFilter() {
 		// tmp
 		Intent intent = new Intent(this, FilterActivity.class);
-		intent.putExtra(Filter.class.toString(), filter);
+		intent.putExtra(Filter.class.toString(), mFilter);
 		startActivityForResult(intent, FILTER_ACTIVITY);
 		// end tmp
+	}
+
+	// transfer
+	private void transferTransactions(final ArrayList<Transaction> transList) {
+		// account spinner
+		final ArrayList<Account> accountsList = Account
+				.getListAccounts(getContentResolver());
+		if (accountsList == null) {
+			Log.w("transfer transaction", "accounts list is null");
+			return;
+		}
+		ArrayAdapter<Account> accountsAdapter = new AccountsAdapter(this,
+				accountsList);
+
+		// dialog to choose the target account
+		MyDialog.chooseInList(this, R.string.activity_detail_transfer_question,
+				accountsAdapter, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, final int which) {
+						// confirm transfer
+						MyDialog.confirm(AccountDetailActivity.this,
+								R.string.activity_detail_transfer_confirm,
+								new Callable<Object>() {
+									@Override
+									public Object call() throws Exception {
+										// if yes, transfer
+										for (Transaction trans : transList) {
+											trans.transfer(
+													getContentResolver(),
+													accountsList.get(which));
+										}
+										// update actual view
+										fillData();
+										return null;
+									}
+								}, null);
+
+					}
+				});
+	}
+
+	// set the type of a list of trans
+	private void changeType(final ArrayList<Transaction> transList) {
+		// type spinner
+		final ArrayList<Type> typesList = Type.getTypes(getContentResolver());
+		if (typesList == null) {
+			Log.w("change type", "types list is null");
+			return;
+		}
+		ArrayAdapter<Type> typesAdapter = new TypesAdapter(this, typesList);
+
+		// dialog to choose the target type
+		MyDialog.chooseInList(this,
+				R.string.activity_detail_change_type_question, typesAdapter,
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, final int which) {
+						// confirm change
+						MyDialog.confirm(AccountDetailActivity.this,
+								R.string.activity_detail_change_type_confirm,
+								new Callable<Object>() {
+									@Override
+									public Object call() throws Exception {
+										// if yes, change type
+										for (Transaction trans : transList) {
+											trans.setParent(AccountDetailActivity.this.mAccount); // TODO
+																									// do
+																									// better
+											trans.changeType(
+													getContentResolver(),
+													typesList.get(which));
+										}
+										// update actual view
+										fillData();
+										return null;
+									}
+								}, null);
+
+					}
+				});
 	}
 
 	@Override
@@ -330,13 +505,14 @@ public class AccountDetailActivity extends SherlockListActivity {
 		switch (requestCode) {
 		case FILTER_ACTIVITY:
 			if (resultCode == Activity.RESULT_OK) {
-				filter = (Filter) data.getSerializableExtra(Filter.class
+				mFilter = (Filter) data.getSerializableExtra(Filter.class
 						.toString());
 			}
 		}
 	}
 
-	// ADD and FILTER BUTTON IN ACTION BAR ------------------------
+	// ADD, FILTER, TRANSFER and HELP BUTTONS IN ACTION BAR
+	// ------------------------
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -352,6 +528,18 @@ public class AccountDetailActivity extends SherlockListActivity {
 			return true;
 		case R.id.menu_detail_filter:
 			setFilter();
+			return true;
+		case R.id.menu_detail_change_type:
+			changeType(mAccount.getListTransactions(getContentResolver(),
+					mFilter));
+			return true;
+		case R.id.menu_detail_transfer:
+			transferTransactions(mAccount.getListTransactions(
+					getContentResolver(), mFilter));
+			return true;
+		case R.id.menu_detail_help:
+			if (isNoTooltip())
+				nextTooltip(null);
 			return true;
 		case android.R.id.home:
 			NavUtils.navigateUpFromSameTask(this);
@@ -404,28 +592,11 @@ public class AccountDetailActivity extends SherlockListActivity {
 			editTransaction(info.id);
 			return false;
 		case MOVE_TO_ID:
-			// account spinner
-			final ArrayList<Account> accountsList = Account
-					.getListAccounts(getContentResolver());
-			if (accountsList == null) {
-				Log.w("transfer transaction", "accounts list is null");
-				return false;
-			}
-			ArrayAdapter<Account> accountsAdapter = new AccountsAdapter(this,
-					accountsList);
-			accountsAdapter
-					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			
-			// dialog to choose the target account
-			MyDialog.chooseAccount(this,
-					R.string.activity_detail_transfer_question,
-					accountsAdapter, new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							actTransaction.transfer(accountsList.get(which));
-						}
-					});
-			
+			// create list with one trans
+			ArrayList<Transaction> trans = new ArrayList<Transaction>();
+			trans.add(actTransaction);
+			// transfer it
+			transferTransactions(trans);
 			return false;
 		}
 
@@ -440,6 +611,111 @@ public class AccountDetailActivity extends SherlockListActivity {
 
 		editTransaction(id);
 
+	}
+
+	// TOOLTIPS -------------------
+
+	// display the first or the next tooltip
+	private void nextTooltip(ToolTipView toolTipView) {
+		if (toolTipView == null) {
+			addTransTooltip();
+		} else if (toolTipView == mTooltipAddTrans) {
+			mTooltipAddTrans = null;
+			addFilterTooltip();
+		} else if (toolTipView == mTooltipFilter) {
+			mTooltipFilter = null;
+			addIntervalTooltip();
+		} else if (toolTipView == mTooltipInterval) {
+			mTooltipInterval = null;
+			addArrowsTooltip();
+		} else if (toolTipView == mTooltipArrows) {
+			mTooltipArrows = null;
+			addTotalTooltip();
+		} else if (toolTipView == mTooltipTotal) {
+			mTooltipTotal = null;
+		} 
+	}
+
+	// returns true if no tooltip is displayed
+	private boolean isNoTooltip() {
+		return (mTooltipAddTrans == null && mTooltipFilter == null
+				&& mTooltipArrows == null && mTooltipInterval == null && mTooltipTotal == null);
+	}
+
+	private void addTransTooltip() {
+		
+		mTooltipAddTrans = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Add a new transactions, which \nrepresents a new income or expense.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.menu_detail_add));
+		mTooltipAddTrans.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addFilterTooltip() {
+		mTooltipFilter = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Set a filter to display only a \nselection of this account's \ntransactions.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.menu_detail_filter));
+		mTooltipFilter.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addArrowsTooltip() {
+		mTooltipArrows = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Display the transactions for \nthe previous interval.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true), previous);
+		mTooltipArrows.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addIntervalTooltip() {
+		mTooltipInterval = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Change the interval of time for \nthe transactions displayed.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true), timeFilter);
+		mTooltipInterval.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addTotalTooltip() {
+		if (totalView != null) {
+			mTooltipTotal = mTooltipLayout
+					.showToolTipForView(
+							new ToolTip()
+									.withText(
+											"The total of the displayed transactions.")
+									.withColor(
+											getResources().getColor(
+													R.color.holo_orange))
+									.withShadow(true), totalView);
+			mTooltipTotal.setOnToolTipViewClickedListener(this);
+		} else
+			mTooltipTotal = null;
+	}
+
+	@Override
+	public void onToolTipViewClicked(ToolTipView toolTipView) {
+		nextTooltip(toolTipView);
 	}
 
 	// ---------------------------------------------

@@ -11,7 +11,12 @@
         android:showAsAction="always|withText"
         android:title="@string/action_set_filter"/>
     <item
-        android:id="@+id/menu_detail_transfert"
+        android:id="@+id/menu_detail_change_type"
+        android:icon="@drawable/ic_action_forward"
+        android:showAsAction="never|withText"
+        android:title="@string/action_change_type"/>
+    <item
+        android:id="@+id/menu_detail_transfer"
         android:icon="@drawable/ic_action_forward"
         android:showAsAction="never|withText"
         android:title="@string/action_transfer_trans"/>
