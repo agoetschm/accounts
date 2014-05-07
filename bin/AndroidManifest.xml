@@ -127,6 +127,15 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="ch.goetschy.android.accounts.activities.MenuActivity" />
         </activity>
+        
+        <activity
+            android:name=".activities.GraphActivity"
+            android:label="@string/title_activity_graph"
+            android:parentActivityName="ch.goetschy.android.accounts.activities.AccountDetailActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="ch.goetschy.android.accounts.activities.AccountDetailActivity" />
+        </activity>
 
         <provider
             android:name="ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider"

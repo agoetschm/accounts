@@ -19,6 +19,14 @@ import java.util.Stack;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.haarman.supertooltips.ToolTip;
+import com.haarman.supertooltips.ToolTipRelativeLayout;
+import com.haarman.supertooltips.ToolTipView;
+
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
@@ -26,7 +34,6 @@ import ch.goetschy.android.accounts.objects.Savable;
 import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Tree;
 import ch.goetschy.android.accounts.objects.Type;
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -34,6 +41,7 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -46,7 +54,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class SaveRestoreActivity extends Activity {
+public class SaveRestoreActivity extends SherlockActivity implements
+		ToolTipView.OnToolTipViewClickedListener {
 
 	private Spinner mSaveSpinnerAccounts;
 	private Button mChooseSaveLocation;
@@ -83,6 +92,11 @@ public class SaveRestoreActivity extends Activity {
 	static final private String TAG_TRANSACTION = "transaction";
 	static final private String TAG_NAME = "name";
 
+	// tooltips
+	private ToolTipView mTooltipSave = null;
+	private ToolTipView mTooltipRestore = null;
+	private ToolTipRelativeLayout mTooltipLayout;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -97,6 +111,8 @@ public class SaveRestoreActivity extends Activity {
 		mRestore = (Button) findViewById(R.id.activity_save_button_restore);
 		mPreview = (Button) findViewById(R.id.activity_save_button_preview);
 		mPreviewLayout = (LinearLayout) findViewById(R.id.activity_save_preview);
+
+		mTooltipLayout = (ToolTipRelativeLayout) findViewById(R.id.activity_save_tooltiplayout);
 
 		// init file vars
 		mSaveFile = new File(""); // void path
@@ -163,6 +179,21 @@ public class SaveRestoreActivity extends Activity {
 				loadFilePreview();
 			}
 		});
+
+		// ACTION BAR ------------------
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		// force overflow
+		try {
+			ViewConfiguration config = ViewConfiguration.get(this);
+			Field menuKeyField = ViewConfiguration.class
+					.getDeclaredField("sHasPermanentMenuKey");
+			if (menuKeyField != null) {
+				menuKeyField.setAccessible(true);
+				menuKeyField.setBoolean(config, false);
+			}
+		} catch (Exception e) {
+		}
 	}
 
 	// open the file browser activity
@@ -199,7 +230,7 @@ public class SaveRestoreActivity extends Activity {
 		super.onActivityResult(requestCode, resultCode, data);
 		switch (requestCode) {
 		case SAVE_FILE_ACTIVITY: // selection for the location of the saved file
-			if (resultCode == Activity.RESULT_OK) {
+			if (resultCode == SherlockActivity.RESULT_OK) {
 				File tmp = (File) data.getSerializableExtra(File.class
 						.toString());
 				if (tmp.isDirectory()) {
@@ -211,7 +242,7 @@ public class SaveRestoreActivity extends Activity {
 			break;
 		case RESTORE_FILE_ACTIVITY: // selection for the location of the saved
 									// file
-			if (resultCode == Activity.RESULT_OK) {
+			if (resultCode == SherlockActivity.RESULT_OK) {
 				File tmp = (File) data.getSerializableExtra(File.class
 						.toString());
 				if (tmp.isFile()) {
@@ -668,11 +699,8 @@ public class SaveRestoreActivity extends Activity {
 		}
 
 		// save amount
-		Log.w("saveRestore", "set account amount");
 		newAccount.setAmount(amount);
-		Log.w("saveRestore", "save account amount");
 		newAccount.saveAmountInDB(getContentResolver());
-		Log.w("saveRestore", "save account amount");
 	}
 
 	private void restoreType(Tree node) {
@@ -686,7 +714,7 @@ public class SaveRestoreActivity extends Activity {
 			makeToast("Restoring failed : type " + name + " already exists.");
 			return;
 		}
-		
+
 		Log.w("restore type", "type " + name + " doesn't exist");
 
 		// fields
@@ -906,4 +934,76 @@ public class SaveRestoreActivity extends Activity {
 		}
 		return false;
 	}
+
+	// ADD and TYPES BUTTON IN ACTION BAR ------------------------
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.activity_save_restore, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_save_help:
+			if (mTooltipSave == null && this.mTooltipRestore == null)
+				nextTooltip(null);
+			return true;
+		case android.R.id.home:
+			finish();
+			return true;
+
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+
+	// TOOLTIPS -------------------
+
+	// display the first or the next tooltip
+	private void nextTooltip(ToolTipView toolTipView) {
+		if (toolTipView == null) {
+			addSaveTooltip();
+		} else if (toolTipView == mTooltipSave) {
+			mTooltipSave = null;
+			addRestoreTooltip();
+		} else if (toolTipView == mTooltipRestore) {
+			mTooltipRestore = null;
+		}
+	}
+
+	private void addSaveTooltip() {
+		mTooltipSave = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Save accounts and types in a file\non your SD card.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.activity_save_title_save));
+		mTooltipSave.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addRestoreTooltip() {
+		mTooltipRestore = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Restore accounts and types from\na saved file. This function is\nsometimes not 100% working.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.activity_save_title_restore));
+		mTooltipRestore.setOnToolTipViewClickedListener(this);
+	}
+
+	@Override
+	public void onToolTipViewClicked(ToolTipView toolTipView) {
+		nextTooltip(toolTipView);
+	}
+
 }

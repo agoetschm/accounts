@@ -25,14 +25,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ViewConfiguration;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
-import android.widget.Button;
 import android.widget.ListView;
 
 public class AccountsOverviewActivity extends SherlockListActivity implements
@@ -177,7 +175,7 @@ public class AccountsOverviewActivity extends SherlockListActivity implements
 				nextTooltip(null);
 			return true;
 		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
+			finish();
 			return true;
 
 		}

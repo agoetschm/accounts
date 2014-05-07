@@ -42,7 +42,6 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 	private EditText mDescription;
 	private Spinner mType;
 	private Button mDateButton;
-	private TextView mDateTextView;
 	private long mTimeInMillis;
 	private RadioGroup inOrOutRadio;
 
@@ -63,7 +62,6 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 		mDescription = (EditText) findViewById(R.id.edit_transaction_description);
 		mType = (Spinner) findViewById(R.id.edit_transaction_type);
 		mDateButton = (Button) findViewById(R.id.edit_transaction_date_button);
-		mDateTextView = (TextView) findViewById(R.id.edit_transaction_date);
 		inOrOutRadio = (RadioGroup) findViewById(R.id.edit_transaction_radio);
 		Button confirmButton = (Button) findViewById(R.id.edit_transaction_confirm);
 		Button deleteButton = (Button) findViewById(R.id.edit_transaction_delete);
@@ -293,15 +291,18 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 			transaction.saveInDB(getContentResolver());
 		}
 	}
-
+	
+	/*
+	 * update the date in view
+	 */
 	public void setDate() {
 		final Calendar c = Calendar.getInstance();
 		if (mTimeInMillis != 0)
 			c.setTimeInMillis(mTimeInMillis);
 		else
 			mTimeInMillis = c.getTimeInMillis();
-
-		mDateTextView.setText(Filter.millisToText(mTimeInMillis));
+		
+		mDateButton.setText(Filter.millisToText(mTimeInMillis));
 	}
 
 	@Override
@@ -310,7 +311,7 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 		c.set(year, month, day);
 		mTimeInMillis = c.getTimeInMillis();
 
-		mDateTextView.setText(Filter.millisToText(mTimeInMillis));
+		mDateButton.setText(Filter.millisToText(mTimeInMillis));
 	}
 
 }

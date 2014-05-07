@@ -21,6 +21,11 @@
         android:showAsAction="never|withText"
         android:title="@string/action_transfer_trans"/>
     <item
+        android:id="@+id/menu_detail_graph"
+        android:icon="@drawable/ic_action_picture"
+        android:showAsAction="ifRoom|withText"
+        android:title="@string/action_graph"/>
+    <item
         android:id="@+id/menu_detail_help"
         android:icon="@drawable/ic_action_help"
         android:showAsAction="ifRoom|withText"

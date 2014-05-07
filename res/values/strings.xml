@@ -16,6 +16,7 @@
     <string name="title_activity_save">Save/ restore accounts</string>
     <string name="color_picker_title">Pick a color</string>
     <string name="title_coin_detect">Coins recognition</string>
+    <string name="title_activity_graph">Graph</string>
     
     
     <string name="previous">Previous</string>
@@ -50,10 +51,12 @@
     <string name="edit_type_delete_question">Delete this type ?</string>
     
     
-    <string name="edit_transaction_name">Name</string>
+    <string name="edit_transaction_name">Transaction name</string>
+    <string name="edit_transaction_amount_label">Amount :</string>
     <string name="edit_transaction_amount">0.0</string>
-    <string name="edit_transaction_description">Description</string>
-    <string name="edit_transaction_date">Set date</string>
+    <string name="edit_transaction_type_label">Type :</string>
+    <string name="edit_transaction_description">Description (optional)</string>
+    <string name="edit_transaction_date_label">Date :</string>
     <string name="edit_transaction_name_toast">Please enter a name</string>
     <string name="edit_transaction_amount_toast">Please enter a valid amount</string>
     <string name="edit_transaction_credit">Credit</string>
@@ -72,12 +75,12 @@
     <string name="activity_overview_default_types_no">No</string>
     
     
-    <string name="activity_save_title_save">Save an account</string>
+    <string name="activity_save_title_save">Save</string>
     <string name="activity_save_text_save">Select an account to save :</string>
-    <string name="activity_save_text_location_save">Select the location :</string>
+    <string name="activity_save_text_location_save">Location :</string>
     <string name="activity_save_button_choose_location">Browse...</string>
     <string name="activity_save_button_save">Save</string>
-    <string name="activity_save_title_restore">Restore an account</string>
+    <string name="activity_save_title_restore">Restore</string>
     <string name="activity_save_text_restore">Select a file to restore :</string>
     <string name="activity_save_button_preview">Preview</string>
     <string name="activity_save_button_restore">Restore</string>
@@ -104,8 +107,10 @@
     <string name="activity_filter_confirm">Confirm</string>
     <string name="activity_filter_date_box">Date filter</string>
     <string name="activity_filter_type_box">Type filter</string>
-    <string name="activity_filter_bound1_label">Lower bound</string>
-    <string name="activity_filter_bound2_label">Upper bound</string>
+    <string name="activity_filter_bound1_label">From</string>
+    <string name="activity_filter_bound2_label">to</string>
+    <string name="activity_filter_interval">Choose a selection interval : </string>
+    
     
     <string name="coin_detect_button_start">Start coins recognition</string>
     <string name="coin_detect_button_quit">Quit</string>
@@ -138,6 +143,7 @@
     
     <string name="action_change_type">Change type</string>
     <string name="action_transfer_trans">Transfer</string>
+    <string name="action_graph">Graph</string>
     <string name="action_help">Help</string>
     
 </resources>

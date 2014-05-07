@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/BaseLayout" >
+
+
+    <LinearLayout
+        android:id="@+id/activity_graph_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        android:orientation="vertical">
+
+    </LinearLayout>
+    
+    
+    <com.haarman.supertooltips.ToolTipRelativeLayout
+        android:id="@+id/activity_graph_tooltiplayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>

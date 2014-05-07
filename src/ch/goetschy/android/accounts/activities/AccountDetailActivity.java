@@ -74,6 +74,9 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	// default interval for the filter
 	private static final int DEFAULT_TIME_INTERVAL = Filter.MONTH;
 
+	// key for saved value
+	private static final String FIRST_FILL_KEY = "firstFill";
+
 	// task object
 	private FillDataTask mFillDataTask = null;
 
@@ -89,6 +92,12 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		// get firstFill if is one
+		if (savedInstanceState != null) {
+			String savedVal = savedInstanceState.getString(FIRST_FILL_KEY);
+			if (savedVal != null)
+				firstFill = Boolean.parseBoolean(savedVal);
+		}
 
 		// data from parent activity
 		mAccount = new Account();
@@ -141,7 +150,6 @@ public class AccountDetailActivity extends SherlockListActivity implements
 				createTransaction();
 			}
 		});
-		
 
 		// tooltip layout
 		mTooltipLayout = (ToolTipRelativeLayout) findViewById(R.id.activity_detail_tooltiplayout);
@@ -244,14 +252,24 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	}
 
 	private void afterFillDataTask(ArrayList<Transaction> transactions,
-			double total) {
+			double total, boolean shouldAdapt) {
 		Log.w("fill data", "finished");
+
+		// update first fill
+		firstFill = shouldAdapt;
+
+		// hide nav if no date filter
+		if (mFilter.isDateFilter() == false)
+			enableNavigation(false);
 
 		// set adapter
 		if (transactions != null) {
-			Log.w("fill data", "trans bot null");
+			Log.w("fill data", "trans not null");
 			mAdapter = new TransactionsAdapter(this, transactions);
 			this.setListAdapter(mAdapter);
+		} else {
+			mAdapter = new TransactionsAdapter(this,
+					new ArrayList<Transaction>());
 		}
 
 		// set total footer
@@ -306,25 +324,30 @@ public class AccountDetailActivity extends SherlockListActivity implements
 
 			if (tTransactions != null) {
 
+				// debug
 				Log.w("accountDetail", "num of trans " + tTransactions.size());
 				for (Transaction trans : tTransactions)
 					Log.w("accountDetail", "trans " + trans.getName());
 
-				// adapt filter if no trans
-				if (tShouldAdapt) {
-					Log.w("accountDetail", "first fill");
-					if (tTransactions.size() == 0) {
-						Log.w("accountDetail",
-								"num of trans " + tTransactions.size());
+				// end debug
+
+				// no trans
+				if (tTransactions.size() == 0) {
+					// adapt filter if no trans
+					if (tShouldAdapt) {
+						Log.w("accountDetail", "first fill");
 						tFilter.adaptToAccount(tAccount);
 						tTransactions = tAccount.getListTransactions(
 								tContext.getContentResolver(), tFilter);
+
+						// tShouldAdapt = false;
 					}
-					tShouldAdapt = false;
 				}
 
-			} else if (tAdapter != null)
-				tAdapter.clear();
+				// allow adaptation only on first fill
+				tShouldAdapt = false;
+
+			}
 
 			// set amount of the selected transactions
 			// tmp TODO
@@ -341,7 +364,7 @@ public class AccountDetailActivity extends SherlockListActivity implements
 		@Override
 		protected void onPostExecute(Void result) {
 			progressDialog.dismiss();
-			tContext.afterFillDataTask(tTransactions, tTotal);
+			tContext.afterFillDataTask(tTransactions, tTotal, tShouldAdapt);
 		}
 
 	}
@@ -410,13 +433,21 @@ public class AccountDetailActivity extends SherlockListActivity implements
 		startActivity(intent);
 	}
 
-	// open the filter dialog
+	// open the filter activity
 	private void setFilter() {
-		// tmp
 		Intent intent = new Intent(this, FilterActivity.class);
 		intent.putExtra(Filter.class.toString(), mFilter);
 		startActivityForResult(intent, FILTER_ACTIVITY);
-		// end tmp
+	}
+
+	/*
+	 * starts the graph activity
+	 */
+	private void createGraph() {
+		Intent intent = new Intent(this, GraphActivity.class);
+		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
+				mAccount.getUri());
+		startActivity(intent);
 	}
 
 	// transfer
@@ -537,12 +568,15 @@ public class AccountDetailActivity extends SherlockListActivity implements
 			transferTransactions(mAccount.getListTransactions(
 					getContentResolver(), mFilter));
 			return true;
+		case R.id.menu_detail_graph:
+			createGraph();
+			return true;
 		case R.id.menu_detail_help:
 			if (isNoTooltip())
 				nextTooltip(null);
 			return true;
 		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
+			finish();
 			return true;
 		}
 
@@ -633,7 +667,7 @@ public class AccountDetailActivity extends SherlockListActivity implements
 			addTotalTooltip();
 		} else if (toolTipView == mTooltipTotal) {
 			mTooltipTotal = null;
-		} 
+		}
 	}
 
 	// returns true if no tooltip is displayed
@@ -643,7 +677,7 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	}
 
 	private void addTransTooltip() {
-		
+
 		mTooltipAddTrans = mTooltipLayout
 				.showToolTipForView(
 						new ToolTip()
@@ -699,15 +733,10 @@ public class AccountDetailActivity extends SherlockListActivity implements
 
 	private void addTotalTooltip() {
 		if (totalView != null) {
-			mTooltipTotal = mTooltipLayout
-					.showToolTipForView(
-							new ToolTip()
-									.withText(
-											"The total of the displayed transactions.")
-									.withColor(
-											getResources().getColor(
-													R.color.holo_orange))
-									.withShadow(true), totalView);
+			mTooltipTotal = mTooltipLayout.showToolTipForView(new ToolTip()
+					.withText("The total of the displayed transactions.")
+					.withColor(getResources().getColor(R.color.holo_orange))
+					.withShadow(true), totalView);
 			mTooltipTotal.setOnToolTipViewClickedListener(this);
 		} else
 			mTooltipTotal = null;
@@ -723,9 +752,16 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	@Override
 	protected void onResume() {
 		Log.w("accountDetail", "on resume");
+		Log.w("accountDetail", "first fill : " + this.firstFill);
 		fillData();
 		changeFooterColor(false);
 		updateNavigator();
 		super.onResume();
+	}
+
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		outState.putString(FIRST_FILL_KEY, String.valueOf(firstFill));
+		super.onSaveInstanceState(outState);
 	}
 }

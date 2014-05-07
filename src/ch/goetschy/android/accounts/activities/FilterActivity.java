@@ -1,21 +1,27 @@
 package ch.goetschy.android.accounts.activities;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.haarman.supertooltips.ToolTip;
+import com.haarman.supertooltips.ToolTipRelativeLayout;
+import com.haarman.supertooltips.ToolTipView;
+
 import ch.goetschy.android.accounts.R;
-import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
-import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Type;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NavUtils;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -24,8 +30,13 @@ import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-public class FilterActivity extends FragmentActivity implements
-		DatePickerListener {
+public class FilterActivity extends SherlockFragmentActivity implements
+		DatePickerListener, ToolTipView.OnToolTipViewClickedListener {
+
+	static final private int LOWER = 1;
+	static final private int UPPER = 2;
+
+	private int actualBound = LOWER;
 
 	private Filter filter;
 	private Spinner dateSpinner;
@@ -38,10 +49,10 @@ public class FilterActivity extends FragmentActivity implements
 	private CheckBox dateCheckbox;
 	private CheckBox typeCheckbox;
 
-	static final private int LOWER = 1;
-	static final private int UPPER = 2;
-
-	private int actualBound = LOWER;
+	private ToolTipView mTooltipDateFilter = null;
+	private ToolTipView mTooltipInterval = null;
+	private ToolTipView mTooltipTypesFilter = null;
+	private ToolTipRelativeLayout mTooltipLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +71,8 @@ public class FilterActivity extends FragmentActivity implements
 		lowerBound = (Button) findViewById(R.id.activity_filter_bound1);
 		upperBound = (Button) findViewById(R.id.activity_filter_bound2);
 
+		mTooltipLayout = (ToolTipRelativeLayout) findViewById(R.id.activity_filter_tooltiplayout);
+
 		// data from parent activity
 		Bundle extras = getIntent().getExtras();
 
@@ -72,15 +85,26 @@ public class FilterActivity extends FragmentActivity implements
 			finish();
 		}
 
+		// ACTION BAR ------------------
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		// force overflow
+		try {
+			ViewConfiguration config = ViewConfiguration.get(this);
+			Field menuKeyField = ViewConfiguration.class
+					.getDeclaredField("sHasPermanentMenuKey");
+			if (menuKeyField != null) {
+				menuKeyField.setAccessible(true);
+				menuKeyField.setBoolean(config, false);
+			}
+		} catch (Exception e) {
+		}
+
 		// confirm
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				save();
-				Intent resultIntent = new Intent();
-				resultIntent.putExtra(Filter.class.toString(), filter);
-				setResult(RESULT_OK, resultIntent);
-				finish();
+				finish(true);
 			}
 		});
 
@@ -88,8 +112,7 @@ public class FilterActivity extends FragmentActivity implements
 		cancelButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				setResult(RESULT_CANCELED);
-				finish();
+				finish(false);
 			}
 		});
 
@@ -101,9 +124,10 @@ public class FilterActivity extends FragmentActivity implements
 					public void onCheckedChanged(CompoundButton box,
 							boolean isChecked) {
 						// if before was none filter
-						if(dateSpinner.getSelectedItemPosition() == Filter.NONE && isChecked)
+						if (dateSpinner.getSelectedItemPosition() == Filter.NONE
+								&& isChecked)
 							dateSpinner.setSelection(Filter.CUSTOM);
-						
+
 						dateSpinner.setEnabled(isChecked);
 						lowerBound.setEnabled(isChecked);
 
@@ -203,16 +227,41 @@ public class FilterActivity extends FragmentActivity implements
 		fillData();
 	}
 
+	/*
+	 * finish with saving or not
+	 */
+	public void finish(boolean save) {
+		if (save) {
+			save();
+			Intent resultIntent = new Intent();
+			resultIntent.putExtra(Filter.class.toString(), filter);
+			setResult(RESULT_OK, resultIntent);
+			finish();
+		} else {
+			setResult(RESULT_CANCELED);
+			finish();
+		}
+	}
+
+	/*
+	 * update the text in the bound views
+	 */
 	public void setBounds() {
 		lowerBound.setText(Filter.millisToText(filter.getLowerBound()));
 		upperBound.setText(Filter.millisToText(filter.getUpperBound() - 1));
 	}
 
+	/*
+	 * enable or disable all the types checkboxes
+	 */
 	private void enableTypesCheckBoxes(boolean enabled) {
 		for (CheckBox box : typeBoxList)
 			box.setEnabled(enabled);
 	}
 
+	/*
+	 * update the displayed informations
+	 */
 	private void fillData() {
 		dateCheckbox.setChecked(filter.isDateFilter());
 
@@ -229,6 +278,31 @@ public class FilterActivity extends FragmentActivity implements
 
 	private void makeToast(String msg) {
 		Toast.makeText(FilterActivity.this, msg, Toast.LENGTH_LONG).show();
+	}
+
+	// ACTION BAR ------------------------
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.activity_filter, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish(true);
+			return true;
+		case R.id.menu_filter_help:
+			if (mTooltipDateFilter == null && this.mTooltipTypesFilter == null
+					&& this.mTooltipInterval == null)
+				nextTooltip(null);
+			return true;
+
+		}
+
+		return super.onOptionsItemSelected(item);
 	}
 
 	// save in filter object
@@ -263,5 +337,69 @@ public class FilterActivity extends FragmentActivity implements
 		}
 
 		setBounds();
+	}
+
+	// TOOLTIPS -------------------
+
+	// display the first or the next tooltip
+	private void nextTooltip(ToolTipView toolTipView) {
+		if (toolTipView == null) {
+			addDateFilterTooltip();
+		} else if (toolTipView == mTooltipDateFilter) {
+			mTooltipDateFilter = null;
+			addIntervalTooltip();
+		} else if (toolTipView == mTooltipInterval) {
+			mTooltipInterval = null;
+			addTypesFilterTooltip();
+		} else if (toolTipView == mTooltipTypesFilter) {
+			mTooltipTypesFilter = null;
+		}
+	}
+
+	private void addDateFilterTooltip() {
+		mTooltipDateFilter = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Enable or disable the \ntime selection.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.activity_filter_date_box));
+		mTooltipDateFilter.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addIntervalTooltip() {
+		mTooltipInterval = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Select the time interval in which you\n want to see the transactions.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.activity_filter_interval_spinner));
+		mTooltipInterval.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addTypesFilterTooltip() {
+		mTooltipTypesFilter = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Enable or disable the type selection. Only\nthe transactions of the selected types\n will be displayed.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.activity_filter_type_box));
+		mTooltipTypesFilter.setOnToolTipViewClickedListener(this);
+	}
+
+	@Override
+	public void onToolTipViewClicked(ToolTipView toolTipView) {
+		nextTooltip(toolTipView);
 	}
 }

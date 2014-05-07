@@ -6,7 +6,8 @@
     </style>
 
     <style name="Theme.Styled.WithDarkSpinner" parent="Theme.Styled">
-<!--         <item name="android:spinnerStyle">@style/DarkSpinner</item> -->
+
+        <!-- <item name="android:spinnerStyle">@style/DarkSpinner</item> -->
         <item name="android:spinnerItemStyle">@style/DarkSpinnerItem</item>
         <item name="android:spinnerDropDownItemStyle">@style/DarkSpinnerDropDownItem</item>
     </style>
@@ -26,6 +27,27 @@
     <style name="TextDark">
         <item name="android:textColor">#999999</item>
     </style>
+
+    <style name="TextTitle">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textColor">#222222</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextItem">
+        <item name="android:textSize">20sp</item>
+<!--         <item name="android:textColor">#222222</item> -->
+    </style>
+    
+    <style name="TextInput">
+        <item name="android:textSize">25sp</item>
+    </style>
+    
+    <style name="TextInputSmall">
+        <item name="android:textSize">20sp</item>
+    </style>
+    
+    
 
     <style name="MenuTitle">
         <item name="android:layout_margin">15dp</item>
@@ -78,17 +100,18 @@
     <style name="DarkSpinner">
         <item name="android:popupBackground">@null</item>
         <item name="android:clickable">true</item>
-
     </style>
 
     <style name="DarkSpinnerItem">
-<!--         <item name="android:background">@drawable/dark_spinner</item> -->
+
+        <!-- <item name="android:background">@drawable/dark_spinner</item> -->
         <item name="android:textColor">#999999</item>
         <item name="android:gravity">center</item>
     </style>
 
     <style name="DarkSpinnerDropDownItem">
-<!--         <item name="android:background">@drawable/dark_spinner</item> -->
+
+        <!-- <item name="android:background">@drawable/dark_spinner</item> -->
         <item name="android:textColor">#999999</item>
         <item name="android:gravity">center</item>
     </style>
