@@ -312,7 +312,7 @@ public class FilterActivity extends SherlockFragmentActivity implements
 		filter.setDateFilter(dateCheckbox.isChecked());
 		filter.setTypeFilter(typeCheckbox.isChecked());
 
-		if (filter.isDateFilter()) {
+		if (filter.isTypeFilter()) {
 			// clear existing list
 			filter.clearTypesList();
 

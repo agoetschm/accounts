@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    style="@style/BaseLayout"
     android:orientation="vertical" >
 
     <LinearLayout
@@ -11,9 +10,9 @@
 
         <EditText
             android:id="@+id/edit_account_name"
-            android:layout_width="wrap_content"
+            style="@style/TextInput"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:hint="@string/edit_account_name"
             android:imeOptions="actionNext" >
         </EditText>
@@ -25,16 +24,17 @@
 
         <Button
             android:id="@+id/edit_account_confirm"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="50"
             android:text="@string/edit_account_confirm" >
         </Button>
-        
-        
+
         <Button
             android:id="@+id/edit_account_delete"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="50"
             android:text="@string/edit_account_delete" >
         </Button>
     </LinearLayout>

@@ -1,0 +1,21 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <com.actionbarsherlock.internal.widget.ics
+        spinner=""
+        android:id="@+id/menu_graph_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"/>
+
+    <item
+        android:id="@+id/menu_graph_filter"
+        android:icon="@drawable/ic_action_settings"
+        android:showAsAction="always|withText"
+        android:title="@string/action_set_filter"/>
+    <item
+        android:id="@+id/menu_graph_help"
+        android:icon="@drawable/ic_action_help"
+        android:showAsAction="always|withText"
+        android:title="@string/action_help"/>
+
+</menu>

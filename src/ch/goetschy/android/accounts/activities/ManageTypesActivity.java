@@ -2,27 +2,23 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.ArrayList;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockListActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+
 import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
-import ch.goetschy.android.accounts.database.TypeTable;
-import ch.goetschy.android.accounts.objects.Account;
-import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Type;
-import android.app.Activity;
-import android.app.ListActivity;
-import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
-public class ManageTypesActivity extends ListActivity {
+public class ManageTypesActivity extends SherlockListActivity {
 
 	private TypesAdapter adapter;
 
@@ -34,6 +30,10 @@ public class ManageTypesActivity extends ListActivity {
 		this.setContentView(R.layout.activity_types);
 		this.getListView().setDividerHeight(2);
 		fillData();
+
+		// ACTION BAR ------------------
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	private void fillData() {
@@ -50,7 +50,7 @@ public class ManageTypesActivity extends ListActivity {
 				}
 			}
 			this.setListAdapter(adapter);
-		} else if(adapter != null)
+		} else if (adapter != null)
 			adapter.clear();
 
 	}
@@ -64,7 +64,7 @@ public class ManageTypesActivity extends ListActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_types, menu);
+		getSupportMenuInflater().inflate(R.menu.activity_types, menu);
 		return true;
 	}
 
@@ -73,6 +73,9 @@ public class ManageTypesActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case R.id.menu_types_add:
 			createType();
+			return true;
+		case android.R.id.home:
+			finish();
 			return true;
 		}
 

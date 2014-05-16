@@ -37,7 +37,7 @@
 
             <Button
                 android:id="@+id/activity_menu_button_coin_detect"
-                style="@style/MenuButton"
+                style="@style/MenuButtonNew"
                 android:layout_below="@+id/activity_menu_button_save"
                 android:text="@string/menu_save_coin_detect" />
 

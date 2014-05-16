@@ -21,6 +21,19 @@
         android:textSize="20sp" >
     </TextView>
     
+    <Button
+        android:id="@+id/activity_overview_add_test"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="6dp"
+        android:gravity="center"
+        android:text="@string/account_overview_add_test"
+        android:textColor="#222222"
+        android:textSize="20sp" >
+
+    </Button>
+    
     
     <com.haarman.supertooltips.ToolTipRelativeLayout
         android:id="@+id/activity_overview_tooltiplayout"

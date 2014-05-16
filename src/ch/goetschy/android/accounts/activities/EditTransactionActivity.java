@@ -15,8 +15,10 @@ import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Type;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -26,6 +28,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -42,6 +45,7 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 	private EditText mDescription;
 	private Spinner mType;
 	private Button mDateButton;
+	private ImageButton mCoinsButton;
 	private long mTimeInMillis;
 	private RadioGroup inOrOutRadio;
 
@@ -49,6 +53,8 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 	private long parent_id;
 
 	private boolean mDelete = false; // do not save -> delete
+	
+	private static final int COINS_DETECT_ACTIVITY = 10;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +65,7 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 		// get widgets
 		mName = (EditText) findViewById(R.id.edit_transaction_name);
 		mAmount = (EditText) findViewById(R.id.edit_transaction_amount);
+		mCoinsButton= (ImageButton) findViewById(R.id.edit_transaction_detect_coins);
 		mDescription = (EditText) findViewById(R.id.edit_transaction_description);
 		mType = (Spinner) findViewById(R.id.edit_transaction_type);
 		mDateButton = (Button) findViewById(R.id.edit_transaction_date_button);
@@ -139,6 +146,16 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 			}
 		});
 
+		// coins detection
+		mCoinsButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(EditTransactionActivity.this, CoinDetectionActivity.class);
+				startActivityForResult(intent, COINS_DETECT_ACTIVITY);
+			}
+		});
+		
+		
 		// confirm button
 		confirmButton.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -242,6 +259,20 @@ public class EditTransactionActivity extends SherlockFragmentActivity implements
 				transaction.getUri());
 		outState.putLong(MyAccountsContentProvider.CONTENT_ACCOUNT_ID_TYPE,
 				parent_id);
+	}
+	
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		switch (requestCode) {
+		case COINS_DETECT_ACTIVITY:
+			if (resultCode == Activity.RESULT_OK) {
+				double detectedAmount = (Double) data.getSerializableExtra(Double.class
+						.toString());
+				mAmount.setText(String.valueOf(detectedAmount));
+			}
+		}
 	}
 	
 

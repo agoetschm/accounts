@@ -2,17 +2,16 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.concurrent.Callable;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
-import ch.goetschy.android.accounts.database.AccountsTable;
-import ch.goetschy.android.accounts.database.TypeTable;
 import ch.goetschy.android.accounts.objects.Account;
-import ch.goetschy.android.accounts.objects.Type;
+import ch.goetschy.android.accounts.objects.Filter;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.database.Cursor;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -21,7 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class EditAccountActivity extends Activity {
+public class EditAccountActivity extends SherlockActivity {
 
 	private EditText mName;
 	private Account account;
@@ -96,6 +95,10 @@ public class EditAccountActivity extends Activity {
 
 			}
 		});
+
+		// ACTION BAR ------------------
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	private void fillData() {
@@ -106,6 +109,7 @@ public class EditAccountActivity extends Activity {
 			baseName = account.getName();
 		}
 	}
+	
 
 	private void makeToast(String message) {
 		Toast.makeText(EditAccountActivity.this, message, Toast.LENGTH_LONG)
@@ -154,6 +158,20 @@ public class EditAccountActivity extends Activity {
 			account.setName(name);
 			account.saveInDB(getContentResolver());
 		}
+	}
+
+	// RETURN IN ACTION BAR ------------------------
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			finish();
+			return true;
+
+		}
+
+		return super.onOptionsItemSelected(item);
 	}
 
 }

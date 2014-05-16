@@ -5,6 +5,7 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.activities.CoinDetectionActivity;
 
 import android.app.ProgressDialog;
@@ -12,8 +13,8 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
-/*
- * detecting coins class
+/**
+ * detecting coins class <br/>
  * takes a bitmap as param and returns the circles
  */
 
@@ -25,11 +26,12 @@ public class DetectCoinsTask extends AsyncTask<Void, Void, Mat> {
 	private int maxRadius;
 	private Bitmap input;
 	private Mat circles;
-	
+
 	private CoinDetectionActivity parent;
 
-	public DetectCoinsTask(CoinDetectionActivity mParent, Bitmap pInput, double mCannyUpperThreshold,
-			double mAccumulator, double mDp, int mMinRadius, int mMaxRadius) {
+	public DetectCoinsTask(CoinDetectionActivity mParent, Bitmap pInput,
+			double mCannyUpperThreshold, double mAccumulator, double mDp,
+			int mMinRadius, int mMaxRadius) {
 		parent = mParent;
 		input = pInput;
 		cannyUpperThreshold = mCannyUpperThreshold;
@@ -38,18 +40,20 @@ public class DetectCoinsTask extends AsyncTask<Void, Void, Mat> {
 		minRadius = mMinRadius;
 		maxRadius = mMaxRadius;
 	}
-	
+
 	@Override
 	protected Mat doInBackground(Void... params) {
 
 		// bmp to mat
 		Mat colorMat = new Mat();
-		Log.w("detectCoins", "bmp to mat");
+		if (BuildConfig.DEBUG)
+			Log.w("detectCoins", "bmp to mat");
 		Utils.bitmapToMat(input, colorMat);
 
 		// gray
 		Mat grayMat = new Mat();
-		Log.w("detectCoins", "gray mat");
+		if (BuildConfig.DEBUG)
+			Log.w("detectCoins", "gray mat");
 		Imgproc.cvtColor(colorMat, grayMat, Imgproc.COLOR_BGR2GRAY);
 
 		// mat of circles
@@ -67,16 +71,18 @@ public class DetectCoinsTask extends AsyncTask<Void, Void, Mat> {
 		// }
 
 		// gaussian blur
-		Log.w("detectCoins", "blur");
+		if (BuildConfig.DEBUG)
+			Log.w("detectCoins", "blur");
 		Imgproc.GaussianBlur(grayMat, grayMat, new Size(9, 9), 3, 3);
 
 		// detecting vars
 
 		// detect circles
-		Log.w("detectCoins", "hough circles");
+		if (BuildConfig.DEBUG)
+			Log.w("detectCoins", "hough circles");
 		Imgproc.HoughCircles(grayMat, circles, Imgproc.CV_HOUGH_GRADIENT, dp,
-				minRadius*2, cannyUpperThreshold, accumulator,
-				minRadius, maxRadius);
+				minRadius * 2, cannyUpperThreshold, accumulator, minRadius,
+				maxRadius);
 
 		// tmp
 		Utils.matToBitmap(grayMat, input);
@@ -88,6 +94,5 @@ public class DetectCoinsTask extends AsyncTask<Void, Void, Mat> {
 	protected void onPostExecute(Mat result) {
 		parent.continueDetectAndCount(result);
 	}
-
 
 }

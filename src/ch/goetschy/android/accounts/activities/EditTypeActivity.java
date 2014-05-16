@@ -2,28 +2,29 @@ package ch.goetschy.android.accounts.activities;
 
 import java.util.concurrent.Callable;
 
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.haarman.supertooltips.ToolTip;
+import com.haarman.supertooltips.ToolTipRelativeLayout;
+import com.haarman.supertooltips.ToolTipView;
+
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.activities.ColorPickerDialog.OnColorChangedListener;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
-import ch.goetschy.android.accounts.database.AccountsTable;
-import ch.goetschy.android.accounts.database.TypeTable;
-import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Type;
-import android.app.Activity;
-import android.database.Cursor;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class EditTypeActivity extends Activity implements
-		OnColorChangedListener {
+public class EditTypeActivity extends SherlockActivity implements
+		OnColorChangedListener, ToolTipView.OnToolTipViewClickedListener  {
 
 	private EditText mName;
 	private Button mColor;
@@ -34,12 +35,17 @@ public class EditTypeActivity extends Activity implements
 	private boolean editing;
 
 	private String baseName = null;
+	
+	private ToolTipView mTooltipColor = null;
+	private ToolTipRelativeLayout mTooltipLayout;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
 		this.setContentView(R.layout.activity_edit_type);
+		
+		mTooltipLayout = (ToolTipRelativeLayout) findViewById(R.id.activity_edit_type_tooltiplayout);
 
 		mName = (EditText) findViewById(R.id.edit_type_name);
 		mColor = (Button) findViewById(R.id.edit_type_color);
@@ -115,6 +121,10 @@ public class EditTypeActivity extends Activity implements
 				}
 			}
 		});
+
+		// ACTION BAR ------------------
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setDisplayHomeAsUpEnabled(true);
 	}
 
 	private void fillData() {
@@ -122,7 +132,6 @@ public class EditTypeActivity extends Activity implements
 			mName.setText(type.getName());
 			mPaint.setColor(type.getColor());
 			mColor.setBackgroundColor(type.getColor());
-			
 
 			// detecting name changing
 			baseName = type.getName();
@@ -155,7 +164,7 @@ public class EditTypeActivity extends Activity implements
 
 			if (name.length() == 0) // if no name
 				return;
-			
+
 			// complexe condition
 			boolean conditionAlreadyExits = false;
 			int occurences = Type.typeNameExists(getContentResolver(), name);
@@ -184,4 +193,58 @@ public class EditTypeActivity extends Activity implements
 		mPaint.setColor(color);
 		mColor.setBackgroundColor(color);
 	}
+
+	// ADD and TYPES BUTTON IN ACTION BAR ------------------------
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getSupportMenuInflater().inflate(R.menu.activity_edit_type, menu);
+		return true;
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.menu_edit_type_help:
+			nextTooltip(null);
+			return true;
+		case android.R.id.home:
+			finish();
+			return true;
+		}
+
+		return super.onOptionsItemSelected(item);
+	}
+
+	
+	// TOOLTIPS -------------------
+
+		// display the first or the next tooltip
+		private void nextTooltip(ToolTipView toolTipView) {
+			if (toolTipView == null) {
+				addColorTooltip();
+			} else if (toolTipView == mTooltipColor) {
+				mTooltipColor = null;
+			}
+		}
+
+		private void addColorTooltip() {
+			mTooltipColor = mTooltipLayout
+					.showToolTipForView(
+							new ToolTip()
+									.withText(
+											"This color will be the background of\nthe transactions with the type\nbeing edited.")
+									.withColor(
+											getResources().getColor(
+													R.color.holo_orange))
+									.withShadow(true),
+							findViewById(R.id.edit_type_color));
+			mTooltipColor
+					.setOnToolTipViewClickedListener(this);
+		}
+
+		@Override
+		public void onToolTipViewClicked(ToolTipView toolTipView) {
+			nextTooltip(toolTipView);
+		}
 }

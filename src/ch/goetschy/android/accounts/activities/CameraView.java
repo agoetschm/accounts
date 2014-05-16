@@ -7,6 +7,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 
+import ch.goetschy.android.accounts.BuildConfig;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -20,7 +22,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceHolder;
 
-public class CameraView extends JavaCameraView{
+public class CameraView extends JavaCameraView {
 
 	private static final String TAG = "cameraView";
 	private static final int CIRCLES_COLOR = Color.BLUE;
@@ -55,7 +57,8 @@ public class CameraView extends JavaCameraView{
 	}
 
 	public void draw(Mat image, Mat circles, int biggest, int thickness) {
-		Log.w(TAG, "begin draw");
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "begin draw");
 
 		// lock surface
 		Canvas canvas = surfaceHolder.lockCanvas();
@@ -63,25 +66,29 @@ public class CameraView extends JavaCameraView{
 		int imgW = image.cols(), imgH = image.rows();
 		offsetLeft = (getWidth() - imgW) / 2;
 		offsetTop = (getHeight() - imgH) / 2;
-		Log.w(TAG, "convert to bmp : " + imgW + " x " + imgH);
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "convert to bmp : " + imgW + " x " + imgH);
 		// convert the Mat to Bitmap
 		Bitmap bmp = Bitmap.createBitmap(imgW, imgH, Bitmap.Config.ARGB_8888);
 		Utils.matToBitmap(image, bmp);
 
-		Log.w(TAG, "draw on canvas");
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "draw on canvas");
 		// draw on canvas
 		canvas.drawBitmap(bmp, offsetLeft, offsetTop, null);
 
 		// for each circle
 		if (circles.cols() > 0) {
-			Log.w(TAG, "circles found " + circles.cols());
+			if (BuildConfig.DEBUG)
+				Log.w(TAG, "circles found " + circles.cols());
 			for (int x = 0; x < circles.cols(); x++) {
 				double circle[] = circles.get(0, x);
 
 				if (circle == null)
 					break;
 
-				Log.w(TAG, "radius : " + circle[2]);
+				if (BuildConfig.DEBUG)
+					Log.w(TAG, "radius : " + circle[2]);
 
 				Paint paint = new Paint();
 				paint.setStyle(Paint.Style.STROKE);
@@ -106,53 +113,55 @@ public class CameraView extends JavaCameraView{
 		// unlock
 		surfaceHolder.unlockCanvasAndPost(canvas);
 	}
-	
+
 	public void draw(Bitmap image, Mat circles) {
-		Log.w(TAG, "begin draw");
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "begin draw");
 
 		// lock surface
 		Canvas canvas = surfaceHolder.lockCanvas();
 
-		Log.w(TAG, "draw bmp on canvas");
-		
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "draw bmp on canvas");
+
 		// fill with black
 		canvas.drawColor(Color.BLACK);
-		
+
 		// get dims of screen and img
-		int screenW = this.getWidth(), 
-			screenH = this.getHeight(),
-			imageW = image.getWidth(),
-			imageH = image.getHeight();
-		
-		double wScale = (double)(screenW) / imageW,
-				hScale = (double)(screenH) / imageH;
-		
+		int screenW = this.getWidth(), screenH = this.getHeight(), imageW = image
+				.getWidth(), imageH = image.getHeight();
+
+		double wScale = (double) (screenW) / imageW, hScale = (double) (screenH)
+				/ imageH;
+
 		// set scale and offsets to fit the screen
-		if(wScale > hScale){ // space on sides
+		if (wScale > hScale) { // space on sides
 			scale = hScale;
 			this.offsetTop = 0;
-			this.offsetLeft =  (int) (screenW - scale * imageW) / 2;
-		}else{ // space on top and bottom
+			this.offsetLeft = (int) (screenW - scale * imageW) / 2;
+		} else { // space on top and bottom
 			scale = wScale;
 			this.offsetLeft = 0;
-			this.offsetTop =   (int) (screenH - scale * imageH) / 2;
+			this.offsetTop = (int) (screenH - scale * imageH) / 2;
 		}
-		
+
 		// draw on canvas
-		canvas.drawBitmap(Bitmap.createScaledBitmap(image, (int)(scale * imageW), (int)(scale * imageH), false), offsetLeft, offsetTop, null);
-		
-		
-		
+		canvas.drawBitmap(Bitmap.createScaledBitmap(image,
+				(int) (scale * imageW), (int) (scale * imageH), false),
+				offsetLeft, offsetTop, null);
+
 		// for each circle
 		if (circles.cols() > 0) {
-			Log.w(TAG, "circles found " + circles.cols());
+			if (BuildConfig.DEBUG)
+				Log.w(TAG, "circles found " + circles.cols());
 			for (int x = 0; x < circles.cols(); x++) {
 				double circle[] = circles.get(0, x);
 
 				if (circle == null)
 					break;
 
-				Log.w(TAG, "radius : " + circle[2]);
+				if (BuildConfig.DEBUG)
+					Log.w(TAG, "radius : " + circle[2]);
 
 				Paint paint = new Paint();
 				paint.setStyle(Paint.Style.STROKE);
@@ -160,13 +169,14 @@ public class CameraView extends JavaCameraView{
 
 				// radius
 				canvas.drawText(String.valueOf(Math.round(circle[2])),
-						(float) (circle[0] * scale + offsetLeft), (float) (circle[1] * scale
-								+ offsetTop), paint);
+						(float) (circle[0] * scale + offsetLeft),
+						(float) (circle[1] * scale + offsetTop), paint);
 
 				paint.setStrokeWidth(3); // thickness
 
 				canvas.drawCircle((float) (circle[0] * scale) + offsetLeft,
-						(float) (circle[1] * scale) + offsetTop, (float) (circle[2] * scale), paint);
+						(float) (circle[1] * scale) + offsetTop,
+						(float) (circle[2] * scale), paint);
 
 			}
 		}
@@ -176,7 +186,8 @@ public class CameraView extends JavaCameraView{
 	}
 
 	public void takePicture(PictureCallback callback) {
-		Log.i(TAG, "Taking picture");
+		if (BuildConfig.DEBUG)
+			Log.i(TAG, "Taking picture");
 		// Postview and jpeg are sent in the same buffers if the queue is not
 		// empty when performing a capture.
 		// Clear up buffers to avoid mCamera.takePicture to be stuck because of

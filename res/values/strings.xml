@@ -67,6 +67,7 @@
     <string name="edit_transaction_yes">Yes</string>
     <string name="edit_transaction_no">No</string>
     
+    <string name="account_overview_add_test">Add test data</string>
     <string name="account_overview_delete">Delete</string>
     <string name="account_overview_edit">Edit</string>
     <string name="activity_overview_add_footer">Add an account</string>
@@ -139,7 +140,7 @@
     <string name="action_add_trans">Add transaction</string>
     <string name="action_set_filter">Set filter</string>
     
-    <string name="action_add_type">Add transaction</string>
+    <string name="action_add_type">Add type</string>
     
     <string name="action_change_type">Change type</string>
     <string name="action_transfer_trans">Transfer</string>

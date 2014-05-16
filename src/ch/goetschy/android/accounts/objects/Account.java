@@ -54,8 +54,7 @@ public class Account extends Item {
 		return listTransactions;
 	}
 
-	
-	/*
+	/**
 	 * Returns a list of trans. Also updates amount.
 	 */
 	public ArrayList<Transaction> getListTransactions(
@@ -100,7 +99,9 @@ public class Account extends Item {
 		return listTransactions;
 	}
 
-	// return only the transactions within the filter's bounds
+	/**
+	 * return only the transactions within the filter's bounds
+	 */
 	public ArrayList<Transaction> getListTransactions(
 			ContentResolver contentResolver, Filter filter) {
 
@@ -118,6 +119,42 @@ public class Account extends Item {
 			}
 		}
 		return filteredTransactions;
+	}
+
+	/**
+	 * get the amount from all transactions under the bound date
+	 */
+	public double getAmountUpTo(ContentResolver contentResolver, long bound) {
+		double amount = 0;
+		if (uri != null) {
+			// projection
+			String[] projection = new String[] { AccountsTable.COLUMN_AMOUNT };
+			// query only amount
+			Cursor cursor = contentResolver.query(
+					MyAccountsContentProvider.CONTENT_URI_TRANSACTIONS,
+					projection, TransactionTable.COLUMN_PARENT + "=" + id
+							+ " AND " + TransactionTable.COLUMN_DATE + "<"
+							+ bound, null, null);
+
+			if (BuildConfig.DEBUG)
+				Log.w("account", " getAmountUpTo cursor movetofirst / size = " + cursor.getCount());
+			if (cursor.moveToFirst()) {
+				while (!cursor.isAfterLast()) {
+					if (BuildConfig.DEBUG)
+						Log.w("account", "getAmountUpTo cursor line " + amount);
+					// add amount
+					amount += cursor.getDouble(cursor
+							.getColumnIndex(TransactionTable.COLUMN_AMOUNT));
+					
+					cursor.moveToNext();
+				}
+				if (BuildConfig.DEBUG)
+					Log.w("account", "cursor close");
+				cursor.close();
+			}
+		}
+
+		return amount;
 	}
 
 	public int getOrder() {
@@ -183,12 +220,11 @@ public class Account extends Item {
 		if (parent != null)
 			values.put(AccountsTable.COLUMN_PARENT, parent.getId());
 
-		if (uri == null){
+		if (uri == null) {
 			uri = contentResolver.insert(
 					MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, values);
 			id = Integer.valueOf(uri.getLastPathSegment());
-		}
-		else
+		} else
 			contentResolver.update(uri, values, null, null);
 
 	}
@@ -198,7 +234,7 @@ public class Account extends Item {
 		ContentValues values = new ContentValues();
 
 		values.put(AccountsTable.COLUMN_AMOUNT, amount);
-		
+
 		Log.w("account", "save amount; uri = " + uri);
 		if (uri != null)
 			contentResolver.update(uri, values, null, null);
@@ -212,19 +248,19 @@ public class Account extends Item {
 		Cursor cursor = contentResolver.query(
 				MyAccountsContentProvider.CONTENT_URI_ACCOUNTS, null, null,
 				null, null);
-//		if (BuildConfig.DEBUG)
-//			Log.w("account", "cursor movetofirst");
+		// if (BuildConfig.DEBUG)
+		// Log.w("account", "cursor movetofirst");
 		if (cursor.moveToFirst()) {
 			while (!cursor.isAfterLast()) {
-//				if (BuildConfig.DEBUG)
-//					Log.w("account", "cursor line");
+				// if (BuildConfig.DEBUG)
+				// Log.w("account", "cursor line");
 
 				listAccounts.add(new Account(cursor));
 
 				cursor.moveToNext();
 			}
-//			if (BuildConfig.DEBUG)
-//				Log.w("account", "cursor close");
+			// if (BuildConfig.DEBUG)
+			// Log.w("account", "cursor close");
 			cursor.close();
 
 		}

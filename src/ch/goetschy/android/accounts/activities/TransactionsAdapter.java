@@ -33,7 +33,8 @@ public class TransactionsAdapter extends ArrayAdapter<Transaction> {
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-		Log.w("transactionsAdapter", "begin");
+		if (BuildConfig.DEBUG)
+			Log.w("transactionsAdapter", "begin");
 		View rowView = inflater.inflate(R.layout.activity_detail_item, parent,
 				false);
 

@@ -6,6 +6,7 @@ import java.util.Calendar;
 
 import ch.goetschy.android.accounts.BuildConfig;
 
+import android.content.ContentResolver;
 import android.util.Log;
 
 public class Filter implements Serializable {
@@ -80,6 +81,14 @@ public class Filter implements Serializable {
 
 	public ArrayList<Type> getTypesList() {
 		return typesList;
+	}
+
+	public ArrayList<Type> getTypesList(ContentResolver contentResolver) {
+		if (this.isTypeFilter())
+			return typesList;
+		else
+			return Type.getTypes(contentResolver);
+		
 	}
 
 	public void setTypesList(ArrayList<Type> typesList) {
@@ -229,7 +238,7 @@ public class Filter implements Serializable {
 	 * Adapts the filter to display transactions in the filter (with the last),
 	 * but not too many of them.
 	 */
-	public void adaptToAccount(Account account){
+	public void adaptToAccount(Account account) {
 		// TODO
 		setInterval(Filter.NONE);
 	}

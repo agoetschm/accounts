@@ -24,11 +24,17 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import com.haarman.supertooltips.ToolTip;
+import com.haarman.supertooltips.ToolTipRelativeLayout;
+import com.haarman.supertooltips.ToolTipView;
+
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.engine.DetectCoinsTask;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -47,13 +53,15 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 public class CoinDetectionActivity extends Activity implements
-		CvCameraViewListener2, OnTouchListener, PictureCallback {
+		CvCameraViewListener2, OnTouchListener, PictureCallback,
+		ToolTipView.OnToolTipViewClickedListener {
 	private static final String TAG = "coinDetection";
 	private static final int REQ_WIDTH = 1024, REQ_HEIGHT = 768;
 	private static final int FPS = 10;
@@ -68,14 +76,15 @@ public class CoinDetectionActivity extends Activity implements
 	private Button startButton;
 	private Button quitButton;
 	private Button showSettingsButton;
+	private ImageButton helpButton;
 	private View settingsLayout;
 	private View biggestLayout;
 	private Spinner biggestSpinner;
 	private CheckBox torchCheckbox;
 
 	private boolean detectionOn;
-	private boolean countingOn;
 	private boolean settingsOn;
+	private boolean pictureTaken;
 
 	private double amount;
 	private int biggestCoinInd;
@@ -86,17 +95,21 @@ public class CoinDetectionActivity extends Activity implements
 	double maxiAccumulator = 400;
 	double maxiDp = 6;
 	double maxiMinRadius = 100;
-	double maxiMaxRadius = 300;
+	double maxiMaxRadius = 600;
 	double iCannyUpperThreshold = 50;
 	double iAccumulator = 100;
-	double iDp = 1.0;
+	double iDp = 1.3;
 	double iMinRadius = 20;
-	double iMaxRadius = 100;
-
-	private int circlesLineThickness = 5;
+	double iMaxRadius = 250;
 
 	private Bitmap mPicture;
-	
+	private Bitmap copy;
+
+	private ToolTipView mTooltipSettings = null;
+	private ToolTipView mTooltipSettingsBut = null;
+	private ToolTipView mTooltipDetectBut = null;
+	private ToolTipRelativeLayout mTooltipLayout;
+
 	// for loading spinner
 	private ProgressDialog progressDialog;
 	private boolean detectingTaskWorking;
@@ -125,10 +138,10 @@ public class CoinDetectionActivity extends Activity implements
 
 		// init vars
 		detectionOn = false;
-		countingOn = false;
 		settingsOn = true; // show settings
 		amount = 0;
 		biggestCoinInd = 0;
+		pictureTaken = false;
 		detectingTaskWorking = false;
 
 		// keep screen on
@@ -136,6 +149,9 @@ public class CoinDetectionActivity extends Activity implements
 
 		// set layout
 		setContentView(R.layout.activity_coin_detect);
+
+		// set tooltip view
+		mTooltipLayout = (ToolTipRelativeLayout) findViewById(R.id.activity_coin_detect_tooltiplayout);
 
 		// set camera
 		mCameraView = (CameraView) findViewById(R.id.openCvView);
@@ -150,6 +166,7 @@ public class CoinDetectionActivity extends Activity implements
 		startButton = (Button) findViewById(R.id.coin_detect_button_start);
 		quitButton = (Button) findViewById(R.id.coin_detect_button_quit);
 		showSettingsButton = (Button) findViewById(R.id.coin_detect_button_settings);
+		helpButton = (ImageButton) findViewById(R.id.coin_detect_button_help);
 		settingsLayout = (View) findViewById(R.id.coin_detect_settings);
 		biggestLayout = (View) findViewById(R.id.coin_detect_biggest_value);
 		biggestSpinner = (Spinner) findViewById(R.id.coin_detect_biggest_value_spinner);
@@ -168,29 +185,23 @@ public class CoinDetectionActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				if (detectionOn) { // if already detecting
-					if (countingOn) { // if already counted
-						// add amount in extras
-						// TODO
-						finish();
-					} else { // start counting coins
-						countingOn = true;
-
-						Log.w(TAG, "disable view");
-						// no preview any more, the last is saved
-						// if (mCameraView != null)
-						// mCameraView.disableView();
-
-						mCameraView.takePicture(CoinDetectionActivity.this); // give
-																				// itself
-																				// as
-																				// callback
-					}
+					finish(true); // return the amount to parent activity
 				} else { // start detection
 					detectionOn = true;
-					// set the low frame rate
-					mCameraView.setFps(FPS);
+					if (BuildConfig.DEBUG)
+						Log.w(TAG, "disable view");
+					// no preview any more, the last is saved
+					// if (mCameraView != null)
+					// mCameraView.disableView();
+
 					// set text
 					startButton.setText("Count coins");
+
+					mCameraView.takePicture(CoinDetectionActivity.this); // give
+																			// itself
+																			// as
+																			// callback
+
 				}
 			}
 		});
@@ -217,7 +228,17 @@ public class CoinDetectionActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				// quit activity
-				finish();
+				finish(false);
+			}
+		});
+
+		helpButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// show tooltip
+				if (mTooltipSettings == null && mTooltipSettingsBut == null
+						&& mTooltipDetectBut == null)
+					nextTooltip(null);
 			}
 		});
 
@@ -266,89 +287,118 @@ public class CoinDetectionActivity extends Activity implements
 		seekBar5.setProgress((int) (iMaxRadius / maxiMaxRadius * 100));
 
 		final TextView tv1 = (TextView) findViewById(R.id.coin_detect_button_seekbar1_text);
-		tv1.setText("iCannyUpperThreshold = " + iCannyUpperThreshold);
+		tv1.setText("canny upper threshold = " + iCannyUpperThreshold);
 		final TextView tv2 = (TextView) findViewById(R.id.coin_detect_button_seekbar2_text);
-		tv2.setText("iAccumulator = " + iAccumulator);
+		tv2.setText("accumulator = " + iAccumulator);
 		final TextView tv3 = (TextView) findViewById(R.id.coin_detect_button_seekbar3_text);
-		tv3.setText("iDp = " + iDp);
+		tv3.setText("dp = " + iDp);
 		final TextView tv4 = (TextView) findViewById(R.id.coin_detect_button_seekbar4_text);
-		tv4.setText("iMinRadius = " + iMinRadius);
+		tv4.setText("min radius = " + iMinRadius);
 		final TextView tv5 = (TextView) findViewById(R.id.coin_detect_button_seekbar5_text);
-		tv5.setText("iMaxRadius = " + iMaxRadius);
+		tv5.setText("max radius = " + iMaxRadius);
 
 		seekBar1.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
 				iCannyUpperThreshold = ((double) progress) / 100.0
 						* maxiCannyUpperThreshold;
-				tv1.setText("iCannyUpperThreshold = " + iCannyUpperThreshold);
+				tv1.setText("canny upper threshold = " + iCannyUpperThreshold);
 
-				if (countingOn)
+				if (detectionOn)
 					detectAndCount();
 			}
 
-			public void onStartTrackingTouch(SeekBar seekBar) {	}
-			public void onStopTrackingTouch(SeekBar seekBar) {}
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
 		});
 
 		seekBar2.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
 				iAccumulator = ((double) progress) / 100.0 * maxiAccumulator;
-				tv2.setText("iAccumulator = " + iAccumulator);
+				tv2.setText("accumulator = " + iAccumulator);
 
-				if (countingOn)
+				if (detectionOn)
 					detectAndCount();
 			}
 
-			public void onStartTrackingTouch(SeekBar seekBar) {	}
-			public void onStopTrackingTouch(SeekBar seekBar) {}
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
 		});
 
 		seekBar3.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
 				iDp = ((double) progress) / 100.0 * maxiDp;
-				tv3.setText("iDp = " + iDp);
+				tv3.setText("dp = " + iDp);
 
-				if (countingOn)
+				if (detectionOn)
 					detectAndCount();
 			}
 
-			public void onStartTrackingTouch(SeekBar seekBar) {	}
-			public void onStopTrackingTouch(SeekBar seekBar) {}
-		});
-		
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
 
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
+		});
 
 		seekBar4.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
 				iMinRadius = ((double) progress) / 100.0 * maxiMinRadius;
-				tv4.setText("iMinRadius = " + iMinRadius);
+				tv4.setText("min radius = " + iMinRadius);
 
-				if (countingOn)
+				if (detectionOn)
 					detectAndCount();
 			}
-			public void onStartTrackingTouch(SeekBar seekBar) {	}
-			public void onStopTrackingTouch(SeekBar seekBar) {}
-		});
-		
 
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
+		});
 
 		seekBar5.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
 			public void onProgressChanged(SeekBar seekBar, int progress,
 					boolean fromUser) {
 				iMaxRadius = ((double) progress) / 100.0 * maxiMaxRadius;
-				tv5.setText("iMaxRadius = " + iMaxRadius);
+				tv5.setText("max radius = " + iMaxRadius);
 
-				if (countingOn)
+				if (detectionOn)
 					detectAndCount();
 			}
-			public void onStartTrackingTouch(SeekBar seekBar) {	}
-			public void onStopTrackingTouch(SeekBar seekBar) {}
+
+			public void onStartTrackingTouch(SeekBar seekBar) {
+			}
+
+			public void onStopTrackingTouch(SeekBar seekBar) {
+			}
 		});
 
+	}
+	
+
+	/**
+	 * finish with saving or not
+	 */
+	public void finish(boolean save) {
+		if (save) {
+			Intent resultIntent = new Intent();
+			resultIntent.putExtra(Double.class.toString(), amount);
+			setResult(RESULT_OK, resultIntent);
+			finish();
+		} else {
+			setResult(RESULT_CANCELED);
+			finish();
+		}
 	}
 
 	@Override
@@ -388,24 +438,7 @@ public class CoinDetectionActivity extends Activity implements
 	@Override
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 
-		if (detectionOn) {
-			// temp
-			Mat grayFrame = inputFrame.gray();
-			// end temp
-
-			// detect
-			Mat circles = detectCoins(grayFrame);
-
-			// draw circles
-			grayFrame = drawCircles(grayFrame, circles);
-
-			// save circles
-			lastCircles = circles;
-
-			// mat with circles drawn
-			return grayFrame;
-		} else
-			return inputFrame.rgba();
+		return inputFrame.rgba();
 
 	}
 
@@ -418,6 +451,11 @@ public class CoinDetectionActivity extends Activity implements
 
 	// count the coins and their sizes
 	private void computeAmount() {
+		if (pictureTaken == false)
+			return;
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "start compute amount");
+
 		double scale = biggestCircleSize / COIN_SIZES[biggestCoinInd];
 		ArrayList<Double> scaledSizes = new ArrayList<Double>();
 
@@ -426,7 +464,8 @@ public class CoinDetectionActivity extends Activity implements
 
 		for (int i = 0; i < numberCoins; i++) {
 			scaledSizes.add(COIN_SIZES[i] * scale); // scale the sizes
-			Log.w(TAG, "scaled : " + scaledSizes.get(i));
+			if (BuildConfig.DEBUG)
+				Log.w(TAG, "scaled : " + scaledSizes.get(i));
 		}
 
 		// value of each coin detected
@@ -459,50 +498,22 @@ public class CoinDetectionActivity extends Activity implements
 
 			}
 
+			if (BuildConfig.DEBUG)
+				Log.w(TAG, "coin : " + COIN_VALUES[minDiffInd]);
+			
 			// add to list
 			values.add(COIN_VALUES[minDiffInd]);
 			// and to amount
 			amount += COIN_VALUES[minDiffInd];
 			// **************************
 		}
-
+		
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "amount : " + amount);
+		Log.w(TAG, "amount * 100 rounded : " + Math.round(amount * 100));
 		// display amount in button
-		startButton.setText("Amount : " + Math.round(amount*100)/100 + " CHF");
-	}
-
-	private Mat detectCoins(Mat input) {
-		// gray
-		Mat grayFrame = input;
-
-		// mat of circles
-		Mat circles = new Mat();
-
-		// higher contrast
-		// int cols = grayFrame.cols();
-		// int rows = grayFrame.rows();
-		// for (int i = 0; i < cols; i++) {
-		// for (int j = 0; j < rows; j++) {
-		// double[] pix = grayFrame.get(j, i);
-		// pix[0] *= 2;
-		// grayFrame.put(j, i, pix);
-		// }
-		// }
-
-		// gaussian blur
-		Imgproc.GaussianBlur(grayFrame, grayFrame, new Size(9, 9), 2, 2);
-
-		// detecting vars
-		int iMinRadius = 20;
-		int iMaxRadius = 150;
-
-		// Imgproc.HoughCircles(grayFrame, circles,
-		// Imgproc.CV_HOUGH_GRADIENT, iAccumulator, iMinRadius);
-		// detect circles
-		Imgproc.HoughCircles(grayFrame, circles, Imgproc.CV_HOUGH_GRADIENT,
-				iDp, grayFrame.rows() / 8, iCannyUpperThreshold, iAccumulator,
-				iMinRadius, iMaxRadius);
-
-		return circles;
+		startButton.setText("Amount : " + ((double)Math.round(amount * 100) / 100.0)
+				+ " CHF");
 	}
 
 	// TODO
@@ -515,7 +526,6 @@ public class CoinDetectionActivity extends Activity implements
 	// return circles;
 	// }
 
-
 	// get the biggest circle from lastCircles
 	private int getBiggestCircle() {
 		int biggestIndex = 0;
@@ -525,7 +535,8 @@ public class CoinDetectionActivity extends Activity implements
 		if (cols < 1)
 			return -1;
 
-		Log.w(TAG, "biggest circle");
+		if (BuildConfig.DEBUG)
+			Log.w(TAG, "biggest circle");
 		for (int x = 0; x < cols; x++) {
 			double circle[] = lastCircles.get(0, x);
 
@@ -542,46 +553,20 @@ public class CoinDetectionActivity extends Activity implements
 		return biggestIndex;
 	}
 
-	private Mat drawCircles(Mat image, Mat circles) {
-		// thickness
-
-		// for each circle
-		if (circles.cols() > 0) {
-			Log.w(TAG, "circles found " + circles.cols());
-			for (int x = 0; x < circles.cols(); x++) {
-				double vCircle[] = circles.get(0, x);
-
-				if (vCircle == null)
-					break;
-
-				Log.w(TAG, "circle " + x + " : " + vCircle[0] + " "
-						+ vCircle[1] + " " + vCircle[2]);
-
-				Point pt = new Point(Math.round(vCircle[0]),
-						Math.round(vCircle[1]));
-				int radius = (int) Math.round(vCircle[2]);
-
-				// draw the found circle
-				Core.circle(image, pt, radius, new Scalar(0, 0, 0),
-						circlesLineThickness);
-			}
-		}
-
-		return image;
-	}
-
 	@Override
 	public void onPictureTaken(byte[] data, Camera camera) {
 		// spinner
 		showLoadingDialog();
-		
+
 		// load size
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
-		Log.w("pictureTaken", "width : " + options.outWidth);
-		Log.w("pictureTaken", "height: " + options.outHeight);
+		if (BuildConfig.DEBUG) {
+			Log.w("pictureTaken", "width : " + options.outWidth);
+			Log.w("pictureTaken", "height: " + options.outHeight);
+		}
 
 		// set scale
 		options.inSampleSize = calculateInSampleSize(options, REQ_WIDTH,
@@ -591,8 +576,10 @@ public class CoinDetectionActivity extends Activity implements
 		options.inJustDecodeBounds = false;
 		mPicture = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
-		Log.w("pictureTaken", "width scaled : " + options.outWidth);
-		Log.w("pictureTaken", "height scaled: " + options.outHeight);
+		if (BuildConfig.DEBUG) {
+			Log.w("pictureTaken", "width scaled : " + options.outWidth);
+			Log.w("pictureTaken", "height scaled: " + options.outHeight);
+		}
 
 		// detect and count
 		detectAndCount();
@@ -611,23 +598,28 @@ public class CoinDetectionActivity extends Activity implements
 
 	// do detecting and counting (called when params change or picture taken)
 	private void detectAndCount() {
-		if(this.detectingTaskWorking) // prevent two detecting tasks
+		if (this.detectingTaskWorking) // prevent two detecting tasks
 			return;
 		detectingTaskWorking = true;
-		
+
 		// progress spinner if not already
-		if(progressDialog.isShowing() == false)
+		if (progressDialog.isShowing() == false)
 			this.showLoadingDialog();
-		
+
+		copy = mPicture.copy(Bitmap.Config.ARGB_8888, true);
 		// detection
-		DetectCoinsTask task = new DetectCoinsTask(this, mPicture, iCannyUpperThreshold,
-				iAccumulator, iDp, (int)iMinRadius, (int)iMaxRadius);
+		DetectCoinsTask task = new DetectCoinsTask(this, copy,
+				iCannyUpperThreshold, iAccumulator, iDp, (int) iMinRadius,
+				(int) iMaxRadius);
 		task.execute();
 	}
-	public void continueDetectAndCount(Mat resultCircles){ // CALL ONLY FROM DetectCoinsTask !!!
-		
+
+	public void continueDetectAndCount(Mat resultCircles) { // CALL ONLY FROM
+															// DetectCoinsTask
+															// !!!
+
 		lastCircles = resultCircles;
-		
+
 		// biggest coin
 		int biggestCircleInd = getBiggestCircle();
 		if (biggestCircleInd == -1)
@@ -636,14 +628,17 @@ public class CoinDetectionActivity extends Activity implements
 			biggestCircleSize = lastCircles.get(0, biggestCircleInd)[2];
 
 		// draw the last frame and the circles
-		mCameraView.draw(mPicture, lastCircles);
+		mCameraView.draw(copy/* mPicture */, lastCircles);
+
+		// allows to compute amount
+		pictureTaken = true;
 		
 		// (re)compute the amount
 		computeAmount();
-		
+
 		// stop spinner
 		this.progressDialog.dismiss();
-		
+
 		// "unlock"
 		detectingTaskWorking = false;
 	}
@@ -672,11 +667,72 @@ public class CoinDetectionActivity extends Activity implements
 
 		return inSampleSize;
 	}
-	
+
 	// loading dialog
-	private void showLoadingDialog(){
+	private void showLoadingDialog() {
 		progressDialog = new ProgressDialog(this, ProgressDialog.STYLE_SPINNER);
 		progressDialog.setMessage("Loading...");
 		progressDialog.show();
+	}
+
+	// TOOLTIPS -------------------
+
+	// display the first or the next tooltip
+	private void nextTooltip(ToolTipView toolTipView) {
+		if (toolTipView == null) {
+			addSettingsTooltip();
+		} else if (toolTipView == mTooltipSettings) {
+			mTooltipSettings = null;
+			addSettingsButTooltip();
+		} else if (toolTipView == mTooltipSettingsBut) {
+			mTooltipSettingsBut = null;
+			addDetectButTooltip();
+		} else if (toolTipView == mTooltipDetectBut) {
+			mTooltipDetectBut = null;
+		}
+	}
+
+	private void addSettingsTooltip() {
+		mTooltipSettings = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Here are different parameters for the circle detection\nfunction. Will be better documented in a\nfurther version.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true),
+						findViewById(R.id.coin_detect_button_seekbar1));
+		mTooltipSettings.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addSettingsButTooltip() {
+		mTooltipSettingsBut = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText("Hide/display the settings field.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true), showSettingsButton);
+		mTooltipSettingsBut.setOnToolTipViewClickedListener(this);
+	}
+
+	private void addDetectButTooltip() {
+		mTooltipDetectBut = mTooltipLayout
+				.showToolTipForView(
+						new ToolTip()
+								.withText(
+										"Click here to take a picture and detect some\ncoins. The value will then be displayed\nin this button.")
+								.withColor(
+										getResources().getColor(
+												R.color.holo_orange))
+								.withShadow(true), startButton);
+		mTooltipDetectBut.setOnToolTipViewClickedListener(this);
+	}
+
+	@Override
+	public void onToolTipViewClicked(ToolTipView toolTipView) {
+		nextTooltip(toolTipView);
 	}
 }

@@ -44,6 +44,22 @@ public class Transaction extends Item implements Savable {
 		setDescription(p_description);
 		setDate(p_date);
 	}
+	
+	public Transaction(Item p_parent, double p_amount, String p_name, long p_date) {
+		super();
+		setType(new Type());
+		setDescription("");
+		setDate(p_date);
+		setAmount(p_amount);
+		setName(p_name);
+		setParent(p_parent);
+	}
+	
+	public Transaction(Item p_parent, double p_amount, String p_name, Type p_type, long p_date) {
+		this(p_parent, p_amount, p_name, p_date);
+		setType(p_type);
+	}
+
 
 	public Type getType() {
 		return type;

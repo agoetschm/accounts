@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+    <string-array name="graph_types">
+        <item>TIME GRAPH</item>
+        <item>TYPES GRAPH</item>
+        <item>TIME GRAPH FOR EACH TYPE</item>
+    </string-array>
+
+</resources>

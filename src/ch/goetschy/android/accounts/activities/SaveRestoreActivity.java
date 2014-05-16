@@ -27,6 +27,7 @@ import com.haarman.supertooltips.ToolTip;
 import com.haarman.supertooltips.ToolTipRelativeLayout;
 import com.haarman.supertooltips.ToolTipView;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.Filter;
@@ -274,7 +275,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 		// if loading failed
 		if (root == null) {
 			makeToast("Loading failed ! Invalid file content.");
-			Log.w("saveRestore", "root node == null");
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "root node == null");
 			return;
 		}
 
@@ -288,7 +290,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 		previewContent = new ArrayList<Tree>();
 		while (actNode != root) {
 			// next node
-			Log.w("saveRestore", "actNode : " + actNode.getType());
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "actNode : " + actNode.getType());
 			actNode = actNode.getNextNode(root, filter);
 			// add to list
 			if (actNode != root)
@@ -324,7 +327,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 			for (int i = 0; i < size; i++) {
 				Tree node = previewContent.get(i);
 				if (node.getType().equals(TAG_TYPE)) { // only for types
-					Log.w("saveRestore", "preview : " + node.getType());
+					if (BuildConfig.DEBUG)
+						Log.w("saveRestore", "preview : " + node.getType());
 
 					// construct element
 					mPreviewLayout.addView(constructPreviewElement(node,
@@ -347,7 +351,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 		for (int i = 0; i < size; i++) {
 			Tree node = previewContent.get(i);
 			if (node.getType().equals(TAG_ACCOUNT)) { // only for accounts
-				Log.w("saveRestore", "preview : " + node.getType());
+				if (BuildConfig.DEBUG)
+					Log.w("saveRestore", "preview : " + node.getType());
 
 				// construct element
 				mPreviewLayout.addView(constructPreviewElement(node,
@@ -476,7 +481,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 
 					if (!vide) {
 						actNode.setData(dataStr);
-						Log.w("saveRestore", "data : " + dataStr);
+						if (BuildConfig.DEBUG)
+							Log.w("saveRestore", "data : " + dataStr);
 					}
 
 					openTag = true;
@@ -491,18 +497,22 @@ public class SaveRestoreActivity extends SherlockActivity implements
 					String tagStr = actWord.toString();
 					if (closingTag) {
 						if (tagStr.equals(actNode.getType())) {
-							Log.w("saveRestore",
-									"close tag : " + actNode.getType());
+							if (BuildConfig.DEBUG)
+								Log.w("saveRestore",
+										"close tag : " + actNode.getType());
 							actNode = actNode.getParent(); // close node
 						} else {
-							Log.w("saveRestore", "------> problem : " + tagStr
-									+ " != " + actNode.getType());
+							if (BuildConfig.DEBUG)
+								Log.w("saveRestore", "------> problem : "
+										+ tagStr + " != " + actNode.getType());
 							return null;
 						}
 					} else { // opening tag
 						// add node
 						actNode = actNode.addChild(tagStr);
-						Log.w("saveRestore", "open tag : " + actNode.getType());
+						if (BuildConfig.DEBUG)
+							Log.w("saveRestore",
+									"open tag : " + actNode.getType());
 					}
 
 					openTag = false;
@@ -511,8 +521,9 @@ public class SaveRestoreActivity extends SherlockActivity implements
 				} else {
 					// content of a tag must be a letter
 					if (openTag && (charac > 'z' || charac < 'A')) {
-						Log.w("saveRestore", "openTag and " + charac
-								+ " is not a letter !");
+						if (BuildConfig.DEBUG)
+							Log.w("saveRestore", "openTag and " + charac
+									+ " is not a letter !");
 					}
 
 					// only append if
@@ -548,7 +559,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 			makeToast("There is no file loaded (preview).");
 			return;
 		}
-		Log.w("saveRestore", "restore from " + from);
+		if (BuildConfig.DEBUG)
+			Log.w("saveRestore", "restore from " + from);
 
 		// retore each element checked
 		int size = previewContent.size();
@@ -593,7 +605,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 																				// name
 																				// already
 																				// exits
-			Log.w("saveRestore", "restore account : name exists");
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "restore account : name exists");
 			// edit text
 			final EditText input = new EditText(this);
 			input.setHint(name); // with hint
@@ -610,12 +623,14 @@ public class SaveRestoreActivity extends SherlockActivity implements
 											getContentResolver(), newName) == 0) { // valid
 																					// new
 																					// name
-								Log.w("saveRestore",
-										"restore account : new name valid");
+								if (BuildConfig.DEBUG)
+									Log.w("saveRestore",
+											"restore account : new name valid");
 								restoreAccountWithValidName(fNode, newName);
 							} else {
-								Log.w("saveRestore",
-										"restore account : new name invalid");
+								if (BuildConfig.DEBUG)
+									Log.w("saveRestore",
+											"restore account : new name invalid");
 								makeToast("Invalid new name : account ignored.");
 							}
 
@@ -639,7 +654,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 	}
 
 	private void restoreAccountWithValidName(Tree node, String name) {
-		Log.w("saveRestore", "restore with name " + name);
+		if (BuildConfig.DEBUG)
+			Log.w("saveRestore", "restore with name " + name);
 
 		Account newAccount = new Account();
 		newAccount.setName(name);
@@ -662,10 +678,13 @@ public class SaveRestoreActivity extends SherlockActivity implements
 		double amount = 0;
 
 		for (Tree transNode : transactionsNodeList) {
-			Log.w("saveRestore", "transNode");
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "transNode");
 
 			if (!transNode.getType().equals(TAG_TRANSACTION)) {
-				Log.w("saveRestore", "transNode type " + transNode.getType());
+				if (BuildConfig.DEBUG)
+					Log.w("saveRestore",
+							"transNode type " + transNode.getType());
 				continue; // jump
 			}
 
@@ -678,12 +697,15 @@ public class SaveRestoreActivity extends SherlockActivity implements
 
 			// construct transaction
 			Transaction trans = new Transaction();
-			Log.w("saveRestore", "setFields");
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "setFields");
 			if (!trans.setFields(fields)) {
-				Log.w("saveRestore", "restore transaction fields failed");
+				if (BuildConfig.DEBUG)
+					Log.w("saveRestore", "restore transaction fields failed");
 				continue; // jump this trans
 			}
-			Log.w("saveRestore", "fields set");
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "fields set");
 			// set parent
 			trans.setParent(newAccount);
 			// set type (special case bacause it needs the content resolver)
@@ -693,7 +715,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 			// cumulate amount
 			amount += trans.getAmount();
 
-			Log.w("saveRestore", "save trans");
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "save trans");
 			// save trans
 			trans.saveInDB(getContentResolver());
 		}
@@ -715,13 +738,15 @@ public class SaveRestoreActivity extends SherlockActivity implements
 			return;
 		}
 
-		Log.w("restore type", "type " + name + " doesn't exist");
+		if (BuildConfig.DEBUG)
+			Log.w("restore type", "type " + name + " doesn't exist");
 
 		// fields
 		HashMap<String, String> fields = new HashMap<String, String>();
 		for (Tree field : node.getChildren()) {
 			fields.put(field.getType(), field.getData());
-			Log.w("saveRestore", "put field " + field.getType());
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "put field " + field.getType());
 		}
 
 		// new Type
@@ -729,13 +754,14 @@ public class SaveRestoreActivity extends SherlockActivity implements
 		newType.setFields(fields);
 
 		if (!newType.setFields(fields)) {
-			Log.w("saveRestore", "restore type fields failed");
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "restore type fields failed");
 			return; // jump this type
 		}
 
-		Log.w("saveRestore", "save type");
+		if (BuildConfig.DEBUG)
+			Log.w("saveRestore", "save type");
 		newType.saveInDB(getContentResolver());
-		Log.w("saveRestore", "type saved");
 	}
 
 	// save file
@@ -778,7 +804,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 		// delete, in case it already exists
 		path.delete();
 
-		Log.w("saveRestore", "filename : " + filename);
+		if (BuildConfig.DEBUG)
+			Log.w("saveRestore", "filename : " + filename);
 
 		makeToast("Saving " + filename + "...");
 
@@ -844,7 +871,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 			}
 		}
 
-		Log.w("saveRestore", "tree constructed, writing to file");
+		if (BuildConfig.DEBUG)
+			Log.w("saveRestore", "tree constructed, writing to file");
 
 		// END OF TREE -------------------
 
@@ -871,8 +899,10 @@ public class SaveRestoreActivity extends SherlockActivity implements
 			// open node
 			writeToFile(writer, node.getType(), null, false, indentLevel);
 
-			Log.w("saveRestore", "saveElement : " + node.getType());
-			Log.w("saveRestore", "fields : " + node.getChildren());
+			if (BuildConfig.DEBUG) {
+				Log.w("saveRestore", "saveElement : " + node.getType());
+				Log.w("saveRestore", "fields : " + node.getChildren());
+			}
 
 			// each child node
 			for (Tree child : node.getChildren()) {
@@ -914,7 +944,8 @@ public class SaveRestoreActivity extends SherlockActivity implements
 		}
 		// write
 		try {
-			Log.w("saveRestore", "write : " + buffer);
+			if (BuildConfig.DEBUG)
+				Log.w("saveRestore", "write : " + buffer);
 			writer.write(buffer);
 		} catch (Exception e) {
 			e.printStackTrace();

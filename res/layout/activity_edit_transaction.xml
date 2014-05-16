@@ -31,28 +31,44 @@
             <TextView
                 style="@style/TextInput"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="40"
+                android:gravity="center|left"
                 android:text="@string/edit_transaction_amount_label" />
 
-            <EditText
-                android:id="@+id/edit_transaction_amount"
-                style="@style/TextInput"
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="30"
-                android:digits="-0123456789."
-                android:gravity="right"
-                android:hint="@string/edit_transaction_amount"
-                android:inputType="numberSigned|numberDecimal" >
-            </EditText>
+                android:orientation="vertical" >
+
+                <EditText
+                    android:id="@+id/edit_transaction_amount"
+                    style="@style/TextInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="50"
+                    android:digits="-0123456789."
+                    android:gravity="right"
+                    android:hint="@string/edit_transaction_amount"
+                    android:inputType="numberSigned|numberDecimal" >
+                </EditText>
+                
+                <ImageButton 
+                    android:id="@+id/edit_transaction_detect_coins"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="50" 
+                    android:src="@drawable/ic_action_camera"
+                    android:contentDescription="Coins"/>
+            </LinearLayout>
 
             <RadioGroup
                 android:id="@+id/edit_transaction_radio"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
+                android:layout_gravity="center|right"
                 android:layout_weight="30"
                 android:orientation="vertical" >
 
@@ -117,9 +133,8 @@
             <TextView
                 android:id="@+id/edit_transaction_date_label"
                 style="@style/TextInput"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
-                android:layout_margin="5dp"
                 android:layout_marginLeft="10dp"
                 android:layout_weight="30"
                 android:gravity="center|left"
@@ -129,8 +144,9 @@
             <Button
                 android:id="@+id/edit_transaction_date_button"
                 style="@style/TextInput"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
                 android:layout_weight="70" />
         </LinearLayout>
 

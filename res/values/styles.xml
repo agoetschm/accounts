@@ -85,6 +85,10 @@
         <item name="android:textSize">22sp</item>
         <item name="android:layout_margin">5dp</item>
     </style>
+    
+    <style name="MenuButtonNew" parent="MenuButton">
+        <item name="android:drawableLeft">@drawable/ic_new</item>
+    </style>
 
     <style name="TooltipsButton" parent="BaseButton">
         <item name="android:layout_width">wrap_content</item>

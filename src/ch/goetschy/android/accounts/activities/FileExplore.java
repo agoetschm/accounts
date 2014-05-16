@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 
+import ch.goetschy.android.accounts.BuildConfig;
 import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.objects.Filter;
 import ch.goetschy.android.accounts.objects.Type;
@@ -53,9 +54,11 @@ public class FileExplore extends Activity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			File tmp = (File) extras.getSerializable(File.class.toString());
+			if (BuildConfig.DEBUG)
 			Log.w("fileExplore", "file...");
 			if (tmp.exists()) { // if valid path in extras
-				Log.w("fileExplore", " exists !");
+				if (BuildConfig.DEBUG)
+					Log.w("fileExplore", " exists !");
 				if (!tmp.isDirectory()) // if it's a file
 					path = tmp.getParentFile();
 				else

@@ -16,28 +16,28 @@ public final class R {
 		public static final int bg_tooltip_pointer_padding_bottom = 0x7f040004;
 	}
 	public static final class drawable {
-		public static final int ic_launcher = 0x7f020082;
-		public static final int quickcontact_drop_shadow = 0x7f020085;
-		public static final int tooltip_arrow_down = 0x7f020086;
-		public static final int tooltip_arrow_up = 0x7f020087;
-		public static final int tooltip_bottom_frame = 0x7f020088;
-		public static final int tooltip_top_frame = 0x7f020089;
+		public static final int ic_launcher = 0x7f020083;
+		public static final int quickcontact_drop_shadow = 0x7f020087;
+		public static final int tooltip_arrow_down = 0x7f020088;
+		public static final int tooltip_arrow_up = 0x7f020089;
+		public static final int tooltip_bottom_frame = 0x7f02008a;
+		public static final int tooltip_top_frame = 0x7f02008b;
 	}
 	public static final class id {
-		public static final int action_settings = 0x7f0700a2;
-		public static final int tooltip_bottomframe = 0x7f070094;
-		public static final int tooltip_contentholder = 0x7f070091;
-		public static final int tooltip_contenttv = 0x7f070092;
-		public static final int tooltip_pointer_down = 0x7f070095;
-		public static final int tooltip_pointer_up = 0x7f070090;
-		public static final int tooltip_shadow = 0x7f070093;
-		public static final int tooltip_topframe = 0x7f07008f;
+		public static final int action_settings = 0x7f0700ab;
+		public static final int tooltip_bottomframe = 0x7f070099;
+		public static final int tooltip_contentholder = 0x7f070096;
+		public static final int tooltip_contenttv = 0x7f070097;
+		public static final int tooltip_pointer_down = 0x7f07009a;
+		public static final int tooltip_pointer_up = 0x7f070095;
+		public static final int tooltip_shadow = 0x7f070098;
+		public static final int tooltip_topframe = 0x7f070094;
 	}
 	public static final class layout {
-		public static final int tooltip = 0x7f03002b;
+		public static final int tooltip = 0x7f03002c;
 	}
 	public static final class menu {
-		public static final int main = 0x7f0c0005;
+		public static final int main = 0x7f0c0007;
 	}
 	public static final class string {
 		public static final int action_settings = 0x7f050001;

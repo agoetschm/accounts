@@ -203,8 +203,9 @@ public class AccountDetailActivity extends SherlockListActivity implements
 					@Override
 					public void onItemSelected(AdapterView<?> parent,
 							View view, int position, long id) {
-						Log.w("accountDetail", "time filter selected = "
-								+ position);
+						if (BuildConfig.DEBUG)
+							Log.w("accountDetail", "time filter selected = "
+									+ position);
 						mFilter.setInterval(position);
 						updateNavigator();
 						if (position == Filter.CUSTOM)
@@ -241,10 +242,12 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	 * any transaction, adapt it.
 	 */
 	private void fillData() {
-		Log.w("fill data", "called");
+		if (BuildConfig.DEBUG)
+			Log.w("fill data", "called");
 		// only one filling
 		if (mFillDataTask == null) {
-			Log.w("fill data", "executed");
+			if (BuildConfig.DEBUG)
+				Log.w("fill data", "executed");
 			mFillDataTask = new FillDataTask(this, mAccount, mFilter, mAdapter,
 					firstFill);
 			mFillDataTask.execute();
@@ -253,7 +256,8 @@ public class AccountDetailActivity extends SherlockListActivity implements
 
 	private void afterFillDataTask(ArrayList<Transaction> transactions,
 			double total, boolean shouldAdapt) {
-		Log.w("fill data", "finished");
+		if (BuildConfig.DEBUG)
+			Log.w("fill data", "finished");
 
 		// update first fill
 		firstFill = shouldAdapt;
@@ -264,7 +268,8 @@ public class AccountDetailActivity extends SherlockListActivity implements
 
 		// set adapter
 		if (transactions != null) {
-			Log.w("fill data", "trans not null");
+			if (BuildConfig.DEBUG)
+				Log.w("fill data", "trans not null");
 			mAdapter = new TransactionsAdapter(this, transactions);
 			this.setListAdapter(mAdapter);
 		} else {
@@ -286,14 +291,13 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	private static class FillDataTask extends AsyncTask<Void, Void, Void> {
 
 		private ProgressDialog progressDialog;
-		private double tTotal = 0;
 		private ArrayList<Transaction> tTransactions; // t for task
 		private AccountDetailActivity tContext;
+		private double tTotal = 0;
 
 		// copy all vars to keep task independant
 		private Account tAccount;
 		private Filter tFilter;
-		private TransactionsAdapter tAdapter;
 		private boolean tShouldAdapt;
 
 		public FillDataTask(AccountDetailActivity context, Account account,
@@ -301,7 +305,6 @@ public class AccountDetailActivity extends SherlockListActivity implements
 			tContext = context;
 			tAccount = account;
 			tFilter = filter;
-			tAdapter = adapter;
 			tShouldAdapt = shouldAdapt;
 		}
 
@@ -316,7 +319,8 @@ public class AccountDetailActivity extends SherlockListActivity implements
 
 		@Override
 		protected Void doInBackground(Void... arg0) {
-			Log.w("accountDetail", "fill data");
+			if (BuildConfig.DEBUG)
+				Log.w("accountDetail", "fill data");
 
 			// get transactions
 			tTransactions = tAccount.getListTransactions(
@@ -325,9 +329,12 @@ public class AccountDetailActivity extends SherlockListActivity implements
 			if (tTransactions != null) {
 
 				// debug
-				Log.w("accountDetail", "num of trans " + tTransactions.size());
-				for (Transaction trans : tTransactions)
-					Log.w("accountDetail", "trans " + trans.getName());
+				if (BuildConfig.DEBUG) {
+					Log.w("accountDetail",
+							"num of trans " + tTransactions.size());
+					for (Transaction trans : tTransactions)
+						Log.w("accountDetail", "trans " + trans.getName());
+				}
 
 				// end debug
 
@@ -335,7 +342,8 @@ public class AccountDetailActivity extends SherlockListActivity implements
 				if (tTransactions.size() == 0) {
 					// adapt filter if no trans
 					if (tShouldAdapt) {
-						Log.w("accountDetail", "first fill");
+						if (BuildConfig.DEBUG)
+							Log.w("accountDetail", "first fill");
 						tFilter.adaptToAccount(tAccount);
 						tTransactions = tAccount.getListTransactions(
 								tContext.getContentResolver(), tFilter);
@@ -445,8 +453,11 @@ public class AccountDetailActivity extends SherlockListActivity implements
 	 */
 	private void createGraph() {
 		Intent intent = new Intent(this, GraphActivity.class);
+		// the graph needs the account...
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE,
 				mAccount.getUri());
+		// ... and the filter
+		intent.putExtra(Filter.class.toString(), mFilter);
 		startActivity(intent);
 	}
 
@@ -456,7 +467,8 @@ public class AccountDetailActivity extends SherlockListActivity implements
 		final ArrayList<Account> accountsList = Account
 				.getListAccounts(getContentResolver());
 		if (accountsList == null) {
-			Log.w("transfer transaction", "accounts list is null");
+			if (BuildConfig.DEBUG)
+				Log.w("transfer transaction", "accounts list is null");
 			return;
 		}
 		ArrayAdapter<Account> accountsAdapter = new AccountsAdapter(this,
@@ -494,7 +506,8 @@ public class AccountDetailActivity extends SherlockListActivity implements
 		// type spinner
 		final ArrayList<Type> typesList = Type.getTypes(getContentResolver());
 		if (typesList == null) {
-			Log.w("change type", "types list is null");
+			if (BuildConfig.DEBUG)
+				Log.w("change type", "types list is null");
 			return;
 		}
 		ArrayAdapter<Type> typesAdapter = new TypesAdapter(this, typesList);
@@ -723,7 +736,7 @@ public class AccountDetailActivity extends SherlockListActivity implements
 				.showToolTipForView(
 						new ToolTip()
 								.withText(
-										"Change the interval of time for \nthe transactions displayed.")
+										"Change the interval of time for the\ntransactions to be displayed.")
 								.withColor(
 										getResources().getColor(
 												R.color.holo_orange))
@@ -751,8 +764,10 @@ public class AccountDetailActivity extends SherlockListActivity implements
 
 	@Override
 	protected void onResume() {
-		Log.w("accountDetail", "on resume");
-		Log.w("accountDetail", "first fill : " + this.firstFill);
+		if (BuildConfig.DEBUG) {
+			Log.w("accountDetail", "on resume");
+			Log.w("accountDetail", "first fill : " + this.firstFill);
+		}
 		fillData();
 		changeFooterColor(false);
 		updateNavigator();

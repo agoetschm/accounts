@@ -2,6 +2,7 @@ package ch.goetschy.android.accounts.activities;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.concurrent.Callable;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -18,6 +19,7 @@ import ch.goetschy.android.accounts.R;
 import ch.goetschy.android.accounts.contentprovider.MyAccountsContentProvider;
 import ch.goetschy.android.accounts.objects.Account;
 import ch.goetschy.android.accounts.objects.AppInfos;
+import ch.goetschy.android.accounts.objects.Transaction;
 import ch.goetschy.android.accounts.objects.Type;
 
 import android.app.AlertDialog;
@@ -31,6 +33,7 @@ import android.view.ViewConfiguration;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
 import android.widget.ListView;
 
 public class AccountsOverviewActivity extends SherlockListActivity implements
@@ -39,6 +42,7 @@ public class AccountsOverviewActivity extends SherlockListActivity implements
 	private static final int DELETE_ID = 10;
 	private static final int EDIT_ID = 20;
 
+	private Button mAddTest;
 	private AccountsAdapter adapter;
 	private Account actAccount; // actual account -> delete
 
@@ -54,6 +58,7 @@ public class AccountsOverviewActivity extends SherlockListActivity implements
 		this.registerForContextMenu(listview);
 
 		mTooltipLayout = (ToolTipRelativeLayout) findViewById(R.id.activity_overview_tooltiplayout);
+		mAddTest = (Button) findViewById(R.id.activity_overview_add_test);
 
 		// ACTION BAR ------------------
 		ActionBar actionBar = getSupportActionBar();
@@ -72,6 +77,7 @@ public class AccountsOverviewActivity extends SherlockListActivity implements
 
 		// default types ------------
 		AppInfos infos = new AppInfos(getContentResolver());
+		if (BuildConfig.DEBUG)
 		Log.w("overview",
 				"infos : -" + infos.loadFromDB(AppInfos.CONTROL_DEFAULT_TYPES)
 						+ "-");
@@ -122,6 +128,15 @@ public class AccountsOverviewActivity extends SherlockListActivity implements
 			if (BuildConfig.DEBUG)
 				Log.w("overview", "not all default");
 		}
+
+		// listener
+		mAddTest.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addTestData();
+				fillData(); // update
+			}
+		});
 
 	}
 
@@ -243,6 +258,60 @@ public class AccountsOverviewActivity extends SherlockListActivity implements
 		intent.putExtra(MyAccountsContentProvider.CONTENT_ITEM_TYPE, accountUri);
 
 		startActivity(intent);
+	}
+
+	// TEST DATA
+
+	private void addTestData() {
+		// account
+		Account testAcc = new Account();
+		testAcc.setName("test account");
+		testAcc.saveInDB(getContentResolver());
+		// array of transactions
+		ArrayList<Transaction> arrayTrans = new ArrayList<Transaction>();
+		// get types
+		ArrayList<Type> types = Type.getTypes(getContentResolver());
+		// act date
+		long time = Calendar.getInstance().getTimeInMillis();
+		long dayInMillis = 1000 * 3600 * 24;
+		// transactions
+		if (types == null || types.size() == 0) {
+			// fake amounts
+			double amounts[] = { 10.5, 30, -20, 144, -8.5, -12, -32, -56, -11 };
+			// some fake transactions
+			for (int i = 0; i < amounts.length; i++) {
+				arrayTrans.add(new Transaction(testAcc, amounts[i],
+						"transaction " + (i + 1), time
+								- ((long) Math.rint(Math.random() * dayInMillis
+										* 7))));
+				// time in the last week
+			}
+		} else {
+			int c = 1;
+			int numberOfTypes = types.size();
+			int numberOfTransForType = numberOfTypes;
+			for (Type type : types) {
+				for (int i = numberOfTransForType; i >= 0; i--) {
+					arrayTrans.add(new Transaction(testAcc,
+					// generate random amounts
+							Math.rint(Math.random() * 10), "transaction "
+									+ c, type, time
+									- ((long) Math.rint(Math.random()
+											* dayInMillis * 7))));
+					// time in the last week
+					c++;
+				}
+				numberOfTransForType--;
+			}
+		}
+
+		// save test trans
+		for (Transaction trans : arrayTrans)
+			trans.saveInDB(getContentResolver());
+		
+		// update amount
+		testAcc.getListTransactions(getContentResolver());
+
 	}
 
 	// TOOLTIPS -------------------
